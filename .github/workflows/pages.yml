@@ -18,6 +18,16 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v6
+      - name: Install content tools
+        run: pnpm install --frozen-lockfile
+      - name: Check Markdown handling
+        run: pnpm test
+      - name: Build essays from Markdown
+        run: pnpm build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

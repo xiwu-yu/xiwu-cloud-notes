@@ -4,3 +4,6 @@
 node_modules/
 .openai/
 work/
+dist/profile.js
+.sites-runtime/
+.pnpm-store/

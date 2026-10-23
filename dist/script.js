@@ -28,7 +28,7 @@ let currentId = null;
 let openedFrom = null;
 const node = (tag, className, text) => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = text; return el; };
 const formatDay = value => { const key = archive.dateKey(value); return key ? key.replace(/-/g, '.') : '日期待补充'; };
-const readingInfo = item => { const words = archive.wordCount(item.body); return words.toLocaleString('zh-CN') + ' 字 · 约 ' + Math.max(1, Math.ceil(words / 300)) + ' 分钟'; };
+const readingInfo = item => { const words = archive.wordCount(item.text ?? item.body ?? ''); return words.toLocaleString('zh-CN') + ' 字 · 约 ' + Math.max(1, Math.ceil(words / 300)) + ' 分钟'; };
 function dateLine(item) {
   const line = node('span', 'entry-date');
   const time = node('time', '', formatDay(item.publishedAt));
@@ -44,7 +44,10 @@ function openEssay(item, trigger) {
   const meta = document.querySelector('#dialog-meta');
   meta.replaceChildren(dateLine(item));
   if (item.updatedAt && Date.parse(item.updatedAt) > Date.parse(item.publishedAt)) meta.append(document.createTextNode(' · ' + formatDay(item.updatedAt) + ' 更新'));
-  document.querySelector('#dialog-body').replaceChildren(...item.body.split(/\n\n+/).map(text => node('p', '', text)));
+  // HTML 仅来自构建时关闭了原始 HTML 的 Markdown 解析器。
+  const bodyElement = document.querySelector('#dialog-body');
+  if (typeof item.bodyHtml === 'string') bodyElement.innerHTML = item.bodyHtml;
+  else bodyElement.replaceChildren(...(item.body || '').split(/\n\n+/).map(text => node('p', '', text)));
   const sourceLink = document.querySelector('#dialog-source');
   sourceLink.hidden = !item.source;
   if (item.source) sourceLink.href = item.source;
