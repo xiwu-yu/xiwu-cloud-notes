@@ -49,6 +49,16 @@ test('Article tags are optional, support Chinese text, and reject invalid values
   assert.throws(() => parsePost(source('正文', 'tags: [HRT, 123]\n'), 'bad.md'), /tags/);
 });
 
+test('Writing dates accept real calendar dates without inventing a time or upload fallback', () => {
+  assert.equal(parsePost(source(), 'unknown.md').writtenAt,null);
+  assert.equal(parsePost(source('正文', 'writtenAt: null\n'), 'unknown.md').writtenAt,null);
+  assert.equal(parsePost(source('正文', 'writtenAt: "2026-10-14"\n'), 'old.md').writtenAt,'2026-10-14');
+  assert.equal(parsePost(source('正文', 'writtenAt: "2024-02-29"\n'), 'leap.md').writtenAt,'2024-02-29');
+  for (const date of ['2026-02-29','2026-02-30','2026-13-01','2026-10-14T00:00:00Z']) {
+    assert.throws(()=>parsePost(source('正文', `writtenAt: "${date}"\n`),'bad.md'), /writtenAt/);
+  }
+});
+
 test('Adding and removing Markdown updates the build; a bad file preserves the last good output', async () => {
   const root=await mkdtemp(join(tmpdir(),'xiwu-content-'));
   try {

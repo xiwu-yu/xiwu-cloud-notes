@@ -4,7 +4,7 @@ import { basename } from 'node:path';
 
 // Markdown 在发布前转换；关闭原始 HTML，保留解析器默认的危险链接检查。
 const markdown = new MarkdownIt({ html: false, breaks: false, typographer: false });
-const fields = new Set(['id', 'title', 'category', 'tags', 'publishedAt', 'updatedAt', 'description', 'subtitle', 'image', 'alt', 'order', 'source']);
+const fields = new Set(['id', 'title', 'category', 'tags', 'writtenAt', 'publishedAt', 'updatedAt', 'description', 'subtitle', 'image', 'alt', 'order', 'source']);
 
 function requireDate(value, field, filename) {
   const match = typeof value === 'string' && value.match(/^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$/);
@@ -39,6 +39,9 @@ export function parsePost(source, filename) {
     if (typeof data[field] !== 'string' || !data[field].trim()) throw new Error(`${filename}: 缺少 ${field}`);
   }
   requireDate(data.publishedAt, 'publishedAt', filename);
+  if (data.writtenAt != null) {
+    if (typeof data.writtenAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(data.writtenAt) || !Number.isFinite(Date.parse(data.writtenAt)) || new Date(data.writtenAt).toISOString().slice(0, 10) !== data.writtenAt) throw new Error(`${filename}: writtenAt 请填写真实的写作日期，例如 2026-10-14；未知时留空或填 null`);
+  }
   if (data.updatedAt !== undefined) {
     requireDate(data.updatedAt, 'updatedAt', filename);
     if (Date.parse(data.updatedAt) < Date.parse(data.publishedAt)) throw new Error(`${filename}: updatedAt 不能早于收录时间`);
@@ -58,7 +61,7 @@ export function parsePost(source, filename) {
     id, title: data.title, category: data.category, tags: [...new Set((data.tags || []).map(tag => tag.trim()))],
     description: data.description, subtitle: data.subtitle || `随笔 / ${data.category}`,
     image, alt: data.alt || '淡蓝与浅粉色的云朵',
-    publishedAt: data.publishedAt, updatedAt: data.updatedAt || data.publishedAt,
+    writtenAt: data.writtenAt ?? null, publishedAt: data.publishedAt, updatedAt: data.updatedAt || data.publishedAt,
     order: data.order ?? Number.MAX_SAFE_INTEGER,
     ...(data.source ? { source: data.source } : {}),
     body, text: plainText(tokens).trim(), bodyHtml: markdown.renderer.render(tokens, markdown.options, {})

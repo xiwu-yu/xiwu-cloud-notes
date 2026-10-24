@@ -22,7 +22,8 @@ const timeline = document.querySelector('#essay-timeline');
 const dialog = document.querySelector('#interest-dialog');
 const monthSelect = document.querySelector('#archive-month');
 const orderSelect = document.querySelector('#archive-order');
-const state = { category: '全部', month: 'all', order: 'newest', view: 'cards' };
+const dateBySelect = document.querySelector('#archive-date-by');
+const state = { category: '全部', month: 'all', order: 'newest', view: 'cards', dateBy: 'publishedAt' };
 let visibleItems = [];
 let currentId = null;
 let openedFrom = null;
@@ -38,9 +39,16 @@ function tagLine(item) {
 }
 function dateLine(item) {
   const line = node('span', 'entry-date');
+  const written = node('span', 'written-date');
+  if (archive.dateKey(item.writtenAt)) {
+    const writtenTime = node('time', '', formatDay(item.writtenAt));
+    writtenTime.dateTime = item.writtenAt;
+    written.append(document.createTextNode('写于 '), writtenTime);
+  } else written.textContent = '写作日期未填写';
+  line.append(written, document.createTextNode(' · '));
   const time = node('time', '', formatDay(item.publishedAt));
   if (archive.dateKey(item.publishedAt)) time.dateTime = item.publishedAt;
-  line.append(time, document.createTextNode(' 收录 · ' + readingInfo(item)));
+  line.append(time, document.createTextNode(' 上传 · ' + readingInfo(item)));
   return line;
 }
 function openEssay(item, trigger) {
@@ -82,7 +90,7 @@ function createCard(item) {
 }
 function createTimelineGroup(group) {
   const section = node('section', 'timeline-group');
-  const date = group.key === 'undated' ? '日期待补充' : group.key.replace(/-/g, '.');
+  const date = group.key === 'undated' ? (state.dateBy === 'writtenAt' ? '写作日期未填写' : '上传日期未填写') : group.key.replace(/-/g, '.');
   const heading = node('h3','timeline-heading',date);
   heading.append(node('span','',' / ' + group.items.length + ' 篇'));
   section.append(heading);
@@ -100,7 +108,8 @@ function renderInterests() {
   visibleItems = archive.select(profile.interests, state);
   grid.replaceChildren(...visibleItems.map(createCard));
   grid.classList.toggle('single-entry', visibleItems.length === 1);
-  timeline.replaceChildren(...archive.groups(visibleItems).map(createTimelineGroup));
+  timeline.replaceChildren(...archive.groups(visibleItems, state.dateBy).map(createTimelineGroup));
+  document.querySelector('.archive-note').textContent = state.dateBy === 'writtenAt' ? '按文章写作日期整理；未填写写作日期的文章排在最后。' : '按本站上传时间整理；写作日期单独标注，未填写时不作推测。';
   grid.hidden = state.view !== 'cards'; timeline.hidden = state.view !== 'timeline';
   document.querySelector('#archive-empty').hidden = visibleItems.length > 0;
   document.querySelector('#item-count').textContent = String(visibleItems.length).padStart(2,'0') + ' 篇随笔';
@@ -112,9 +121,15 @@ const filterGroup = document.querySelector('.filters'); filterGroup.replaceChild
   const button=node('button','filter',category);button.type='button';button.dataset.filter=category;
   button.addEventListener('click',()=>{state.category=category;renderInterests();});filterGroup.append(button);
 });
-const months=[...new Set(profile.interests.map(item=>archive.dateKey(item.publishedAt)?.slice(0,7)).filter(Boolean))].sort().reverse();
-months.forEach(month=>{const option=node('option','',month.replace('-',' 年 ')+' 月');option.value=month;monthSelect.append(option);});
-if(profile.interests.some(item=>!archive.dateKey(item.publishedAt))){const option=node('option','','日期待补充');option.value='undated';monthSelect.append(option);}
+function updateMonths() {
+  const all = node('option', '', '全部月份'); all.value = 'all'; monthSelect.replaceChildren(all);
+  archive.months(profile.interests, state.dateBy).forEach(month=>{const option=node('option','',month.replace('-',' 年 ')+' 月');option.value=month;monthSelect.append(option);});
+  if(profile.interests.some(item=>!archive.dateKey(archive.itemDate(item,state.dateBy)))){const option=node('option','',state.dateBy==='writtenAt'?'写作日期未填写':'上传日期未填写');option.value='undated';monthSelect.append(option);}
+  document.querySelector('#archive-month-label').textContent = state.dateBy === 'writtenAt' ? '写作月份' : '上传月份';
+  monthSelect.value = state.month;
+}
+updateMonths();
+dateBySelect.addEventListener('change',()=>{state.dateBy=dateBySelect.value;state.month='all';updateMonths();renderInterests();});
 monthSelect.addEventListener('change',()=>{state.month=monthSelect.value;renderInterests();});
 orderSelect.addEventListener('change',()=>{state.order=orderSelect.value;renderInterests();});
 document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{state.view=button.dataset.view;renderInterests();}));

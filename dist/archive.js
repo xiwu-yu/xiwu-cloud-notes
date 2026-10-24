@@ -7,29 +7,36 @@
   function wordCount(text) {
     return (text.match(/[\p{Script=Han}]|[A-Za-z]+(?:['’-][A-Za-z]+)*|\d+(?:\.\d+)?/gu) || []).length;
   }
-  function select(items, {category = '全部', month = 'all', order = 'newest'} = {}) {
+  function itemDate(item, dateBy = 'publishedAt') {
+    const value = dateBy === 'writtenAt' ? item.writtenAt : item.publishedAt;
+    return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value + 'T00:00:00+08:00' : value;
+  }
+  function months(items, dateBy = 'publishedAt') {
+    return [...new Set(items.map(item => dateKey(itemDate(item, dateBy))?.slice(0, 7)).filter(Boolean))].sort().reverse();
+  }
+  function select(items, {category = '全部', month = 'all', order = 'newest', dateBy = 'publishedAt'} = {}) {
     return items.filter(item => {
-      const key = dateKey(item.publishedAt);
+      const key = dateKey(itemDate(item, dateBy));
       return (category === '全部' || item.category === category) &&
         (month === 'all' || (month === 'undated' ? !key : key?.slice(0, 7) === month));
     }).sort((a, b) => {
-      const at = dateKey(a.publishedAt) ? Date.parse(a.publishedAt) : null;
-      const bt = dateKey(b.publishedAt) ? Date.parse(b.publishedAt) : null;
+      const at = dateKey(itemDate(a, dateBy)) ? Date.parse(itemDate(a, dateBy)) : null;
+      const bt = dateKey(itemDate(b, dateBy)) ? Date.parse(itemDate(b, dateBy)) : null;
       if (at === null && bt === null) return 0;
       if (at === null) return 1;
       if (bt === null) return -1;
       return order === 'oldest' ? at - bt : bt - at;
     });
   }
-  function groups(items) {
+  function groups(items, dateBy = 'publishedAt') {
     const result = [];
     items.forEach(item => {
-      const key = dateKey(item.publishedAt) || 'undated';
+      const key = dateKey(itemDate(item, dateBy)) || 'undated';
       let group = result[result.length - 1];
       if (!group || group.key !== key) { group = {key, items: []}; result.push(group); }
       group.items.push(item);
     });
     return result;
   }
-  root.essayArchive = { dateKey, wordCount, select, groups };
+  root.essayArchive = { dateKey, wordCount, itemDate, months, select, groups };
 })(typeof window === 'undefined' ? globalThis : window);
