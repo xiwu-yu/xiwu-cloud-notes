@@ -14,10 +14,10 @@
     "hero.titleB": "先",
     "hero.titleC": "写下来吧",
     "hero.titleD": "。",
-    "hero.ctaNotes": "看看我写了什么",
+    "hero.ctaNotes": "随笔和记录",
     "hero.ctaAbout": "认识夕雾",
-    "hero.note": "蓝粉白的云，和一些没写完的话。",
-    "hero.caption": "前面还在思考人生，<br>后面不如去码头整点薯条。",
+    "hero.note": "🏳️‍⚧️和🍥",
+    "hero.caption": "云间来信",
     "about.title": "关于夕雾",
     "about.copy": "夕雾是一只可爱的猫猫，喵喵喵～",
     "identity.pronouns": "称呼代词：{pronouns}",
@@ -102,7 +102,9 @@
     "about.avatarAlt1": "夕雾的动漫头像，白发与跨性别旗背景",
     "about.avatarAlt2": "夕雾的动漫头像，拿着棒棒糖和一把刀",
     "ticker.poemLine1": "昔雾曾隔长夜望，",
-    "ticker.poemLine2": "不知彼岸是今朝。"
+    "ticker.poemLine2": "不知彼岸是今朝。",
+    "notes.search": "搜索文章…",
+    "notes.searchAria": "搜索文章"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -119,10 +121,10 @@
     "hero.titleB": "先",
     "hero.titleC": "寫下來吧",
     "hero.titleD": "。",
-    "hero.ctaNotes": "看看我寫了什麼",
+    "hero.ctaNotes": "隨筆和記錄",
     "hero.ctaAbout": "認識夕霧",
-    "hero.note": "藍粉白的雲，和一些沒寫完的話。",
-    "hero.caption": "前面還在思考人生，<br>後面不如去碼頭整點薯條。",
+    "hero.note": "🏳️‍⚧️和🍥",
+    "hero.caption": "雲間來信",
     "about.title": "關於夕霧",
     "about.copy": "夕霧是一隻可愛的貓貓，喵喵喵～",
     "identity.pronouns": "稱呼代詞：{pronouns}",
@@ -207,7 +209,9 @@
     "about.avatarAlt1": "夕霧的動漫頭像，白髮與跨性別旗背景",
     "about.avatarAlt2": "夕霧的動漫頭像，拿著棒棒糖和一把刀",
     "ticker.poemLine1": "昔霧曾隔長夜望，",
-    "ticker.poemLine2": "不知彼岸是今朝。"
+    "ticker.poemLine2": "不知彼岸是今朝。",
+    "notes.search": "搜尋文章…",
+    "notes.searchAria": "搜尋文章"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -224,10 +228,10 @@
     "hero.titleB": "let me ",
     "hero.titleC": "write it down",
     "hero.titleD": ".",
-    "hero.ctaNotes": "See what I've written",
+    "hero.ctaNotes": "Essays & Notes",
     "hero.ctaAbout": "Meet Xiwu",
-    "hero.note": "Blue, pink, and white clouds—and some unfinished sentences.",
-    "hero.caption": "First I'm pondering life,<br>then I'd rather go get fries at the pier.",
+    "hero.note": "🏳️‍⚧️和🍥",
+    "hero.caption": "Letters in the Clouds",
     "about.title": "About Xiwu",
     "about.copy": "Xiwu is a cute little cat, meow meow meow~",
     "identity.pronouns": "Pronouns: {pronouns}",
@@ -312,7 +316,9 @@
     "about.avatarAlt1": "An anime portrait of Xiwu with white hair against a trans flag background",
     "about.avatarAlt2": "An anime portrait of Xiwu holding a lollipop and a knife",
     "ticker.poemLine1": "Xi Wu once gazed across the long night,",
-    "ticker.poemLine2": "not knowing the far shore was this dawn."
+    "ticker.poemLine2": "not knowing the far shore was this dawn.",
+    "notes.search": "Search essays…",
+    "notes.searchAria": "Search essays"
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -329,10 +335,10 @@
     "hero.titleB": "まず",
     "hero.titleC": "書いてみよう",
     "hero.titleD": "。",
-    "hero.ctaNotes": "書いたものを見る",
+    "hero.ctaNotes": "エッセイと記録",
     "hero.ctaAbout": "夕霧について知る",
-    "hero.note": "青、ピンク、白の雲と、書きかけの言葉。",
-    "hero.caption": "前半は人生について考えて、<br>後半は埠頭でポテトでも食べよう。",
+    "hero.note": "🏳️‍⚧️和🍥",
+    "hero.caption": "雲間の手紙",
     "about.title": "夕霧について",
     "about.copy": "夕霧はかわいい猫にゃん、にゃんにゃんにゃん～",
     "identity.pronouns": "代名詞：{pronouns}",
@@ -417,6 +423,8 @@
     "about.avatarAlt1": "トランスジェンダーの旗を背景にした、白髪の夕霧のアニメ風肖像",
     "about.avatarAlt2": "棒付きキャンディーと包丁を持った夕霧のアニメ風肖像",
     "ticker.poemLine1": "昔、霧は長き夜の彼方を見つめ、",
-    "ticker.poemLine2": "彼岸が今朝だと知らぬまま。"
+    "ticker.poemLine2": "彼岸が今朝だと知らぬまま。",
+    "notes.search": "エッセイを検索…",
+    "notes.searchAria": "エッセイを検索"
   }
 }

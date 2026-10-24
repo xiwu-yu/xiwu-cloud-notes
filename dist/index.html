@@ -7,10 +7,10 @@
 <meta name="theme-color" content="#f8f8fc">
 <title>夕雾 · 云间来信</title>
 <link rel="icon" href="assets/favicon.svg?v=79847ec957" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=9b1724c506">
-<script defer src="profile.js?v=f551b92567"></script>
-<script defer src="archive.js?v=460463bd83"></script>
-<script defer src="script.js?v=e0d4dc3494"></script>
+<link rel="stylesheet" href="style.css?v=f94ee18b8d">
+<script defer src="profile.js?v=2472cb040f"></script>
+<script defer src="archive.js?v=6fa7c5f08b"></script>
+<script defer src="script.js?v=31e11445f6"></script>
 </head>
 <body>
 <div class="sky-background" aria-hidden="true"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span><span class="cloud cloud-three"></span></div>
@@ -35,12 +35,12 @@
     <p class="hello"><span data-i18n="hero.helloPrefix">你好，我是 </span><span id="profile-name">夕雾喵</span><span class="pronoun">她</span></p>
     <h1 id="hero-title"><span data-i18n="hero.titleA">想说的话很多喵，</span><br><span data-i18n="hero.titleB">先</span><span class="accent-word"><span data-i18n="hero.titleC">写下来吧</span><svg viewBox="0 0 240 14" aria-hidden="true"><path d="M3 10 Q100 -1 235 8"/></svg></span><span data-i18n="hero.titleD">。</span></h1>
     <p class="hero-description" id="profile-intro"></p>
-    <div class="hero-actions"><a class="button-primary" href="#interests"><span data-i18n="hero.ctaNotes">看看我写了什么</span> <span aria-hidden="true">↗</span></a><a class="text-link" href="#about"><span data-i18n="hero.ctaAbout">认识夕雾</span> <span aria-hidden="true">→</span></a></div>
-    <div class="hero-note"><span class="flag-line" aria-hidden="true"></span><span data-i18n="hero.note">蓝粉白的云，和一些没写完的话。</span></div>
+    <div class="hero-actions"><a class="hero-button hero-button-blue" href="#interests"><span data-i18n="hero.ctaNotes">随笔和记录</span> <span aria-hidden="true">↗</span></a><a class="hero-button hero-button-pink" href="#about"><span data-i18n="hero.ctaAbout">认识夕雾</span> <span aria-hidden="true">→</span></a></div>
+    <div class="hero-note"><span data-i18n="hero.note">🏳️‍⚧️和🍥</span></div>
   </div>
   <figure class="hero-art">
     <img src="assets/cloudscape.svg?v=4b6443d084" alt="淡蓝与浅粉的层层云朵环绕一轮柔和的月亮，云间有微小星光" width="680" height="650">
-    <figcaption><span data-i18n-html="hero.caption">前面还在思考人生，<br>后面不如去码头整点薯条。</span><span class="art-caption">more to be<br>continued...</span></figcaption>
+    <figcaption><span data-i18n-html="hero.caption">云间来信</span><span class="art-caption">more to be<br>continued...</span></figcaption>
   </figure>
 </section>
 <div class="ticker"><div class="wrap ticker-poem"><span data-i18n="ticker.poemLine1">昔雾曾隔长夜望，</span><span data-i18n="ticker.poemLine2">不知彼岸是今朝。</span></div></div>
@@ -76,6 +76,7 @@
     <span class="item-count" id="item-count" aria-live="polite"></span>
   </div>
   <div class="archive-toolbar" aria-label="时间归档工具" data-i18n-aria-label="notes.archiveAria">
+    <label class="archive-search" for="archive-search"><input id="archive-search" type="search" placeholder="搜索文章…" aria-label="搜索文章" data-i18n-aria-label="notes.searchAria" data-i18n-placeholder="notes.search" autocomplete="off" spellcheck="false"></label>
     <div class="archive-selects">
       <label for="archive-date-by"><span data-i18n="notes.sortBy">排序依据</span><select id="archive-date-by"><option value="publishedAt" data-i18n="notes.byPublished">按上传时间</option><option value="writtenAt" data-i18n="notes.byWritten">按写作时间</option></select></label>
       <label for="archive-month"><span id="archive-month-label">上传月份</span><select id="archive-month"><option value="all" data-i18n="notes.allMonths">全部月份</option></select></label>
@@ -117,6 +118,7 @@
 </section>
 <section id="contact" class="contact wrap" aria-labelledby="contact-title">
   <div class="contact-split" aria-hidden="true"><span></span><span></span></div>
+  <div class="contact-mobile-art" aria-hidden="true"><img src="assets/contact.jpg?v=8d141f7dad" alt="" width="338" height="508" loading="lazy" decoding="async"></div>
   <div class="contact-copy"><p class="eyebrow">05 / MORE TO BE CONTINUED</p><h2 id="contact-title" data-i18n-html="contact.title">我们的存在，<br>就是对恶意最大的反抗。</h2></div>
   <div class="contact-action"><a id="email-link" class="contact-email" hidden><span id="email-label">给夕雾写信</span> <span aria-hidden="true">↗</span></a><p id="contact-placeholder" data-i18n="contact.placeholder">联系方式 2464178595@qq.com</p><a class="text-link" href="#interests"><span data-i18n="contact.more">再翻一篇</span> <span aria-hidden="true">↗</span></a></div>
 </section>

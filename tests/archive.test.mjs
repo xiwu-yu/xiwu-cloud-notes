@@ -50,3 +50,17 @@ test('Japanese kana count toward reading length alongside Han characters and Lat
   assert.ok(archive.wordCount('Hello 世界') >= 3);
   assert.equal(archive.wordCount(''),0);
 });
+
+test('Search matches localized titles, tags and body text, requiring every term', () => {
+  const searchable = [
+    {id:'xiwu',title:'夕雾',description:'一首短诗',category:'诗词与随想',categoryKey:'诗词与随想',tags:['诗','成长'],text:'昔雾曾隔长夜望，不知彼岸是今朝。',publishedAt:'2026-10-24T18:27:42+08:00'},
+    {id:'claw-marks',title:'在死亡来临之前',description:'关于朋友',category:'生活与情绪',categoryKey:'生活与情绪',tags:['旧文'],text:'我写下了爪痕。',publishedAt:'2026-10-24T16:15:16+08:00'},
+    {id:'hrt-preface',title:'HRT 前言',description:'开始 HRT',category:'性别与生活',categoryKey:'性别与生活',tags:['HRT'],text:'2026 年 3 月 12 日。',publishedAt:'2026-10-24T15:51:51+08:00'}
+  ];
+  assert.deepEqual(archive.select(searchable,{query:'爪痕'}).map(x=>x.id),['claw-marks']);
+  assert.deepEqual(archive.select(searchable,{query:'诗'}).map(x=>x.id),['xiwu']);
+  assert.deepEqual(archive.select(searchable,{query:'HRT'}).map(x=>x.id),['hrt-preface']);
+  assert.deepEqual(archive.select(searchable,{query:'诗 成长'}).map(x=>x.id),['xiwu']);
+  assert.equal(archive.select(searchable,{query:'诗 不存在'}).length,0);
+  assert.equal(archive.select(searchable,{query:'  '}).length,3);
+});

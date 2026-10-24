@@ -28,6 +28,18 @@ test('article cards are numbered in the order they are displayed', async ({ page
   await expect(page.locator('#contact-title')).toContainText('我们的存在');
   await expect(page.locator('.ticker')).toContainText('昔雾曾隔长夜望');
   await expect(page.locator('.ticker')).toContainText('不知彼岸是今朝');
+  await expect(page.locator('.ticker i')).toHaveCount(0);
+  await expect(page.locator('.hero-note')).toHaveText('🏳️‍⚧️和🍥');
+  await expect(page.locator('.hero-art figcaption > span').first()).toHaveText('云间来信');
+  const heroButtons = page.locator('.hero-actions .hero-button');
+  await expect(heroButtons).toHaveCount(2);
+  await expect(heroButtons.first()).toContainText('随笔和记录');
+  await expect(heroButtons.nth(1)).toContainText('认识夕雾');
+  const buttonMetrics = await heroButtons.evaluateAll(nodes => nodes.map(node => { const box = node.getBoundingClientRect(); return { width: box.width, height: box.height, background: getComputedStyle(node).backgroundColor }; }));
+  expect(Math.abs(buttonMetrics[0].width - buttonMetrics[1].width)).toBeLessThan(1);
+  expect(Math.abs(buttonMetrics[0].height - buttonMetrics[1].height)).toBeLessThan(1);
+  expect(buttonMetrics[0].background).not.toBe(buttonMetrics[1].background);
+  await expect(page.locator('#archive-search')).toBeVisible();
   await expect(page.locator('.editorial-note')).toHaveText('夕雾是一只可爱的猫猫，喵喵喵～');
   await expect(page.locator('#interests .section-heading > p')).toContainText('但行好事');
   await expect(page.locator('#resources .section-heading > p')).toContainText('一些跨性别相关网站');
@@ -59,6 +71,35 @@ test('article cards are numbered in the order they are displayed', async ({ page
   await page.selectOption('#archive-date-by', 'writtenAt');
   expect(await cardIds(page)).toEqual(['claw-marks', 'xiwu', 'hrt-preface']);
   expect(await cardNumbers(page)).toEqual(['01', '02', '03']);
+});
+
+test('search filters articles by title, tags and body in the current language', async ({ page }) => {
+  await page.goto('/');
+  const search = page.locator('#archive-search');
+  await expect(search).toBeVisible();
+  await search.fill('爪痕');
+  await expect(page.locator('.interest-card')).toHaveCount(1);
+  expect(await cardIds(page)).toEqual(['claw-marks']);
+  await expect(page.locator('#item-count')).toHaveText('01 篇随笔');
+
+  await search.fill('不存在的关键词');
+  await expect(page.locator('#archive-empty')).toBeVisible();
+  await expect(page.locator('#item-count')).toHaveText('00 篇随笔');
+
+  await page.locator('#archive-reset').click();
+  await expect(search).toHaveValue('');
+  await expect(page.locator('.interest-card')).toHaveCount(3);
+
+  await search.fill('诗');
+  await expect(page.locator('.interest-card')).toHaveCount(1);
+  expect(await cardIds(page)).toEqual(['xiwu']);
+
+  await page.selectOption('#language-select', 'en');
+  await search.fill('Evening');
+  await expect(page.locator('.interest-card')).toHaveCount(1);
+  expect(await cardIds(page)).toEqual(['xiwu']);
+  await expect(search).toHaveAttribute('placeholder', 'Search essays…');
+  await expect(page.locator('.hero-actions .hero-button').first()).toContainText('Essays & Notes');
 });
 
 test('theme, category filters and the timeline all work together', async ({ page }) => {
@@ -136,12 +177,13 @@ test('article dialog has a shareable URL and follows browser back and forward', 
   expect(langParam(page)).toBe('ja');
 });
 
-test('portrait images load and the contact artwork switches between split and mobile backgrounds', async ({ page }) => {
+test('portrait images load and the contact artwork switches between split and mobile artwork', async ({ page }) => {
   await page.goto('/');
   await page.locator('.about-portraits img').first().scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator('.about-portraits img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true);
 
   await page.locator('#contact').scrollIntoViewIfNeeded();
+  await expect(page.locator('.contact-mobile-art')).toBeHidden();
   const desktopLayers = await page.locator('.contact-split span').evaluateAll(layers => layers.map(layer => getComputedStyle(layer).backgroundImage));
   expect(desktopLayers).toHaveLength(2);
   expect(desktopLayers.every(image => image.includes('contact.jpg'))).toBe(true);
@@ -151,14 +193,23 @@ test('portrait images load and the contact artwork switches between split and mo
 
   await page.setViewportSize({ width: 375, height: 900 });
   await expect(page.locator('.contact-split')).toBeHidden();
-  const mobileStyle = await page.locator('#contact').evaluate(element => {
-    const style = getComputedStyle(element);
-    const rect = element.getBoundingClientRect();
-    return { background: style.backgroundImage, size: style.backgroundSize, ratio: rect.height / rect.width };
+  await expect(page.locator('.contact-mobile-art')).toBeVisible();
+  await expect.poll(() => page.locator('.contact-mobile-art img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+  const mobileLayout = await page.locator('#contact').evaluate(element => {
+    const image = element.querySelector('.contact-mobile-art img').getBoundingClientRect();
+    const email = element.querySelector('#email-link').getBoundingClientRect();
+    const card = element.getBoundingClientRect();
+    return {
+      imageBottom: image.bottom,
+      emailTop: email.top,
+      imageWidth: image.width,
+      cardWidth: card.width,
+      background: getComputedStyle(element).backgroundImage
+    };
   });
-  expect(mobileStyle.background).toContain('contact.jpg');
-  expect(mobileStyle.size).toBe('contain');
-  expect(Math.abs(mobileStyle.ratio - 508 / 338)).toBeLessThan(0.02);
+  expect(mobileLayout.emailTop, '联系方式不应遮住图片').toBeGreaterThanOrEqual(mobileLayout.imageBottom);
+  expect(Math.abs(mobileLayout.imageWidth - mobileLayout.cardWidth)).toBeLessThanOrEqual(2);
+  expect(mobileLayout.background).not.toContain('contact.jpg');
 });
 
 test('category filters stay selected when the interface language changes', async ({ page }) => {
@@ -235,7 +286,8 @@ test('320px, 375px, 768px and 1440px layouts stay inside the viewport in every l
           headerClientWidth: header.clientWidth,
           selectRight: select.right,
           selectLeft: select.left,
-          columns: getComputedStyle(document.querySelector('#interest-grid')).gridTemplateColumns.split(' ').length
+          columns: getComputedStyle(document.querySelector('#interest-grid')).gridTemplateColumns.split(' ').length,
+          buttonWidths: [...document.querySelectorAll('.hero-button')].map(button => button.getBoundingClientRect().width)
         };
       });
       expect(layout.documentWidth, `${width}px ${language}: document overflow`).toBeLessThanOrEqual(layout.viewportWidth + 1);
@@ -244,6 +296,7 @@ test('320px, 375px, 768px and 1440px layouts stay inside the viewport in every l
       expect(layout.selectLeft).toBeGreaterThanOrEqual(0);
       expect(layout.selectRight, `${width}px ${language}: language selector outside viewport`).toBeLessThanOrEqual(layout.viewportWidth);
       expect(layout.columns, `${width}px ${language}: card columns`).toBe(width > 720 ? 3 : 1);
+      expect(Math.abs(layout.buttonWidths[0] - layout.buttonWidths[1]), `${width}px ${language}: hero button widths`).toBeLessThan(1);
 
       await page.locator('.interest-card').first().locator('.card-button').click();
       await expect(page.locator('#interest-dialog')).toBeVisible();

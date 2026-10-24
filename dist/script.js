@@ -80,9 +80,10 @@
   const monthSelect = $('#archive-month');
   const orderSelect = $('#archive-order');
   const dateBySelect = $('#archive-date-by');
+  const searchInput = $('#archive-search');
   const languageSelect = $('#language-select');
   const dialogLanguageSelect = $('#dialog-language-select');
-  const state = { category: 'all', month: 'all', order: 'newest', view: 'cards', dateBy: 'publishedAt' };
+  const state = { category: 'all', month: 'all', order: 'newest', view: 'cards', dateBy: 'publishedAt', query: '' };
   let visibleItems = [];
   let currentId = null;
   let openedFrom = null;
@@ -254,6 +255,7 @@
     document.querySelectorAll('[data-i18n-html]').forEach(element => { element.innerHTML = t(element.dataset.i18nHtml); });
     document.querySelectorAll('[data-i18n-aria-label]').forEach(element => { element.setAttribute('aria-label', t(element.dataset.i18nAriaLabel)); });
     document.querySelectorAll('[data-i18n-alt]').forEach(element => { element.setAttribute('alt', t(element.dataset.i18nAlt)); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => { element.setAttribute('placeholder', t(element.dataset.i18nPlaceholder)); });
     $('#meta-description').content = t('meta.description');
     document.title = t('meta.title');
   }
@@ -317,8 +319,9 @@
   dateBySelect.addEventListener('change', () => { state.dateBy = dateBySelect.value; state.month = 'all'; updateMonths(); renderInterests(); });
   monthSelect.addEventListener('change', () => { state.month = monthSelect.value; renderInterests(); });
   orderSelect.addEventListener('change', () => { state.order = orderSelect.value; renderInterests(); });
+  searchInput.addEventListener('input', () => { state.query = searchInput.value; renderInterests(); });
   document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => { state.view = button.dataset.view; renderInterests(); }));
-  $('#archive-reset').addEventListener('click', () => { state.category = 'all'; state.month = 'all'; updateMonths(); renderInterests(); });
+  $('#archive-reset').addEventListener('click', () => { state.category = 'all'; state.month = 'all'; state.query = ''; searchInput.value = ''; updateMonths(); renderInterests(); });
 
   [languageSelect, dialogLanguageSelect].forEach(select => select.addEventListener('change', () => applyLanguage(select.value)));
 
