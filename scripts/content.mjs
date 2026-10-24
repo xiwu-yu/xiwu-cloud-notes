@@ -4,7 +4,7 @@ import { basename } from 'node:path';
 
 // Markdown 在发布前转换；关闭原始 HTML，保留解析器默认的危险链接检查。
 const markdown = new MarkdownIt({ html: false, breaks: false, typographer: false });
-const fields = new Set(['id', 'title', 'category', 'publishedAt', 'updatedAt', 'description', 'subtitle', 'image', 'alt', 'order', 'source']);
+const fields = new Set(['id', 'title', 'category', 'tags', 'publishedAt', 'updatedAt', 'description', 'subtitle', 'image', 'alt', 'order', 'source']);
 
 function requireDate(value, field, filename) {
   const match = typeof value === 'string' && value.match(/^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$/);
@@ -47,6 +47,7 @@ export function parsePost(source, filename) {
     if (data[field] !== undefined && typeof data[field] !== 'string') throw new Error(`${filename}: ${field} 必须是文字`);
   }
   if (data.order !== undefined && (!Number.isSafeInteger(data.order) || data.order < 1)) throw new Error(`${filename}: order 必须是正整数`);
+  if (data.tags !== undefined && (!Array.isArray(data.tags) || data.tags.some(tag => typeof tag !== 'string' || !tag.trim()))) throw new Error(`${filename}: tags 必须是非空文字组成的数组`);
   if (data.source && !/^https?:\/\//i.test(data.source)) throw new Error(`${filename}: source 只能使用 http 或 https 链接`);
   const image = data.image || 'assets/cloud-blue.svg';
   if (!/^assets\/[a-zA-Z0-9_./-]+$/.test(image) || image.split('/').includes('..')) throw new Error(`${filename}: 配图请使用 dist/assets 内的相对路径`);
@@ -54,7 +55,7 @@ export function parsePost(source, filename) {
   if (!body) throw new Error(`${filename}: 正文不能为空`);
   const tokens = markdown.parse(body, {});
   return {
-    id, title: data.title, category: data.category,
+    id, title: data.title, category: data.category, tags: [...new Set((data.tags || []).map(tag => tag.trim()))],
     description: data.description, subtitle: data.subtitle || `随笔 / ${data.category}`,
     image, alt: data.alt || '淡蓝与浅粉色的云朵',
     publishedAt: data.publishedAt, updatedAt: data.updatedAt || data.publishedAt,

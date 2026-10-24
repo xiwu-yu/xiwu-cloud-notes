@@ -1,6 +1,6 @@
 // 1. 从资料文件读取内容，用 textContent 安全地更新文字。
 const profile = window.siteProfile;
-document.querySelector('#profile-name').textContent = profile.name;
+document.querySelector('#profile-name').textContent = profile.greetingName || profile.name;
 document.querySelector('#profile-intro').textContent = profile.intro;
 document.querySelector('#profile-about').textContent = profile.about;
 const tags = document.querySelector('#profile-tags');
@@ -29,6 +29,13 @@ let openedFrom = null;
 const node = (tag, className, text) => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = text; return el; };
 const formatDay = value => { const key = archive.dateKey(value); return key ? key.replace(/-/g, '.') : '日期待补充'; };
 const readingInfo = item => { const words = archive.wordCount(item.text ?? item.body ?? ''); return words.toLocaleString('zh-CN') + ' 字 · 约 ' + Math.max(1, Math.ceil(words / 300)) + ' 分钟'; };
+function tagLine(item) {
+  const line = node('span', 'entry-tags');
+  line.setAttribute('aria-label', '文章标签');
+  (item.tags || []).forEach(tag => line.append(node('span', 'entry-tag', tag)));
+  line.hidden = !item.tags?.length;
+  return line;
+}
 function dateLine(item) {
   const line = node('span', 'entry-date');
   const time = node('time', '', formatDay(item.publishedAt));
@@ -44,6 +51,7 @@ function openEssay(item, trigger) {
   const meta = document.querySelector('#dialog-meta');
   meta.replaceChildren(dateLine(item));
   if (item.updatedAt && Date.parse(item.updatedAt) > Date.parse(item.publishedAt)) meta.append(document.createTextNode(' · ' + formatDay(item.updatedAt) + ' 更新'));
+  meta.append(tagLine(item));
   // HTML 仅来自构建时关闭了原始 HTML 的 Markdown 解析器。
   const bodyElement = document.querySelector('#dialog-body');
   if (typeof item.bodyHtml === 'string') bodyElement.innerHTML = item.bodyHtml;
@@ -68,7 +76,7 @@ function createCard(item) {
   const img = node('img'); img.src = item.image; img.alt = item.alt; img.width = 600; img.height = 350; img.loading = 'lazy';
   const number = node('span', 'card-number', String(profile.interests.indexOf(item) + 1).padStart(2, '0'));
   imageWrap.append(img, number);
-  button.append(imageWrap, node('p','card-meta',item.subtitle), node('h3','',item.title), dateLine(item), node('p','card-description',item.description), node('span','card-more','继续读 ↗'));
+  button.append(imageWrap, node('p','card-meta',item.subtitle), node('h3','',item.title), dateLine(item), node('p','card-description',item.description), tagLine(item), node('span','card-more','继续读 ↗'));
   button.addEventListener('click', () => openEssay(item, button));
   article.append(button); return article;
 }
@@ -83,6 +91,7 @@ function createTimelineGroup(group) {
     const li = node('li','timeline-entry'); li.dataset.essayId = item.id;
     const button = node('button','timeline-button'); button.type = 'button'; button.setAttribute('aria-label','阅读：'+item.title);
     button.append(node('span','timeline-category',item.category),node('span','timeline-title',item.title),node('span','timeline-description',item.description),node('span','timeline-reading',readingInfo(item)));
+    button.append(tagLine(item));
     button.addEventListener('click',()=>openEssay(item,button)); li.append(button); list.append(li);
   });
   section.append(list); return section;
@@ -90,6 +99,7 @@ function createTimelineGroup(group) {
 function renderInterests() {
   visibleItems = archive.select(profile.interests, state);
   grid.replaceChildren(...visibleItems.map(createCard));
+  grid.classList.toggle('single-entry', visibleItems.length === 1);
   timeline.replaceChildren(...archive.groups(visibleItems).map(createTimelineGroup));
   grid.hidden = state.view !== 'cards'; timeline.hidden = state.view !== 'timeline';
   document.querySelector('#archive-empty').hidden = visibleItems.length > 0;

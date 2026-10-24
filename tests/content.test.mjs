@@ -42,6 +42,13 @@ test('Existing sequence is retained and duplicate article IDs are rejected', () 
   assert.throws(()=>compilePosts([entries[0],entries[0]]), /重复的文章 id/);
 });
 
+test('Article tags are optional, support Chinese text, and reject invalid values', () => {
+  assert.deepEqual(parsePost(source(), 'untagged.md').tags, []);
+  assert.deepEqual(parsePost(source('正文', 'tags: [HRT, 性别认同, HRT]\n'), 'tagged.md').tags, ['HRT', '性别认同']);
+  assert.throws(() => parsePost(source('正文', 'tags: HRT\n'), 'bad.md'), /tags/);
+  assert.throws(() => parsePost(source('正文', 'tags: [HRT, 123]\n'), 'bad.md'), /tags/);
+});
+
 test('Adding and removing Markdown updates the build; a bad file preserves the last good output', async () => {
   const root=await mkdtemp(join(tmpdir(),'xiwu-content-'));
   try {

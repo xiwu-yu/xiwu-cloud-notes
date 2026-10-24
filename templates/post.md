@@ -1,6 +1,7 @@
 ---
 title: "在这里写标题"
 category: "日常碎碎念"
+tags: ["随笔"]
 description: "在这里写一句简介。"
 publishedAt: "2026-10-23T20:00:00+08:00"
 ---
