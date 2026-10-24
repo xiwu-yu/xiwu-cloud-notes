@@ -322,8 +322,8 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
   .resource-note { font-size:9px; }
 }
 
-/* 联系方式与配图 */
-.contact { --contact-inset:55px; padding:50px var(--contact-inset); margin-top:0; margin-bottom:58px; display:flex; justify-content:space-between; align-items:center; gap:30px; border-radius:10px; border:1px solid var(--line); position:relative; overflow:hidden; isolation:isolate; aspect-ratio:676/254; background:linear-gradient(115deg,#dfeaf255,#f3e4ec70); }
+/* 联系方式与配图：桌面图片向正文两侧略微扩展，章节标记留在正文对齐线上。 */
+.contact { --contact-inset:55px; --contact-bleed:24px; width:calc(100% - 64px); max-width:1248px; padding:50px calc(var(--contact-inset) + var(--contact-bleed)); margin-top:0; margin-bottom:58px; display:flex; justify-content:space-between; align-items:center; gap:30px; border-radius:10px; border:1px solid var(--line); position:relative; overflow:hidden; isolation:isolate; aspect-ratio:676/254; background:linear-gradient(115deg,#dfeaf255,#f3e4ec70); }
 .contact .eyebrow { margin-bottom:16px; }
 .contact h2 { font-size:29px; text-wrap:balance; }
 .contact p:not(.eyebrow) { font-size:12px; color:var(--muted); margin-bottom:0; }
@@ -341,12 +341,12 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
 .contact-email>span[aria-hidden] { flex:0 0 auto; font-size:14px; line-height:1; }
 .contact-mobile-art { display:none; }
 @media(max-width:1050px) {
-  .contact { --contact-inset:40px; padding:40px; }
+  .contact { --contact-inset:40px; --contact-bleed:16px; width:calc(100% - 32px); padding:40px calc(var(--contact-inset) + var(--contact-bleed)); }
 }
 /* 移动端完整配图置于文字下层；沿用桌面的透明度与柔和遮罩。
    背景铺满屏宽，文字保留 20px 页边距，与前面各节的标题对齐。 */
 @media(max-width:720px) {
-  .contact { width:100%; max-width:none; flex-direction:column; align-items:start; justify-content:center; margin-bottom:35px; aspect-ratio:338/508; min-height:420px; background:var(--paper); padding:36px 20px; gap:24px; border:0; border-radius:0; }
+  .contact { width:100%; max-width:none; flex-direction:column; align-items:start; justify-content:flex-start; margin-bottom:35px; aspect-ratio:338/508; min-height:420px; background:var(--paper); padding:36px 20px; gap:24px; border:0; border-radius:0; }
   .contact h2 { font-size:24px; }
   .contact p:not(.eyebrow) { margin:0; }
   .contact-split { display:none; }

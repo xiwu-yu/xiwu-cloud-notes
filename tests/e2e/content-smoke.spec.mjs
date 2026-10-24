@@ -25,7 +25,7 @@ test('real content loads in all languages and themes; every article is readable'
   }
 });
 
-test('contact links sit at the mobile image bottom-left, headings align and all languages use the current email', async ({ page }) => {
+test('contact has a spacious desktop image, mobile top-left heading and bottom-left links', async ({ page }) => {
   await page.goto('./');
   await page.locator('.about-portraits').scrollIntoViewIfNeeded();
   expect(await page.locator('.about-portraits img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true);
@@ -60,7 +60,7 @@ test('contact links sit at the mobile image bottom-left, headings align and all 
             return {
               art:{left:artBox.left,right:artBox.right,top:artBox.top,bottom:artBox.bottom},
               texts,
-              actionLeft:actionBox.left, actionTop:actionBox.top, actionBottom:actionBox.bottom, copyBottom:copyBox.bottom,
+              actionLeft:actionBox.left, actionTop:actionBox.top, actionBottom:actionBox.bottom, copyTop:copyBox.top, copyBottom:copyBox.bottom,
               headingLeft:el.querySelector('.eyebrow').getBoundingClientRect().left,
               previousLeft:document.querySelector('.boundaries .eyebrow').getBoundingClientRect().left,
               opacity:Number(getComputedStyle(art).opacity),
@@ -81,6 +81,7 @@ test('contact links sit at the mobile image bottom-left, headings align and all 
           }
           expect(Math.abs(layout.actionLeft-layout.art.left-20)).toBeLessThanOrEqual(1);
           expect(Math.abs(layout.art.bottom-layout.actionBottom-28)).toBeLessThanOrEqual(1);
+          expect(Math.abs(layout.copyTop-layout.art.top-36)).toBeLessThanOrEqual(1);
           expect(layout.actionTop).toBeGreaterThan(layout.copyBottom+12);
           expect(layout.opacity).toBeGreaterThan(0);
           expect(layout.opacity).toBeLessThan(1);
@@ -94,6 +95,13 @@ test('contact links sit at the mobile image bottom-left, headings align and all 
         } else {
           await expect(page.locator('.contact-mobile-art')).toBeHidden();
           await expect(page.locator('.contact-split')).toBeVisible();
+          const desktop = await page.locator('#contact').evaluate(el => {
+            const box = el.getBoundingClientRect();
+            const previous = document.querySelector('.boundaries').getBoundingClientRect();
+            return {width:box.width,previousWidth:previous.width,captionInset:el.querySelector('.eyebrow').getBoundingClientRect().left-box.left};
+          });
+          expect(desktop.width).toBeGreaterThan(desktop.previousWidth);
+          expect(desktop.captionInset).toBeGreaterThanOrEqual(15);
         }
       }
     }
