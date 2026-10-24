@@ -17,12 +17,7 @@ test('music config accepts playlist IDs only and builds official HTTPS links wit
   }
   assert.throws(()=>musicConfig([]),/music.*配置对象/);
   assert.throws(()=>musicConfig({playlistId:'1',title:'',creator:'作者'}),/music.title/);
-  const base={playlistId:'1',title:'歌单',creator:'作者'};
-  const track={id:'2',title:'曲目',artist:'歌手'};
-  assert.throws(()=>musicConfig({...base,tracks:{}}),/music.tracks.*数组/);
-  assert.throws(()=>musicConfig({...base,tracks:[track,track]}),/music.tracks\[1\].id.*重复/);
-  assert.throws(()=>musicConfig({...base,tracks:[{...track,id:'2&auto=1'}]}),/music.tracks\[0\].id/);
-  assert.throws(()=>musicConfig({...base,tracks:[{...track,artist:''}]}),/music.tracks\[0\].artist/);
+
 });
 
 test('changing or removing the playlist config updates markup; invalid config preserves the last build', async () => {

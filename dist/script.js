@@ -444,33 +444,43 @@
   });
 
   // 音乐面板只改变可见性；首次展开后不再改写 iframe 的 src 或节点。
+  const mobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  if (mobileDevice) {
+    $('#music-widget')?.remove();
+    $('#music-static-link')?.remove();
+  }
   const musicWidget = $('#music-widget');
   const musicToggle = $('#music-toggle');
   const musicPanel = $('#music-panel');
-  // 网易云会将手机 UA 重定向到不能跨域嵌入的移动页面；小窗口桌面浏览器仍可内嵌。
-  const mobileMusic = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  const musicLayout = window.matchMedia('(min-width:721px) and (hover:hover) and (pointer:fine)');
   function updateMusicLabel() {
     if (musicToggle) musicToggle.setAttribute('aria-label', t(musicPanel.hidden ? 'music.open' : 'music.collapse'));
-    document.querySelectorAll('[data-music-track-title]').forEach(link => {
-      link.setAttribute('aria-label', t('music.openTrack', { title: link.dataset.musicTrackTitle }));
-    });
   }
   function setMusicExpanded(expanded) {
+    if (!musicLayout.matches) return;
     musicPanel.hidden = !expanded;
     musicToggle.setAttribute('aria-expanded', String(expanded));
     updateMusicLabel();
     const frame = $('#music-frame');
-    if (expanded && !mobileMusic && !frame.hasAttribute('src')) frame.src = frame.dataset.src;
+    if (expanded && !frame.hasAttribute('src')) frame.src = frame.dataset.src;
     (expanded ? $('#music-close') : musicToggle).focus({ preventScroll: true });
   }
   if (musicWidget) {
     musicWidget.hidden = false;
-    musicWidget.dataset.mode = mobileMusic ? 'external' : 'embedded';
-    $('#music-catalog').hidden = !mobileMusic;
-    $('.music-frame-viewport').hidden = mobileMusic;
-    if (mobileMusic) $('#music-hint').dataset.i18n = 'music.mobileHint';
+    musicWidget.dataset.mode = 'embedded';
     $('#music-static-link').hidden = true;
-    document.body.classList.add('has-music');
+    const syncMusicLayout = () => {
+      document.body.classList.toggle('has-music', musicLayout.matches);
+      if (!musicLayout.matches) {
+        musicPanel.hidden = true;
+        musicToggle.setAttribute('aria-expanded', 'false');
+        // 进入禁用音乐的小屏布局时停止加载，避免出现隐藏的音乐播放。
+        $('#music-frame').removeAttribute('src');
+        updateMusicLabel();
+      }
+    };
+    syncMusicLayout();
+    musicLayout.addEventListener('change', syncMusicLayout);
     musicToggle.addEventListener('click', () => setMusicExpanded(musicPanel.hidden));
     $('#music-close').addEventListener('click', () => setMusicExpanded(false));
     musicWidget.addEventListener('keydown', event => {

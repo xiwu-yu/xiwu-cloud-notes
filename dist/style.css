@@ -471,18 +471,6 @@ dialog h2 { font-size:29px; }
   .music-help { margin-top:6px; }
 }
 
-.music-catalog { flex:1 1 auto; min-height:0; overflow:auto; overscroll-behavior:contain; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
-.music-catalog h3 { position:sticky; top:0; margin:0; padding:10px 12px; font:inherit; font-size:12px; background:var(--paper); z-index:1; }
-.music-catalog ol { list-style:none; margin:0; padding:0 10px; }
-.music-catalog li+li { border-top:1px solid var(--line); }
-.music-catalog a { display:flex; align-items:center; gap:10px; min-height:58px; padding:10px 2px; font-size:12px; }
-.music-catalog a:hover { color:var(--accent); }
-.music-track-number { font-size:10px; color:var(--muted); }
-.music-track-copy { flex:1; min-width:0; overflow-wrap:anywhere; }
-.music-track-copy strong { display:block; font-size:12px; font-weight:500; }
-.music-track-copy small { display:block; margin-top:3px; color:var(--muted); font-size:10px; }
-.music-catalog>p { padding:12px; font-size:12px; }
-.music-widget[data-mode="external"] .music-help { display:none; }
 @media(min-width:1051px) {
   .music-widget[data-mode="embedded"] .music-panel { display:grid; grid-template-columns:minmax(180px,1fr) 330px minmax(180px,1fr); grid-template-rows:auto auto 1fr; gap:0 22px; }
   .music-heading { grid-column:1/-1; margin-bottom:12px; }
@@ -490,4 +478,10 @@ dialog h2 { font-size:29px; }
   .music-frame-viewport { grid-column:2; grid-row:2/4; }
   .music-help { grid-column:3; grid-row:2; }
   .music-fallback { grid-column:3; grid-row:3; }
+}
+
+/* 手机/触屏和平板不提供音乐入口；含无脚本时的歌单跳转链接。 */
+@media(max-width:720px), (hover:none) and (pointer:coarse) {
+  .music-widget, .music-static-link { display:none!important; }
+  .has-music footer { padding-bottom:35px; }
 }
