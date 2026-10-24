@@ -25,7 +25,7 @@ test('real content loads in all languages and themes; every article is readable'
   }
 });
 
-test('portraits and contact art load at desktop and mobile widths', async ({ page }) => {
+test('contact artwork is softened and text overlays it with aligned headings on mobile', async ({ page }) => {
   await page.goto('./');
   await page.locator('.about-portraits').scrollIntoViewIfNeeded();
   expect(await page.locator('.about-portraits img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true);
@@ -33,18 +33,64 @@ test('portraits and contact art load at desktop and mobile widths', async ({ pag
   await expect(page.locator('.contact-mobile-art')).toBeHidden();
   for (const width of [320, 375, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
+    await page.locator('#contact').scrollIntoViewIfNeeded();
     for (const lang of profile.locales) {
       await page.selectOption('#language-select', lang);
       for (const theme of ['light', 'dark']) {
         if (await page.locator('html').getAttribute('data-theme') !== theme) await page.locator('.theme-toggle').click();
         await noOverflow(page, width);
+        if (width <= 720) {
+          await expect(page.locator('.contact-split')).toBeHidden();
+          await expect(page.locator('.contact-mobile-art')).toBeVisible();
+          const layout = await page.locator('#contact').evaluate(el => {
+            const art = el.querySelector('.contact-mobile-art');
+            const artBox = art.getBoundingClientRect();
+            const overlay = getComputedStyle(el, '::before');
+            const texts = ['.eyebrow', 'h2', '#email-link', '.contact-action .text-link'].map(selector => {
+              const box = el.querySelector(selector).getBoundingClientRect();
+              return {left:box.left, right:box.right, top:box.top, bottom:box.bottom};
+            });
+            return {
+              art:{left:artBox.left,right:artBox.right,top:artBox.top,bottom:artBox.bottom},
+              texts,
+              headingLeft:el.querySelector('.eyebrow').getBoundingClientRect().left,
+              previousLeft:document.querySelector('.boundaries .eyebrow').getBoundingClientRect().left,
+              opacity:Number(getComputedStyle(art).opacity),
+              overlayDisplay:overlay.display,
+              overlayOpacity:Number(overlay.opacity),
+              overlayPointerEvents:overlay.pointerEvents,
+              artZ:Number(getComputedStyle(art).zIndex),
+              overlayZ:Number(overlay.zIndex),
+              textZ:Number(getComputedStyle(el.querySelector('.contact-copy')).zIndex)
+            };
+          });
+          expect(Math.abs(layout.headingLeft-layout.previousLeft)).toBeLessThanOrEqual(1);
+          for (const box of layout.texts) {
+            expect(box.left).toBeGreaterThanOrEqual(layout.art.left);
+            expect(box.right).toBeLessThanOrEqual(layout.art.right+1);
+            expect(box.top).toBeGreaterThanOrEqual(layout.art.top);
+            expect(box.bottom).toBeLessThanOrEqual(layout.art.bottom+1);
+          }
+          expect(layout.opacity).toBeGreaterThan(0);
+          expect(layout.opacity).toBeLessThan(1);
+          expect(layout.overlayDisplay).not.toBe('none');
+          expect(layout.overlayOpacity).toBeGreaterThan(0);
+          expect(layout.overlayOpacity).toBeLessThan(1);
+          expect(layout.overlayPointerEvents).toBe('none');
+          expect(layout.artZ).toBeLessThan(layout.overlayZ);
+          expect(layout.overlayZ).toBeLessThan(layout.textZ);
+          await expect(page.locator('#email-link')).toHaveAttribute('href', 'mailto:2464178595%40qq.com');
+        } else {
+          await expect(page.locator('.contact-mobile-art')).toBeHidden();
+          await expect(page.locator('.contact-split')).toBeVisible();
+        }
       }
     }
     if (width <= 720) {
-      await expect(page.locator('.contact-split')).toBeHidden();
-      await expect(page.locator('.contact-mobile-art')).toBeVisible();
-      const layout = await page.locator('#contact').evaluate(el => ({ bottom: el.querySelector('.contact-mobile-art').getBoundingClientRect().bottom, email: el.querySelector('#email-link').getBoundingClientRect().top }));
-      expect(layout.email).toBeGreaterThanOrEqual(layout.bottom);
+      await page.locator('#contact').scrollIntoViewIfNeeded();
+      await expect.poll(() => page.locator('.contact-mobile-art img').evaluate(img=>img.complete && img.naturalWidth>0)).toBe(true);
+      await page.locator('.contact-action .text-link').click();
+      await expect.poll(() => new URL(page.url()).hash).toBe('#interests');
     }
   }
 });

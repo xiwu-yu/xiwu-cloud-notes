@@ -334,7 +334,7 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
 .contact-split span:first-child { background-position:center top; }
 .contact-split span:last-child { background-position:center bottom; }
 .contact::before { content:""; position:absolute; inset:0; z-index:1; background:var(--paper); opacity:.45; pointer-events:none; }
-.contact>div:not(.contact-split) { position:relative; z-index:2; }
+.contact-copy, .contact-action { position:relative; z-index:2; }
 .contact .contact-copy .eyebrow { margin-top:0; }
 .contact-email { display:flex; width:max-content; align-items:center; justify-content:center; gap:8px; max-width:100%; margin:0 auto; padding:9px 13px; border:1px solid var(--line); border-radius:6px; background:var(--panel); font-size:11px; line-height:1.7; color:var(--ink); text-align:left; overflow-wrap:anywhere; transition:background .2s,border-color .2s; }
 .contact-email:hover { background:var(--wash); border-color:var(--accent); }
@@ -343,25 +343,22 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
 @media(max-width:1050px) {
   .contact { padding:40px; }
 }
+/* 移动端完整配图置于文字下层；沿用桌面的透明度与柔和遮罩。
+   背景铺满屏宽，文字保留 20px 页边距，与前面各节的标题对齐。 */
 @media(max-width:720px) {
-  .contact { flex-direction:column; align-items:start; margin-bottom:35px; aspect-ratio:auto; max-height:none; background:var(--paper); padding:0; gap:0; border-radius:10px; }
+  .contact { width:100%; max-width:none; flex-direction:column; align-items:start; justify-content:center; margin-bottom:35px; aspect-ratio:338/508; min-height:420px; background:var(--paper); padding:36px 20px; gap:24px; border:0; border-radius:0; }
   .contact h2 { font-size:24px; }
   .contact p:not(.eyebrow) { margin:0; }
-  .contact>div>p:last-child { margin-top:15px; }
-  .contact::before { opacity:.68; display:none; }
   .contact-split { display:none; }
   .contact-action { min-width:0; max-width:none; width:100%; text-align:left; }
-  .contact-email { margin:0; font-size:10px; }
-  .contact-mobile-art { display:block; width:100%; line-height:0; overflow:hidden; border-radius:9px 9px 0 0; background:var(--wash); }
-  .contact-mobile-art img { width:100%; height:auto; display:block; }
-  .contact .contact-copy { width:100%; padding:28px 25px 0; }
-  .contact .contact-action { width:100%; max-width:none; min-width:0; padding:20px 25px 30px; }
+  .contact-email { margin:0; font-size:11px; }
+  .contact .contact-mobile-art { display:block; position:absolute; inset:0; z-index:0; opacity:.62; overflow:hidden; pointer-events:none; }
+  .contact-mobile-art img { width:100%; height:100%; object-fit:cover; filter:saturate(.9); }
+  .contact .contact-copy, .contact .contact-action { width:100%; padding:0; }
   .contact .contact-copy .eyebrow { margin-bottom:14px; }
 }
 @media(max-width:359px) {
   .contact h2 { font-size:21px; }
-  .contact .contact-copy { padding-left:22px; padding-right:22px; }
-  .contact .contact-action { padding-left:22px; padding-right:22px; }
 }
 
 /* 页脚 */

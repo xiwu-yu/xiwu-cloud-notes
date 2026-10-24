@@ -109,6 +109,8 @@ GitHub Actions 在 PR、main push 和手动触发时验证；安装 Chromium 及
 
 资源实测、验证记录与主要截图见 [本轮修复证据](artifacts/verification.md)。`node scripts/evidence.mjs after` 可用本机 Chrome 重新记录本地冷加载数据和截图（先构建）；测量的是本地无压缩 HTTP 服务，gzip 为离线估算，不代表线上 CDN 的传输压缩。
 
+移动端联系区使用完整配图作为底层背景，沿用桌面端的透明度和主题遮罩；标题、联系方式和「再翻一篇」叠在图上。文字保留 20px 页边距，使「05 / MORE TO BE CONTINUED」与前面章节标题对齐。浏览器测试覆盖各语言、主题下的文字边界、对齐与链接可操作性。[联系区前后截图与验证记录](artifacts/contact-mobile/README.md)。
+
 ### 缓存版本
 
 `pnpm build` 会计算 `style.css`、`profile.js`、`archive.js`、`script.js`，以及 `dist/assets` 中图片的内容哈希，并自动写入 HTML、CSS 和文章配图的 `?v=` 参数。部署后浏览器会请求新的 JS、CSS 和图片，不需要手动改版本号。不要手写固定的 `?v=`，再次构建即可自动更新。
