@@ -65,7 +65,7 @@
     "notes.filterAria": "按主题筛选",
     "notes.archiveAria": "时间归档工具",
     "notes.viewAria": "随笔显示方式",
-    "gentle.line": "先别急着升华。<br>我是真的想吃薯条。",
+    "gentle.line": "飞萤扑火，<br>向死而生。",
     "resources.title": "一些中文资料与工具。",
     "resources.side": "想查资料，或找些工具，<br>可以从这里看看。",
     "resources.note": "资料按需参考；HRT 记录工具不能代替医疗建议。",
@@ -84,8 +84,7 @@
     "boundaries.a2": "真实身份、身体、医疗和关系细节不聊，也不会拿别人的私事凑文章。这里已经写出来的想法可以讨论，没写的部分就先留着。",
     "boundaries.q3": "可以转发吗？",
     "boundaries.a3": "先问我。转发时请保留上下文和署名，不要拿零碎句子去猜现实身份，也别把这里的文字和其他人的私人信息拼在一起。",
-    "contact.title": "就先写到这里。<br>想起别的再补。",
-    "contact.thanks": "谢谢你看完。没看完也没事，我自己有时都嫌长。",
+    "contact.title": "我们的存在，<br>就是对恶意最大的反抗。",
     "contact.email": "给{name}写信",
     "contact.placeholder": "暂未开放公开联系方式",
     "contact.more": "再翻一篇",
@@ -101,7 +100,10 @@
     "theme.toDark": "切换到深色模式",
     "theme.toLight": "切换到浅色模式",
     "nav.aria": "主要导航",
-    "gentle.aria": "云间便笺"
+    "gentle.aria": "云间便笺",
+    "about.portraitsLabel": "夕雾的头像",
+    "about.avatarAlt1": "夕雾的动漫头像，白发与跨性别旗背景",
+    "about.avatarAlt2": "夕雾的动漫头像，拿着棒棒糖和一把刀"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -169,7 +171,7 @@
     "notes.filterAria": "按主題篩選",
     "notes.archiveAria": "時間歸檔工具",
     "notes.viewAria": "隨筆顯示方式",
-    "gentle.line": "先別急著昇華。<br>我是真的想吃薯條。",
+    "gentle.line": "飛螢撲火，<br>向死而生。",
     "resources.title": "一些中文資料與工具。",
     "resources.side": "想查資料，或找些工具，<br>可以從這裡看看。",
     "resources.note": "資料按需參考；HRT 記錄工具不能代替醫療建議。",
@@ -188,8 +190,7 @@
     "boundaries.a2": "真實身分、身體、醫療和關係細節不聊，也不會拿別人的私事湊文章。這裡已經寫出來的想法可以討論，沒寫的部分就先留著。",
     "boundaries.q3": "可以轉發嗎？",
     "boundaries.a3": "先問我。轉發時請保留上下文和署名，不要拿零碎句子去猜現實身分，也別把這裡的文字和其他人的私人資訊拼在一起。",
-    "contact.title": "就先寫到這裡。<br>想起別的再補。",
-    "contact.thanks": "謝謝你看完。沒看完也沒事，我自己有時都嫌長。",
+    "contact.title": "我們的存在，<br>就是對惡意最大的反抗。",
     "contact.email": "給{name}寫信",
     "contact.placeholder": "暫未開放公開聯絡方式",
     "contact.more": "再翻一篇",
@@ -205,7 +206,10 @@
     "theme.toDark": "切換到深色模式",
     "theme.toLight": "切換到淺色模式",
     "nav.aria": "主要導覽",
-    "gentle.aria": "雲間便箋"
+    "gentle.aria": "雲間便箋",
+    "about.portraitsLabel": "夕霧的頭像",
+    "about.avatarAlt1": "夕霧的動漫頭像，白髮與跨性別旗背景",
+    "about.avatarAlt2": "夕霧的動漫頭像，拿著棒棒糖和一把刀"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -273,7 +277,7 @@
     "notes.filterAria": "Filter by theme",
     "notes.archiveAria": "Archive tools",
     "notes.viewAria": "Essay view",
-    "gentle.line": "No need to make it profound yet.<br>I really do want fries.",
+    "gentle.line": "Fireflies into the flame,<br>living toward death.",
     "resources.title": "A few Chinese-language resources and tools.",
     "resources.side": "Looking for information or a useful tool?<br>Start here.",
     "resources.note": "Use these as needed; an HRT tracker is not medical advice.",
@@ -292,8 +296,7 @@
     "boundaries.a2": "I don't discuss my real identity, body, medical details, or relationships, and I won't use other people's private lives as material. You're welcome to discuss what I've already written here; what isn't written can stay that way.",
     "boundaries.q3": "Can I share this?",
     "boundaries.a3": "Ask me first. If you share, keep the context and attribution, don't use fragments to guess at my real identity, and don't combine my words with other people's private information.",
-    "contact.title": "I'll stop here for now.<br>If I think of more, I'll add it.",
-    "contact.thanks": "Thanks for reading. It's okay if you didn't finish—sometimes I find it long too.",
+    "contact.title": "Our existence is<br>the greatest resistance to malice.",
     "contact.email": "Write to {name}",
     "contact.placeholder": "No public contact details yet",
     "contact.more": "Read another",
@@ -309,7 +312,10 @@
     "theme.toDark": "Switch to dark mode",
     "theme.toLight": "Switch to light mode",
     "nav.aria": "Main navigation",
-    "gentle.aria": "A note in the clouds"
+    "gentle.aria": "A note in the clouds",
+    "about.portraitsLabel": "Portraits of Xiwu",
+    "about.avatarAlt1": "An anime portrait of Xiwu with white hair against a trans flag background",
+    "about.avatarAlt2": "An anime portrait of Xiwu holding a lollipop and a knife"
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -377,7 +383,7 @@
     "notes.filterAria": "テーマで絞り込む",
     "notes.archiveAria": "アーカイブツール",
     "notes.viewAria": "エッセイの表示形式",
-    "gentle.line": "まだ深く考えなくていい。<br>私は本当にポテトが食べたい。",
+    "gentle.line": "飛蛍、炎へ。<br>死に向かって生きる。",
     "resources.title": "中国語の資料とツール。",
     "resources.side": "調べものやツール探しに、<br>ここからどうぞ。",
     "resources.note": "必要に応じて参考にしてください。HRT記録ツールは医療上の助言の代わりにはなりません。",
@@ -396,8 +402,7 @@
     "boundaries.a2": "本名、身体、医療、関係の細かい話はしません。人の私事を記事の材料にすることもありません。ここに書いた考えについては話せますが、書いていない部分はそのままにしておいてください。",
     "boundaries.q3": "転載してもいい？",
     "boundaries.a3": "まず私に聞いてください。共有するときは文脈と署名を残し、断片的な文から現実の身元を推測しないでください。ここの文章と他人の個人情報を組み合わせるのもやめてください。",
-    "contact.title": "ひとまずここまで。<br>何か思い出したらまた書きます。",
-    "contact.thanks": "読んでくれてありがとうございます。読み終わらなくても大丈夫、私も長いと思うことがあります。",
+    "contact.title": "私たちの存在そのものが、<br>悪意への最大の抵抗だ。",
     "contact.email": "{name}に手紙を書く",
     "contact.placeholder": "公開している連絡先はまだありません",
     "contact.more": "もう一篇読む",
@@ -413,6 +418,9 @@
     "theme.toDark": "ダークモードに切り替え",
     "theme.toLight": "ライトモードに切り替え",
     "nav.aria": "メインナビゲーション",
-    "gentle.aria": "雲間の便箋"
+    "gentle.aria": "雲間の便箋",
+    "about.portraitsLabel": "夕霧の肖像",
+    "about.avatarAlt1": "トランスジェンダーの旗を背景にした、白髪の夕霧のアニメ風肖像",
+    "about.avatarAlt2": "棒付きキャンディーと包丁を持った夕霧のアニメ風肖像"
   }
 }

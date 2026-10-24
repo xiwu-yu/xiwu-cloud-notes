@@ -22,6 +22,9 @@ test('article cards are numbered in the order they are displayed', async ({ page
   await expect(page.locator('.interest-card')).toHaveCount(2);
   expect(await cardIds(page)).toEqual(['claw-marks', 'hrt-preface']);
   expect(await cardNumbers(page)).toEqual(['01', '02']);
+  await expect(page.locator('.gentle-note > p')).toContainText('飞萤扑火');
+  await expect(page.locator('#contact-title')).toContainText('我们的存在');
+  await expect(page.locator('.about-portraits img')).toHaveCount(2);
 
   await page.selectOption('#archive-order', 'oldest');
   expect(await cardIds(page)).toEqual(['hrt-preface', 'claw-marks']);
@@ -111,6 +114,25 @@ test('article dialog has a shareable URL and follows browser back and forward', 
   expect(langParam(page)).toBe('ja');
 });
 
+test('portrait images load and the contact artwork switches between split and mobile backgrounds', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.about-portraits img').first().scrollIntoViewIfNeeded();
+  await expect.poll(() => page.locator('.about-portraits img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true);
+
+  await page.locator('#contact').scrollIntoViewIfNeeded();
+  const desktopLayers = await page.locator('.contact-split span').evaluateAll(layers => layers.map(layer => getComputedStyle(layer).backgroundImage));
+  expect(desktopLayers).toHaveLength(2);
+  expect(desktopLayers.every(image => image.includes('contact.jpg'))).toBe(true);
+  const positions = await page.locator('.contact-split span').evaluateAll(layers => layers.map(layer => getComputedStyle(layer).backgroundPosition));
+  expect(positions[0]).toBe('50% 0%');
+  expect(positions[1]).toBe('50% 100%');
+
+  await page.setViewportSize({ width: 375, height: 900 });
+  await expect(page.locator('.contact-split')).toBeHidden();
+  const mobileBackground = await page.locator('#contact').evaluate(element => getComputedStyle(element).backgroundImage);
+  expect(mobileBackground).toContain('contact.jpg');
+});
+
 test('category filters stay selected when the interface language changes', async ({ page }) => {
   await page.goto('/');
   await page.selectOption('#language-select', 'en');
@@ -140,6 +162,9 @@ test('language selection changes the interface and the essays, including an open
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.locator('#dialog-title')).toHaveText('Leave Claw Marks While I Still Can');
   await expect(page.locator('#dialog-body')).toContainText('Even while writing this');
+  await expect(page.locator('.gentle-note > p')).toContainText('Fireflies into the flame');
+  await expect(page.locator('#contact-title')).toContainText('Our existence');
+  await expect(page.locator('.about-portraits img').first()).toHaveAttribute('alt', /anime portrait/);
   expect(langParam(page)).toBe('en');
   expect(postParam(page)).toBe('claw-marks');
   await page.locator('.dialog-close').click();
