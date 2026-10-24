@@ -109,7 +109,9 @@ GitHub Actions 在 PR、main push 和手动触发时验证；安装 Chromium 及
 
 资源实测、验证记录与主要截图见 [本轮修复证据](artifacts/verification.md)。`node scripts/evidence.mjs after` 可用本机 Chrome 重新记录本地冷加载数据和截图（先构建）；测量的是本地无压缩 HTTP 服务，gzip 为离线估算，不代表线上 CDN 的传输压缩。
 
-移动端联系区使用完整配图作为底层背景，沿用桌面端的透明度和主题遮罩；标题、联系方式和「再翻一篇」叠在图上。文字保留 20px 页边距，使「05 / MORE TO BE CONTINUED」与前面章节标题对齐。浏览器测试覆盖各语言、主题下的文字边界、对齐与链接可操作性。[联系区前后截图与验证记录](artifacts/contact-mobile/README.md)。
+移动端联系区使用完整配图作为底层背景，沿用桌面端的透明度和主题遮罩；标题叠在图上，联系方式和「再翻一篇」固定在图片左下角（左侧 20px、底部 28px）。移动端文字保留 20px 页边距；桌面端「05 / MORE TO BE CONTINUED」也与前面章节标题左边缘对齐。浏览器测试覆盖各语言、主题下的文字边界、对齐与链接可操作性。[联系区前后截图与验证记录](artifacts/contact-mobile/README.md)。
+
+当前联系邮箱统一为 `824396851az@gmail.com`，四种语言的显示文案、备用文案和 `mailto` 均使用该地址。
 
 ### 缓存版本
 

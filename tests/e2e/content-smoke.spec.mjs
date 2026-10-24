@@ -25,7 +25,7 @@ test('real content loads in all languages and themes; every article is readable'
   }
 });
 
-test('contact artwork is softened and text overlays it with aligned headings on mobile', async ({ page }) => {
+test('contact links sit at the mobile image bottom-left, headings align and all languages use the current email', async ({ page }) => {
   await page.goto('./');
   await page.locator('.about-portraits').scrollIntoViewIfNeeded();
   expect(await page.locator('.about-portraits img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true);
@@ -39,6 +39,11 @@ test('contact artwork is softened and text overlays it with aligned headings on 
       for (const theme of ['light', 'dark']) {
         if (await page.locator('html').getAttribute('data-theme') !== theme) await page.locator('.theme-toggle').click();
         await noOverflow(page, width);
+        await expect(page.locator('#email-link')).toHaveAttribute('href', 'mailto:824396851az%40gmail.com');
+        await expect(page.locator('#email-label')).toContainText('824396851az@gmail.com');
+        await expect(page.locator('#contact-placeholder')).toContainText('824396851az@gmail.com');
+        const headingOffset = await page.evaluate(() => document.querySelector('#contact .eyebrow').getBoundingClientRect().left - document.querySelector('.boundaries .eyebrow').getBoundingClientRect().left);
+        expect(Math.abs(headingOffset)).toBeLessThanOrEqual(1);
         if (width <= 720) {
           await expect(page.locator('.contact-split')).toBeHidden();
           await expect(page.locator('.contact-mobile-art')).toBeVisible();
@@ -46,6 +51,8 @@ test('contact artwork is softened and text overlays it with aligned headings on 
             const art = el.querySelector('.contact-mobile-art');
             const artBox = art.getBoundingClientRect();
             const overlay = getComputedStyle(el, '::before');
+            const actionBox = el.querySelector('.contact-action').getBoundingClientRect();
+            const copyBox = el.querySelector('.contact-copy').getBoundingClientRect();
             const texts = ['.eyebrow', 'h2', '#email-link', '.contact-action .text-link'].map(selector => {
               const box = el.querySelector(selector).getBoundingClientRect();
               return {left:box.left, right:box.right, top:box.top, bottom:box.bottom};
@@ -53,6 +60,7 @@ test('contact artwork is softened and text overlays it with aligned headings on 
             return {
               art:{left:artBox.left,right:artBox.right,top:artBox.top,bottom:artBox.bottom},
               texts,
+              actionLeft:actionBox.left, actionTop:actionBox.top, actionBottom:actionBox.bottom, copyBottom:copyBox.bottom,
               headingLeft:el.querySelector('.eyebrow').getBoundingClientRect().left,
               previousLeft:document.querySelector('.boundaries .eyebrow').getBoundingClientRect().left,
               opacity:Number(getComputedStyle(art).opacity),
@@ -71,6 +79,9 @@ test('contact artwork is softened and text overlays it with aligned headings on 
             expect(box.top).toBeGreaterThanOrEqual(layout.art.top);
             expect(box.bottom).toBeLessThanOrEqual(layout.art.bottom+1);
           }
+          expect(Math.abs(layout.actionLeft-layout.art.left-20)).toBeLessThanOrEqual(1);
+          expect(Math.abs(layout.art.bottom-layout.actionBottom-28)).toBeLessThanOrEqual(1);
+          expect(layout.actionTop).toBeGreaterThan(layout.copyBottom+12);
           expect(layout.opacity).toBeGreaterThan(0);
           expect(layout.opacity).toBeLessThan(1);
           expect(layout.overlayDisplay).not.toBe('none');
@@ -79,7 +90,7 @@ test('contact artwork is softened and text overlays it with aligned headings on 
           expect(layout.overlayPointerEvents).toBe('none');
           expect(layout.artZ).toBeLessThan(layout.overlayZ);
           expect(layout.overlayZ).toBeLessThan(layout.textZ);
-          await expect(page.locator('#email-link')).toHaveAttribute('href', 'mailto:2464178595%40qq.com');
+          await expect(page.locator('#email-link')).toHaveAttribute('href', 'mailto:824396851az%40gmail.com');
         } else {
           await expect(page.locator('.contact-mobile-art')).toBeHidden();
           await expect(page.locator('.contact-split')).toBeVisible();

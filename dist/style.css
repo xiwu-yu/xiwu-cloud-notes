@@ -323,7 +323,7 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
 }
 
 /* 联系方式与配图 */
-.contact { padding:50px 55px; margin-top:0; margin-bottom:58px; display:flex; justify-content:space-between; align-items:center; gap:30px; border-radius:10px; border:1px solid var(--line); position:relative; overflow:hidden; isolation:isolate; aspect-ratio:676/254; background:linear-gradient(115deg,#dfeaf255,#f3e4ec70); }
+.contact { --contact-inset:55px; padding:50px var(--contact-inset); margin-top:0; margin-bottom:58px; display:flex; justify-content:space-between; align-items:center; gap:30px; border-radius:10px; border:1px solid var(--line); position:relative; overflow:hidden; isolation:isolate; aspect-ratio:676/254; background:linear-gradient(115deg,#dfeaf255,#f3e4ec70); }
 .contact .eyebrow { margin-bottom:16px; }
 .contact h2 { font-size:29px; text-wrap:balance; }
 .contact p:not(.eyebrow) { font-size:12px; color:var(--muted); margin-bottom:0; }
@@ -335,13 +335,13 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
 .contact-split span:last-child { background-position:center bottom; }
 .contact::before { content:""; position:absolute; inset:0; z-index:1; background:var(--paper); opacity:.45; pointer-events:none; }
 .contact-copy, .contact-action { position:relative; z-index:2; }
-.contact .contact-copy .eyebrow { margin-top:0; }
+.contact .contact-copy .eyebrow { margin-top:0; transform:translateX(calc(0px - var(--contact-inset) - 1px)); }
 .contact-email { display:flex; width:max-content; align-items:center; justify-content:center; gap:8px; max-width:100%; margin:0 auto; padding:9px 13px; border:1px solid var(--line); border-radius:6px; background:var(--panel); font-size:11px; line-height:1.7; color:var(--ink); text-align:left; overflow-wrap:anywhere; transition:background .2s,border-color .2s; }
 .contact-email:hover { background:var(--wash); border-color:var(--accent); }
 .contact-email>span[aria-hidden] { flex:0 0 auto; font-size:14px; line-height:1; }
 .contact-mobile-art { display:none; }
 @media(max-width:1050px) {
-  .contact { padding:40px; }
+  .contact { --contact-inset:40px; padding:40px; }
 }
 /* 移动端完整配图置于文字下层；沿用桌面的透明度与柔和遮罩。
    背景铺满屏宽，文字保留 20px 页边距，与前面各节的标题对齐。 */
@@ -355,7 +355,8 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
   .contact .contact-mobile-art { display:block; position:absolute; inset:0; z-index:0; opacity:.62; overflow:hidden; pointer-events:none; }
   .contact-mobile-art img { width:100%; height:100%; object-fit:cover; filter:saturate(.9); }
   .contact .contact-copy, .contact .contact-action { width:100%; padding:0; }
-  .contact .contact-copy .eyebrow { margin-bottom:14px; }
+  .contact .contact-copy .eyebrow { margin-bottom:14px; transform:none; }
+  .contact .contact-action { position:absolute; left:20px; right:20px; bottom:28px; width:auto; }
 }
 @media(max-width:359px) {
   .contact h2 { font-size:21px; }
