@@ -24,6 +24,19 @@ test('article cards are numbered in the order they are displayed', async ({ page
   expect(await cardNumbers(page)).toEqual(['01', '02']);
   await expect(page.locator('.gentle-note > p')).toContainText('飞萤扑火');
   await expect(page.locator('#contact-title')).toContainText('我们的存在');
+  await expect(page.locator('.ticker')).toContainText('昔雾曾隔长夜望');
+  await expect(page.locator('.ticker')).toContainText('不知彼岸是今朝');
+  await expect(page.locator('.editorial-note')).toHaveText('夕雾是一只可爱的猫猫，喵喵喵～');
+  await expect(page.locator('#interests .section-heading > p')).toContainText('但行好事');
+  await expect(page.locator('#resources .section-heading > p')).toContainText('一些跨性别相关网站');
+  await expect(page.locator('#boundaries-title')).toContainText('有几件事');
+  await expect(page.locator('.faq summary').first()).toHaveText('怎么称呼？');
+  await expect(page.locator('.faq details').nth(1).locator('p')).toHaveText('跨性别相关，游戏动漫，诗词文章都可以。');
+  await expect(page.locator('#email-link')).toBeVisible();
+  await expect(page.locator('#email-link')).toHaveAttribute('href', /mailto:2464178595%40qq\.com/);
+  await expect(page.locator('#email-label')).toHaveText('联系方式 2464178595@qq.com');
+  await expect(page.locator('#contact-placeholder')).toBeHidden();
+  await expect(page.locator('footer p')).toHaveText('今夕回眸怜旧我，明朝抵岸忆他宵。');
   await expect(page.locator('.about-portraits img')).toHaveCount(2);
   expect(await page.locator('.hero-art img').getAttribute('src')).toMatch(/cloudscape\.svg\?v=[a-f0-9]{10}/);
 
@@ -177,6 +190,9 @@ test('language selection changes the interface and the essays, including an open
   await page.locator('.dialog-close').click();
   await expect(page.locator('#hero-title')).toContainText('So much I want to say');
   await expect(page.locator('.interest-card').first()).toContainText('Leave Claw Marks While I Still Can');
+  await expect(page.locator('.ticker')).toContainText('Xi Wu once gazed across the long night');
+  await expect(page.locator('#email-label')).toHaveText('Contact 2464178595@qq.com');
+  await expect(page.locator('footer p')).toContainText('Tonight I turn back and pity who I was');
 
   await page.selectOption('#language-select', 'ja');
   await expect(page.locator('html')).toHaveAttribute('lang', 'ja');

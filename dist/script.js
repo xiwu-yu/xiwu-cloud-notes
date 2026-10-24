@@ -279,7 +279,7 @@
       emailLink.href = 'mailto:' + encodeURIComponent(email);
       emailLink.hidden = false;
       placeholder.hidden = true;
-      $('#email-label').textContent = t('contact.email', { name: site.name });
+      $('#email-label').textContent = t('contact.email', { name: site.name, email });
     } else {
       emailLink.hidden = true;
       placeholder.hidden = false;

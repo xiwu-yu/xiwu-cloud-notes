@@ -98,3 +98,10 @@ html[lang="en"] body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI
 
 .contact h2{text-wrap:balance}
 @media(max-width:359px){.contact{padding-left:22px;padding-right:22px}.contact h2{font-size:21px}}
+
+/* 联系方式不要用大按钮，避免邮箱过长时盖住“再翻一篇”。 */
+.contact-action{min-width:220px;max-width:270px}
+.contact-email{display:flex;width:max-content;align-items:center;justify-content:center;gap:8px;max-width:100%;margin:0 auto;padding:9px 13px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:11px;line-height:1.7;color:var(--ink);text-align:left;overflow-wrap:anywhere;transition:background .2s,border-color .2s}
+.contact-email:hover{background:var(--wash);border-color:var(--accent)}
+.contact-email>span[aria-hidden]{flex:0 0 auto;font-size:14px;line-height:1}
+@media(max-width:720px){.contact-action{min-width:0;max-width:none;width:100%;text-align:left}.contact-email{margin:0;font-size:10px}}
