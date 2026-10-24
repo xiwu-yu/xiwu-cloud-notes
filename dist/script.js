@@ -291,6 +291,7 @@
     document.querySelectorAll('[data-i18n-aria-label]').forEach(element => { element.setAttribute('aria-label', t(element.dataset.i18nAriaLabel)); });
     document.querySelectorAll('[data-i18n-alt]').forEach(element => { element.setAttribute('alt', t(element.dataset.i18nAlt)); });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(element => { element.setAttribute('placeholder', t(element.dataset.i18nPlaceholder)); });
+    document.querySelectorAll('[data-i18n-title]').forEach(element => { element.title = t(element.dataset.i18nTitle); });
     $('#meta-description').content = t('meta.description');
     document.title = t('meta.title');
   }
@@ -339,6 +340,7 @@
     renderFilters();
     updateMonths();
     updateThemeLabel();
+    updateMusicLabel();
     renderInterests();
     renderStaticArchive();
     if (dialog.open && currentId) {
@@ -440,6 +442,36 @@
     setTheme(dark);
     try { localStorage.setItem(THEME_STORAGE, dark ? 'dark' : 'light'); } catch {}
   });
+
+  // 音乐面板只改变可见性；首次展开后不再改写 iframe 的 src 或节点。
+  const musicWidget = $('#music-widget');
+  const musicToggle = $('#music-toggle');
+  const musicPanel = $('#music-panel');
+  function updateMusicLabel() {
+    if (musicToggle) musicToggle.setAttribute('aria-label', t(musicPanel.hidden ? 'music.open' : 'music.collapse'));
+  }
+  function setMusicExpanded(expanded) {
+    musicPanel.hidden = !expanded;
+    musicToggle.setAttribute('aria-expanded', String(expanded));
+    updateMusicLabel();
+    const frame = $('#music-frame');
+    if (expanded && !frame.hasAttribute('src')) frame.src = frame.dataset.src;
+    (expanded ? $('#music-close') : musicToggle).focus({ preventScroll: true });
+  }
+  if (musicWidget) {
+    musicWidget.hidden = false;
+    $('#music-static-link').hidden = true;
+    document.body.classList.add('has-music');
+    musicToggle.addEventListener('click', () => setMusicExpanded(musicPanel.hidden));
+    $('#music-close').addEventListener('click', () => setMusicExpanded(false));
+    musicWidget.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !musicPanel.hidden) {
+        event.preventDefault();
+        event.stopPropagation();
+        setMusicExpanded(false);
+      }
+    });
+  }
 
   // 6. 称呼卡只写入剪贴板，不发送给任何人。
   $('#copy-profile').addEventListener('click', async () => {

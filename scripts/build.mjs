@@ -4,6 +4,7 @@ import { resolve, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { compilePosts, SUPPORTED_LANGS } from './content.mjs';
 import { generateStatic, postPath } from './static.mjs';
+import { musicConfig, musicMarkup } from './music.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const DEFAULT_LOCALE = 'zh-CN';
@@ -119,6 +120,7 @@ export async function build(rootPath = root) {
   const assetVersions = await hashAssetFiles(rootPath);
 
   const site = JSON.parse(await readFile(join(rootPath, 'content/site.json'), 'utf8'));
+  const music = musicConfig(site.music);
   for (const field of SITE_STRINGS) {
     if (typeof site[field] !== 'string') throw new Error(`content/site.json: ${field} 必须是文字`);
   }
@@ -158,6 +160,9 @@ export async function build(rootPath = root) {
   const staging = await mkdtemp(join(rootPath, '.build-'));
   try {
     await cp(join(rootPath, 'dist'), join(staging, 'dist'), { recursive: true });
+    const indexPath = join(staging, 'dist/index.html');
+    const index = await readFile(indexPath, 'utf8');
+    await writeFile(indexPath, index.replace(/<!-- MUSIC_PLAYER_START -->[\s\S]*?<!-- MUSIC_PLAYER_END -->/, `<!-- MUSIC_PLAYER_START -->\n${musicMarkup(music, ui[DEFAULT_LOCALE])}\n<!-- MUSIC_PLAYER_END -->`));
     await rm(join(staging, 'dist/posts'), { recursive: true, force: true });
     await writeFile(join(staging, 'dist/profile.js'), '// 自动生成，请修改 content/ 后运行 pnpm build。\nwindow.siteProfile = ' + json + ';\n');
     await versionAssets(staging, assetVersions);

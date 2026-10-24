@@ -19,7 +19,7 @@ export default defineConfig({
     screenshot: 'only-on-failure'
   },
   projects: [
-    { name: 'interaction', testMatch: 'site.spec.mjs' },
+    { name: 'interaction', testMatch: ['site.spec.mjs', 'music.spec.mjs'] },
     { name: 'content-smoke', testMatch: 'content-smoke.spec.mjs', use: { baseURL: 'http://127.0.0.1:4173/xiwu-cloud-notes/' } }
   ],
   webServer: [
