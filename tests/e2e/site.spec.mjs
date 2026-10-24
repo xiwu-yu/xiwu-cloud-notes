@@ -19,9 +19,11 @@ const langParam = page => new URL(page.url()).searchParams.get('lang');
 
 test('article cards are numbered in the order they are displayed', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.interest-card')).toHaveCount(2);
-  expect(await cardIds(page)).toEqual(['claw-marks', 'hrt-preface']);
-  expect(await cardNumbers(page)).toEqual(['01', '02']);
+  await expect(page.locator('.interest-card')).toHaveCount(3);
+  expect(await cardIds(page)).toEqual(['xiwu', 'claw-marks', 'hrt-preface']);
+  expect(await cardNumbers(page)).toEqual(['01', '02', '03']);
+  await expect(page.locator('#item-count')).toHaveText('03 篇随笔');
+  await expect(page.locator('#profile-about')).toContainText('nina喵');
   await expect(page.locator('.gentle-note > p')).toContainText('飞萤扑火');
   await expect(page.locator('#contact-title')).toContainText('我们的存在');
   await expect(page.locator('.ticker')).toContainText('昔雾曾隔长夜望');
@@ -29,9 +31,11 @@ test('article cards are numbered in the order they are displayed', async ({ page
   await expect(page.locator('.editorial-note')).toHaveText('夕雾是一只可爱的猫猫，喵喵喵～');
   await expect(page.locator('#interests .section-heading > p')).toContainText('但行好事');
   await expect(page.locator('#resources .section-heading > p')).toContainText('一些跨性别相关网站');
-  await expect(page.locator('#boundaries-title')).toContainText('有几件事');
+  await expect(page.locator('#boundaries-title')).toHaveText('一些问题');
   await expect(page.locator('.faq summary').first()).toHaveText('怎么称呼？');
   await expect(page.locator('.faq details').nth(1).locator('p')).toHaveText('跨性别相关，游戏动漫，诗词文章都可以。');
+  await expect(page.locator('.faq details').nth(2).locator('p')).toHaveText('需要征求夕雾的同意喵，联系方式在最后。');
+  await expect(page.locator('.ticker i')).toHaveCount(0);
   await expect(page.locator('#email-link')).toBeVisible();
   await expect(page.locator('#email-link')).toHaveAttribute('href', /mailto:2464178595%40qq\.com/);
   await expect(page.locator('#email-label')).toHaveText('联系方式 2464178595@qq.com');
@@ -41,8 +45,8 @@ test('article cards are numbered in the order they are displayed', async ({ page
   expect(await page.locator('.hero-art img').getAttribute('src')).toMatch(/cloudscape\.svg\?v=[a-f0-9]{10}/);
 
   await page.selectOption('#archive-order', 'oldest');
-  expect(await cardIds(page)).toEqual(['hrt-preface', 'claw-marks']);
-  expect(await cardNumbers(page)).toEqual(['01', '02']);
+  expect(await cardIds(page)).toEqual(['hrt-preface', 'claw-marks', 'xiwu']);
+  expect(await cardNumbers(page)).toEqual(['01', '02', '03']);
 
   await page.getByRole('button', { name: '性别与生活', exact: true }).click();
   await expect(page.locator('.interest-card')).toHaveCount(1);
@@ -51,9 +55,10 @@ test('article cards are numbered in the order they are displayed', async ({ page
   await expect(page.locator('#item-count')).toHaveText('01 篇随笔');
 
   await page.getByRole('button', { name: '全部', exact: true }).click();
+  await page.selectOption('#archive-order', 'newest');
   await page.selectOption('#archive-date-by', 'writtenAt');
-  expect(await cardIds(page)).toEqual(['claw-marks', 'hrt-preface']);
-  expect(await cardNumbers(page)).toEqual(['01', '02']);
+  expect(await cardIds(page)).toEqual(['claw-marks', 'xiwu', 'hrt-preface']);
+  expect(await cardNumbers(page)).toEqual(['01', '02', '03']);
 });
 
 test('theme, category filters and the timeline all work together', async ({ page }) => {
@@ -74,43 +79,45 @@ test('theme, category filters and the timeline all work together', async ({ page
   await expect(page.locator('#essay-timeline')).toBeVisible();
   await expect(page.locator('.timeline-group')).toHaveCount(1);
   await expect(page.locator('.timeline-heading')).toContainText('2026.10.24');
-  await expect(page.locator('.timeline-heading')).toContainText('2 篇');
-  await expect(page.locator('.timeline-entry')).toHaveCount(2);
+  await expect(page.locator('.timeline-heading')).toContainText('3 篇');
+  await expect(page.locator('.timeline-entry')).toHaveCount(3);
 
   await page.selectOption('#archive-date-by', 'writtenAt');
-  await expect(page.locator('.timeline-group')).toHaveCount(2);
+  await expect(page.locator('.timeline-group')).toHaveCount(3);
   await expect(page.locator('.timeline-heading').first()).toContainText('2026.10.14');
-  await expect(page.locator('.timeline-heading').last()).toContainText('写作日期未填写');
+  await expect(page.locator('.timeline-heading').last()).toContainText('2026.03.12');
 
   await page.getByRole('button', { name: '卡片', exact: true }).click();
-  await page.selectOption('#archive-month', 'undated');
+  await page.selectOption('#archive-month', '2026-09');
   await page.getByRole('button', { name: '生活与情绪', exact: true }).click();
   await expect(page.locator('#archive-empty')).toBeVisible();
   await expect(page.locator('#item-count')).toHaveText('00 篇随笔');
   await page.locator('#archive-reset').click();
   await expect(page.locator('#archive-empty')).toBeHidden();
-  await expect(page.locator('.interest-card')).toHaveCount(2);
+  await expect(page.locator('.interest-card')).toHaveCount(3);
 });
 
 test('article dialog has a shareable URL and follows browser back and forward', async ({ page }) => {
   await page.goto('/');
   await page.locator('.interest-card').first().locator('.card-button').click();
   await expect(page.locator('#interest-dialog')).toBeVisible();
-  await expect(page.locator('#dialog-title')).toHaveText('在死亡来临之前，用力留下爪痕喵');
-  expect(postParam(page)).toBe('claw-marks');
-  await expect(page.locator('#essay-position')).toHaveText('1 / 2');
+  await expect(page.locator('#dialog-title')).toHaveText('夕雾');
+  expect(postParam(page)).toBe('xiwu');
+  await expect(page.locator('#essay-position')).toHaveText('1 / 3');
+  await expect(page.locator('#dialog-meta')).toContainText('写于 2026.09.16');
+  await expect(page.locator('#dialog-body')).toContainText('昔雾曾隔长夜望');
 
   await page.locator('#essay-next').click();
-  await expect(page.locator('#dialog-title')).toHaveText('HRT 前言');
-  expect(postParam(page)).toBe('hrt-preface');
-  await expect(page.locator('#essay-position')).toHaveText('2 / 2');
-
-  await page.goBack();
   await expect(page.locator('#dialog-title')).toHaveText('在死亡来临之前，用力留下爪痕喵');
   expect(postParam(page)).toBe('claw-marks');
+  await expect(page.locator('#essay-position')).toHaveText('2 / 3');
+
+  await page.goBack();
+  await expect(page.locator('#dialog-title')).toHaveText('夕雾');
+  expect(postParam(page)).toBe('xiwu');
   await page.goForward();
-  await expect(page.locator('#dialog-title')).toHaveText('HRT 前言');
-  expect(postParam(page)).toBe('hrt-preface');
+  await expect(page.locator('#dialog-title')).toHaveText('在死亡来临之前，用力留下爪痕喵');
+  expect(postParam(page)).toBe('claw-marks');
 
   await page.locator('.dialog-close').click();
   await expect(page.locator('#interest-dialog')).not.toBeVisible();
@@ -119,6 +126,7 @@ test('article dialog has a shareable URL and follows browser back and forward', 
   await page.goto('/?post=hrt-preface');
   await expect(page.locator('#interest-dialog')).toBeVisible();
   await expect(page.locator('#dialog-title')).toHaveText('HRT 前言');
+  await expect(page.locator('#dialog-meta')).toContainText('写于 2026.03.12');
   expect(postParam(page)).toBe('hrt-preface');
 
   await page.goto('/?post=claw-marks&lang=ja');
@@ -176,20 +184,20 @@ test('language selection changes the interface and the essays, including an open
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   await expect(page.locator('#hero-title')).toContainText('想说的话很多喵');
   await page.locator('.interest-card').first().locator('.card-button').click();
-  await expect(page.locator('#dialog-title')).toHaveText('在死亡来临之前，用力留下爪痕喵');
+  await expect(page.locator('#dialog-title')).toHaveText('夕雾');
 
   await page.selectOption('#dialog-language-select', 'en');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  await expect(page.locator('#dialog-title')).toHaveText('Leave Claw Marks While I Still Can');
-  await expect(page.locator('#dialog-body')).toContainText('Even while writing this');
+  await expect(page.locator('#dialog-title')).toHaveText('Evening Mist');
+  await expect(page.locator('#dialog-body')).toContainText('Xi Wu once gazed across the long night');
   await expect(page.locator('.gentle-note > p')).toContainText('Fireflies into the flame');
   await expect(page.locator('#contact-title')).toContainText('Our existence');
   await expect(page.locator('.about-portraits img').first()).toHaveAttribute('alt', /anime portrait/);
   expect(langParam(page)).toBe('en');
-  expect(postParam(page)).toBe('claw-marks');
+  expect(postParam(page)).toBe('xiwu');
   await page.locator('.dialog-close').click();
   await expect(page.locator('#hero-title')).toContainText('So much I want to say');
-  await expect(page.locator('.interest-card').first()).toContainText('Leave Claw Marks While I Still Can');
+  await expect(page.locator('.interest-card').first()).toContainText('Evening Mist');
   await expect(page.locator('.ticker')).toContainText('Xi Wu once gazed across the long night');
   await expect(page.locator('#email-label')).toHaveText('Contact 2464178595@qq.com');
   await expect(page.locator('footer p')).toContainText('Tonight I turn back and pity who I was');
@@ -197,12 +205,12 @@ test('language selection changes the interface and the essays, including an open
   await page.selectOption('#language-select', 'ja');
   await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
   await expect(page.locator('#hero-title')).toContainText('言いたいことはたくさん');
-  await expect(page.locator('.interest-card').first()).toContainText('死が来る前に、爪痕を残したい');
+  await expect(page.locator('.interest-card').first()).toContainText('夕霧');
 
   await page.selectOption('#language-select', 'zh-TW');
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-TW');
   await expect(page.locator('#hero-title')).toContainText('想說的話很多喵');
-  await expect(page.locator('.interest-card').first()).toContainText('在死亡來臨之前，用力留下爪痕喵');
+  await expect(page.locator('.interest-card').first()).toContainText('夕霧');
 
   await page.selectOption('#language-select', 'en');
   await page.reload();
