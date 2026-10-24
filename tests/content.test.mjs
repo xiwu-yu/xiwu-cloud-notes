@@ -74,8 +74,8 @@ test('Adding and removing Markdown updates the build; a bad file preserves the l
     await writeFile(join(root,'dist/assets/cloud-blue.svg'),'<svg/>');
     await writeFile(join(root,'content/site.json'),JSON.stringify({name:'夕雾',pronouns:'她',intro:'介绍',about:'关于',email:'',tags:[]}));
     await writeFile(join(root,'content/ui.json'),await readFile(new URL('../content/ui.json',import.meta.url),'utf8'));
-    await writeFile(join(root,'dist/index.html'),'<link rel="stylesheet" href="style.css?v=old"><script src="script.js?v=old"></script>');
-    await writeFile(join(root,'dist/style.css'),'body{}');
+    await writeFile(join(root,'dist/index.html'),'<link rel="stylesheet" href="style.css?v=old"><script src="script.js?v=old"></script><img src="assets/cloud-blue.svg" alt="">');
+    await writeFile(join(root,'dist/style.css'),'body{background:url("assets/cloud-blue.svg")}');
     await writeFile(join(root,'dist/script.js'),'console.log(1);');
     await writeFile(join(root,'content/posts/one.md'),source('第一篇'));
     await build(root);
@@ -86,10 +86,14 @@ test('Adding and removing Markdown updates the build; a bad file preserves the l
     assert.equal(context.window.siteProfile.interests.length,2);
     assert.equal(context.window.siteProfile.localized.en.interests.length,2);
     assert.equal(context.window.siteProfile.localized.en.interests[0].categoryKey,'日常');
+    assert.match(context.window.siteProfile.interests[0].image,/^assets\/cloud-blue\.svg\?v=[a-f0-9]{10}$/);
     const versioned=await readFile(join(root,'dist/index.html'),'utf8');
     assert.match(versioned,/style\.css\?v=[a-f0-9]{10}/);
     assert.match(versioned,/script\.js\?v=[a-f0-9]{10}/);
+    assert.match(versioned,/assets\/cloud-blue\.svg\?v=[a-f0-9]{10}/);
     assert.doesNotMatch(versioned,/v=old/);
+    const versionedCss=await readFile(join(root,'dist/style.css'),'utf8');
+    assert.match(versionedCss,/assets\/cloud-blue\.svg\?v=[a-f0-9]{10}/);
     const firstVersion=versioned;
     await build(root);
     assert.equal(await readFile(join(root,'dist/index.html'),'utf8'),firstVersion);

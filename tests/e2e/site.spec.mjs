@@ -25,6 +25,7 @@ test('article cards are numbered in the order they are displayed', async ({ page
   await expect(page.locator('.gentle-note > p')).toContainText('飞萤扑火');
   await expect(page.locator('#contact-title')).toContainText('我们的存在');
   await expect(page.locator('.about-portraits img')).toHaveCount(2);
+  expect(await page.locator('.hero-art img').getAttribute('src')).toMatch(/cloudscape\.svg\?v=[a-f0-9]{10}/);
 
   await page.selectOption('#archive-order', 'oldest');
   expect(await cardIds(page)).toEqual(['hrt-preface', 'claw-marks']);
@@ -129,8 +130,14 @@ test('portrait images load and the contact artwork switches between split and mo
 
   await page.setViewportSize({ width: 375, height: 900 });
   await expect(page.locator('.contact-split')).toBeHidden();
-  const mobileBackground = await page.locator('#contact').evaluate(element => getComputedStyle(element).backgroundImage);
-  expect(mobileBackground).toContain('contact.jpg');
+  const mobileStyle = await page.locator('#contact').evaluate(element => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return { background: style.backgroundImage, size: style.backgroundSize, ratio: rect.height / rect.width };
+  });
+  expect(mobileStyle.background).toContain('contact.jpg');
+  expect(mobileStyle.size).toBe('contain');
+  expect(Math.abs(mobileStyle.ratio - 508 / 338)).toBeLessThan(0.02);
 });
 
 test('category filters stay selected when the interface language changes', async ({ page }) => {

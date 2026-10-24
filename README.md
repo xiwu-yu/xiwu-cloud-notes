@@ -92,7 +92,7 @@ pnpm build       # 从 Markdown 生成网页使用的数据
 
 ### 缓存版本
 
-`pnpm build` 会计算 `style.css`、`profile.js`、`archive.js`、`script.js` 的内容哈希，并自动写入 `dist/index.html` 的 `?v=` 参数。部署后浏览器会请求新的 JS 和 CSS，不需要手动改版本号。不要手写固定的 `?v=`，再次构建即可自动更新。
+`pnpm build` 会计算 `style.css`、`profile.js`、`archive.js`、`script.js`，以及 `dist/assets` 中图片的内容哈希，并自动写入 HTML、CSS 和文章配图的 `?v=` 参数。部署后浏览器会请求新的 JS、CSS 和图片，不需要手动改版本号。不要手写固定的 `?v=`，再次构建即可自动更新。
 
 ## 文件地图
 

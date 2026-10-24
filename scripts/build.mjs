@@ -54,22 +54,49 @@ function validateUi(ui) {
   return ui;
 }
 
-// 部署到 GitHub Pages 后 HTML 可能仍被缓存；给本地 CSS/JS 自动加上内容版本号。
-async function versionAssets(rootPath) {
+const contentHash = contents => createHash('sha256').update(contents).digest('hex').slice(0, 10);
+
+async function hashAssetFiles(rootPath) {
+  const directory = join(rootPath, 'dist/assets');
+  const versions = {};
+  let entries;
+  try { entries = await readdir(directory, { withFileTypes: true }); }
+  catch { return versions; }
+  await Promise.all(entries.filter(entry => entry.isFile()).map(async entry => {
+    const relative = `assets/${entry.name}`;
+    versions[relative] = contentHash(await readFile(join(directory, entry.name)));
+  }));
+  return versions;
+}
+
+async function versionCssAssets(rootPath, assetVersions) {
+  const cssPath = join(rootPath, 'dist/style.css');
+  let css;
+  try { css = await readFile(cssPath, 'utf8'); }
+  catch { return; }
+  const updated = css.replace(/url\((["']?)(assets\/[^"')\s?]+)(?:\?[^"')\s]*)?\1\)/g, (whole, quote, reference) => (
+    assetVersions[reference] ? `url(${quote}${reference}?v=${assetVersions[reference]}${quote})` : whole
+  ));
+  if (updated !== css) await writeFile(cssPath, updated);
+}
+
+// 部署到 GitHub Pages 后 HTML、CSS 和图片都可能仍被缓存；给本地静态资源自动加上内容版本号。
+async function versionAssets(rootPath, assetVersions = {}) {
   const indexPath = join(rootPath, 'dist/index.html');
   let html;
   try { html = await readFile(indexPath, 'utf8'); }
   catch { return; }
-  const references = new Set([...html.matchAll(/(?:href|src)="([^"?#]+\.(?:css|js))(?:\?[^"]*)?"/g)].map(match => match[1]));
-  const versions = {};
+  // 先改写 CSS 里的图片地址，再计算 CSS 自身的哈希。
+  await versionCssAssets(rootPath, assetVersions);
+  const references = new Set([...html.matchAll(/(?:href|src)="([^"?#]+)(?:\?[^"]*)?"/g)].map(match => match[1]));
+  const versions = { ...assetVersions };
   await Promise.all([...references].map(async reference => {
+    if (versions[reference] || !/\.(?:css|js)$/i.test(reference)) return;
     if (/^(?:[a-z]+:)?\/\//i.test(reference) || reference.startsWith('/')) return;
-    try {
-      const contents = await readFile(join(rootPath, 'dist', reference));
-      versions[reference] = createHash('sha256').update(contents).digest('hex').slice(0, 10);
-    } catch {}
+    try { versions[reference] = contentHash(await readFile(join(rootPath, 'dist', reference))); }
+    catch {}
   }));
-  html = html.replace(/(href|src)="([^"?#]+\.(?:css|js))(?:\?v=[^"]*)?"/g, (whole, attribute, reference) => (
+  html = html.replace(/(href|src)="([^"?#]+)(?:\?v=[^"]*)?"/g, (whole, attribute, reference) => (
     versions[reference] ? `${attribute}="${reference}?v=${versions[reference]}"` : whole
   ));
   await writeFile(indexPath, html);
@@ -96,6 +123,7 @@ export async function build(rootPath = root) {
     try { await access(join(rootPath, 'dist', post.image)); }
     catch { throw new Error(`${post.id}: 找不到配图 dist/${post.image}`); }
   }));
+  const assetVersions = await hashAssetFiles(rootPath);
 
   const site = JSON.parse(await readFile(join(rootPath, 'content/site.json'), 'utf8'));
   for (const field of SITE_STRINGS) {
@@ -116,6 +144,7 @@ export async function build(rootPath = root) {
       const { body, order, ...post } = variant;
       return {
         ...post,
+        image: assetVersions[post.image] ? `${post.image}?v=${assetVersions[post.image]}` : post.image,
         categoryKey: base.category,
         fallback: variant.lang !== lang,
         // body 兼容浏览器缓存中的旧版阅读脚本，仍只由 Markdown 生成。
@@ -137,7 +166,7 @@ export async function build(rootPath = root) {
   };
   const json = JSON.stringify(data, null, 2).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
   await writeFile(join(rootPath, 'dist/profile.js'), '// 自动生成，请修改 content/site.json、content/ui.json 或 content/posts/*.md，再运行 pnpm build。\nwindow.siteProfile = ' + json + ';\n');
-  await versionAssets(rootPath);
+  await versionAssets(rootPath, assetVersions);
   console.log(`已从 Markdown 生成 ${basePosts.length} 篇随笔、${SUPPORTED_LANGS.length} 种语言。`);
   return posts;
 }

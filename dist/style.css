@@ -84,14 +84,14 @@ html[lang="en"] body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI
 /* 联系我们：桌面端把第五张图上下切开、左右拼接，移动端使用完整图片作为背景。 */
 .contact{position:relative;overflow:hidden;isolation:isolate;aspect-ratio:676/254;background:linear-gradient(115deg,#dfeaf255,#f3e4ec70)}
 .contact-split{position:absolute;inset:0;display:flex;z-index:0;opacity:.62}
-.contact-split span{flex:1;min-width:0;background-image:url("assets/contact.jpg");background-size:100% 200%;background-repeat:no-repeat;filter:saturate(.9)}
+.contact-split span{flex:1;min-width:0;background-image:url("assets/contact.jpg?v=8d141f7dad");background-size:100% 200%;background-repeat:no-repeat;filter:saturate(.9)}
 .contact-split span:first-child{background-position:center top}
 .contact-split span:last-child{background-position:center bottom}
 .contact::before{content:"";position:absolute;inset:0;z-index:1;background:var(--paper);opacity:.45;pointer-events:none}
 .contact>div:not(.contact-split){position:relative;z-index:2}
 .contact .contact-copy .eyebrow{margin-top:0}
-@media(max-width:860px){
-  .contact{aspect-ratio:auto;background:var(--paper) url("assets/contact.jpg") center/cover no-repeat;padding:34px 25px}
+@media(max-width:720px){
+  .contact{aspect-ratio:338/508;max-height:560px;background:var(--paper) url("assets/contact.jpg?v=8d141f7dad") center / contain no-repeat;padding:34px 25px}
   .contact::before{opacity:.68}
   .contact-split{display:none}
 }
