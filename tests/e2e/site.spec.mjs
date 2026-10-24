@@ -29,7 +29,7 @@ test('article cards are numbered in the order they are displayed', async ({ page
   await expect(page.locator('.ticker')).toContainText('昔雾曾隔长夜望');
   await expect(page.locator('.ticker')).toContainText('不知彼岸是今朝');
   await expect(page.locator('.ticker i')).toHaveCount(0);
-  await expect(page.locator('.hero-note')).toHaveText('🏳️‍⚧️和🍥');
+  await expect(page.locator('.hero-note')).toHaveText('🏳️‍⚧️🍥');
   await expect(page.locator('.hero-art figcaption > span').first()).toHaveText('云间来信');
   const heroButtons = page.locator('.hero-actions .hero-button');
   await expect(heroButtons).toHaveCount(2);
@@ -41,6 +41,9 @@ test('article cards are numbered in the order they are displayed', async ({ page
   expect(buttonMetrics[0].background).not.toBe(buttonMetrics[1].background);
   await expect(page.locator('#archive-search')).toBeVisible();
   await expect(page.locator('.editorial-note')).toHaveText('夕雾是一只可爱的猫猫，喵喵喵～');
+  await expect(page.locator('#interests-title')).toHaveText('云间来信——一些思考，一点情绪');
+  await expect(page.locator('#resources-title')).toHaveText('阅读资源——一些中文资料与工具。');
+  await expect(page.locator('#profile-intro')).toContainText('跨性别相关文章');
   await expect(page.locator('#interests .section-heading > p')).toContainText('但行好事');
   await expect(page.locator('#resources .section-heading > p')).toContainText('一些跨性别相关网站');
   await expect(page.locator('#boundaries-title')).toHaveText('一些问题');
@@ -233,7 +236,7 @@ test('category filters stay selected when the interface language changes', async
 test('language selection changes the interface and the essays, including an open dialog', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
-  await expect(page.locator('#hero-title')).toContainText('想说的话很多喵');
+  await expect(page.locator('#hero-title')).toContainText('欢迎来到夕雾的');
   await page.locator('.interest-card').first().locator('.card-button').click();
   await expect(page.locator('#dialog-title')).toHaveText('夕雾');
 
@@ -247,7 +250,7 @@ test('language selection changes the interface and the essays, including an open
   expect(langParam(page)).toBe('en');
   expect(postParam(page)).toBe('xiwu');
   await page.locator('.dialog-close').click();
-  await expect(page.locator('#hero-title')).toContainText('So much I want to say');
+  await expect(page.locator('#hero-title')).toContainText("Welcome to Xiwu's");
   await expect(page.locator('.interest-card').first()).toContainText('Evening Mist');
   await expect(page.locator('.ticker')).toContainText('Xi Wu once gazed across the long night');
   await expect(page.locator('#email-label')).toHaveText('Contact 2464178595@qq.com');
@@ -255,18 +258,18 @@ test('language selection changes the interface and the essays, including an open
 
   await page.selectOption('#language-select', 'ja');
   await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
-  await expect(page.locator('#hero-title')).toContainText('言いたいことはたくさん');
+  await expect(page.locator('#hero-title')).toContainText('夕霧の');
   await expect(page.locator('.interest-card').first()).toContainText('夕霧');
 
   await page.selectOption('#language-select', 'zh-TW');
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-TW');
-  await expect(page.locator('#hero-title')).toContainText('想說的話很多喵');
+  await expect(page.locator('#hero-title')).toContainText('歡迎來到夕霧的');
   await expect(page.locator('.interest-card').first()).toContainText('夕霧');
 
   await page.selectOption('#language-select', 'en');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  await expect(page.locator('#hero-title')).toContainText('So much I want to say');
+  await expect(page.locator('#hero-title')).toContainText("Welcome to Xiwu's");
 });
 
 test('320px, 375px, 768px and 1440px layouts stay inside the viewport in every language', async ({ page }) => {
