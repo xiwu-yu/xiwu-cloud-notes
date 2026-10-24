@@ -13,14 +13,14 @@
     const haystack = [item.id, item.title, item.description, item.category, item.subtitle, ...(item.tags || []), item.text ?? item.body ?? ''].join('\n').toLowerCase();
     return terms.every(term => haystack.includes(term));
   }
-  function itemDate(item, dateBy = 'publishedAt') {
+  function itemDate(item, dateBy = 'writtenAt') {
     const value = dateBy === 'writtenAt' ? item.writtenAt : item.publishedAt;
     return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value + 'T00:00:00+08:00' : value;
   }
-  function months(items, dateBy = 'publishedAt') {
+  function months(items, dateBy = 'writtenAt') {
     return [...new Set(items.map(item => dateKey(itemDate(item, dateBy))?.slice(0, 7)).filter(Boolean))].sort().reverse();
   }
-  function select(items, {category = 'all', month = 'all', order = 'newest', dateBy = 'publishedAt', query = ''} = {}) {
+  function select(items, {category = 'all', month = 'all', order = 'newest', dateBy = 'writtenAt', query = ''} = {}) {
     return items.filter(item => {
       const key = dateKey(itemDate(item, dateBy));
       return (category === 'all' || (item.categoryKey ?? item.category) === category) &&
@@ -35,7 +35,7 @@
       return order === 'oldest' ? at - bt : bt - at;
     });
   }
-  function groups(items, dateBy = 'publishedAt') {
+  function groups(items, dateBy = 'writtenAt') {
     const result = [];
     items.forEach(item => {
       const key = dateKey(itemDate(item, dateBy)) || 'undated';

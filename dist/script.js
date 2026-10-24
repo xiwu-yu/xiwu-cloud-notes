@@ -86,7 +86,7 @@
   const searchInput = $('#archive-search');
   const languageSelect = $('#language-select');
   const dialogLanguageSelect = $('#dialog-language-select');
-  const state = { category: 'all', month: 'all', order: 'newest', view: 'cards', dateBy: 'publishedAt', query: '' };
+  const state = { category: 'all', month: 'all', order: 'newest', view: 'cards', dateBy: 'writtenAt', query: '' };
   let visibleItems = [];
   let currentId = null;
   let openedFrom = null;
@@ -267,6 +267,24 @@
     document.querySelectorAll('[data-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.view === state.view)));
   }
 
+  function renderStaticArchive() {
+    const directory = $('#static-archive');
+    const list = directory.querySelector('ul');
+    const labels = { 'zh-CN': '简体中文', 'zh-TW': '繁體中文', en: 'English', ja: '日本語' };
+    list.replaceChildren(...archive.select(posts).map(item => {
+      const entry = node('li');
+      const link = node('a', '', `${labels[item.lang]} · ${item.title}`);
+      link.href = item.url;
+      link.lang = item.lang;
+      link.hreflang = item.lang;
+      entry.append(link);
+      if (item.fallback) entry.append(node('p', 'static-fallback', t('notes.fallback')));
+      return entry;
+    }));
+    directory.querySelector('summary').textContent = t('notes.staticArchive');
+    directory.querySelector(':scope > p').textContent = t('notes.staticHint');
+  }
+
   function applyStaticText() {
     document.querySelectorAll('[data-i18n]').forEach(element => { element.textContent = t(element.dataset.i18n); });
     document.querySelectorAll('[data-i18n-html]').forEach(element => { element.innerHTML = t(element.dataset.i18nHtml); });
@@ -322,6 +340,7 @@
     updateMonths();
     updateThemeLabel();
     renderInterests();
+    renderStaticArchive();
     if (dialog.open && currentId) {
       const item = posts.find(entry => entry.id === currentId);
       if (item) renderDialog(item);
@@ -395,14 +414,27 @@
 
   // 5. 主题：优先本地偏好，其次系统设置；文案随界面语言更新。
   const themeButton = $('.theme-toggle');
+  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
   function setTheme(dark) {
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     themeButton.setAttribute('aria-pressed', String(dark));
     updateThemeLabel();
   }
-  let initialDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  try { const stored = localStorage.getItem(THEME_STORAGE); if (stored) initialDark = stored === 'dark'; } catch {}
-  setTheme(initialDark);
+  function preferredDark() {
+    try {
+      const stored = localStorage.getItem(THEME_STORAGE);
+      if (stored === 'dark' || stored === 'light') return stored === 'dark';
+    } catch {}
+    return systemTheme.matches;
+  }
+  setTheme(preferredDark());
+  const collapseFaq = () => document.querySelectorAll('.faq details').forEach(item => { item.open = false; });
+  collapseFaq();
+  window.addEventListener('pageshow', () => { setTheme(preferredDark()); collapseFaq(); });
+  window.addEventListener('storage', event => {
+    if (event.key === THEME_STORAGE || event.key === null) setTheme(preferredDark());
+  });
+  systemTheme.addEventListener('change', () => setTheme(preferredDark()));
   themeButton.addEventListener('click', () => {
     const dark = document.documentElement.dataset.theme !== 'dark';
     setTheme(dark);

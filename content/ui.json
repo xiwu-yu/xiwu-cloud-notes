@@ -105,7 +105,9 @@
     "notes.search": "搜索文章…",
     "notes.searchAria": "搜索文章",
     "notes.fallback": "当前语言暂无译文，正在展示简体中文原文。",
-    "dialog.static": "独立文章页 ↗"
+    "dialog.static": "独立文章页 ↗",
+    "notes.staticArchive": "静态文章目录",
+    "notes.staticHint": "无需 JavaScript 即可阅读。"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -213,7 +215,9 @@
     "notes.search": "搜尋文章…",
     "notes.searchAria": "搜尋文章",
     "notes.fallback": "目前語言暫無譯文，正在顯示簡體中文原文。",
-    "dialog.static": "獨立文章頁 ↗"
+    "dialog.static": "獨立文章頁 ↗",
+    "notes.staticArchive": "靜態文章目錄",
+    "notes.staticHint": "無需 JavaScript 即可閱讀。"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -321,7 +325,9 @@
     "notes.search": "Search essays…",
     "notes.searchAria": "Search essays",
     "notes.fallback": "No translation is available in this language. Showing the original in Simplified Chinese.",
-    "dialog.static": "Static article page ↗"
+    "dialog.static": "Static article page ↗",
+    "notes.staticArchive": "Static archive",
+    "notes.staticHint": "Read without JavaScript."
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -429,6 +435,8 @@
     "notes.search": "エッセイを検索…",
     "notes.searchAria": "エッセイを検索",
     "notes.fallback": "この言語の翻訳はまだありません。簡体字中国語の原文を表示しています。",
-    "dialog.static": "個別の記事ページ ↗"
+    "dialog.static": "個別の記事ページ ↗",
+    "notes.staticArchive": "記事一覧",
+    "notes.staticHint": "JavaScript なしで読めます。"
   }
 }

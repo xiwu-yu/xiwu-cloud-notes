@@ -78,6 +78,7 @@ test('Adding and removing Markdown updates the build; a bad file preserves the l
     await writeFile(join(root,'dist/index.html'),'<!-- STATIC_ARCHIVE_START --><!-- STATIC_ARCHIVE_END --><link rel="stylesheet" href="style.css?v=old"><script src="script.js?v=old"></script><img src="assets/cloud-blue.svg" alt="">');
     await writeFile(join(root,'dist/style.css'),'body{background:url("assets/cloud-blue.svg")}');
     await writeFile(join(root,'dist/script.js'),'console.log(1);');
+    await writeFile(join(root,'dist/reading.js'),await readFile(new URL('../dist/reading.js',import.meta.url)));
     await writeFile(join(root,'content/posts/one.md'),source('第一篇'));
     await build(root);
     await writeFile(join(root,'content/posts/two.md'),source('第二篇'));
@@ -170,7 +171,8 @@ test('new article, missing translations, static metadata, deletion and failed re
     assert.match(html, /<link rel="canonical" href="https:\/\/xiwu-yu.github.io\/xiwu-cloud-notes\/posts\/new-day\/zh-CN.html">/);
     assert.match(html, /property="og:locale" content="zh_CN"/);
     assert.match(html, /name="description" content="一点想法"/);
-    assert.doesNotMatch(html, /<script/);
+    assert.match(html, /<script src="\.\.\/\.\.\/reading\.js\?v=[a-f0-9]{10}"><\/script>/);
+    assert.doesNotMatch(html, /(?:profile|archive|script)\.js/);
     const sitemap = await readFile(join(root,'dist/sitemap.xml'),'utf8');
     assert.match(sitemap, /xiwu-cloud-notes\/posts\/new-day\/zh-CN.html/);
     assert.doesNotMatch(sitemap, /new-day\/en.html/);

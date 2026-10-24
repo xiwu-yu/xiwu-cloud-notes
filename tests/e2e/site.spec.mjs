@@ -6,9 +6,13 @@ const openFirst = page => page.locator('.card-button').first().click();
 
 test('fixture ordering, numbering, full-text search and combined archive filters', async ({ page }) => {
   await page.goto('./');
-  expect(await ids(page)).toEqual(['cloud', 'rain', 'original']);
+  await expect(page.locator('#archive-date-by')).toHaveValue('writtenAt');
+  await expect(page.locator('#archive-order')).toHaveValue('newest');
+  expect(await ids(page)).toEqual(['rain', 'cloud', 'original']);
   expect(await page.locator('.card-number').allTextContents()).toEqual(['01', '02', '03']);
   await page.selectOption('#archive-order', 'oldest');
+  expect(await ids(page)).toEqual(['cloud', 'rain', 'original']);
+  await page.selectOption('#archive-date-by', 'publishedAt');
   expect(await ids(page)).toEqual(['original', 'rain', 'cloud']);
   await page.selectOption('#archive-date-by', 'writtenAt');
   expect(await ids(page)).toEqual(['cloud', 'rain', 'original']);
@@ -36,7 +40,7 @@ test('timeline, undated groups, category keys and language changes share the sam
   await page.goto('./');
   await page.locator('[data-view="timeline"]').click();
   await expect(page.locator('.timeline-group')).toHaveCount(3);
-  await page.selectOption('#archive-date-by', 'writtenAt');
+  expect(await page.locator('.timeline-entry').evaluateAll(entries => entries.map(entry => entry.dataset.essayId))).toEqual(['rain', 'cloud', 'original']);
   await expect(page.locator('.timeline-heading').last()).toContainText('未填写');
   await page.locator('[data-filter="随笔"]').click();
   for (const lang of langs) {
@@ -83,6 +87,7 @@ test('explicit Chinese share overrides saved English, including reload and clipb
 
 test('opening, changing language, pagination, history, closing and focus remain consistent', async ({ page }) => {
   await page.goto('./');
+  await page.selectOption('#archive-date-by', 'publishedAt');
   await openFirst(page);
   for (let i = 0; i < langs.length; i++) {
     await page.selectOption('#dialog-language-select', langs[i]);
@@ -135,7 +140,7 @@ test('missing translation announces fallback and uses actual body language for r
   await page.locator('.dialog-close').click();
   await page.locator('#archive-search').fill('独特原文词');
   await page.locator('[data-filter="生活"]').click();
-  await page.selectOption('#archive-month', '2026-09');
+  await page.selectOption('#archive-month', 'undated');
   expect(await ids(page)).toEqual(['original']);
   await openFirst(page);
   await expect(page.locator('#essay-prev')).toBeDisabled();
@@ -205,11 +210,91 @@ test('static reading layouts cover four languages and both system themes', async
       await page.goto(`./posts/rain/${lang}.html`);
       for (const colorScheme of ['light', 'dark']) {
         await page.emulateMedia({ colorScheme });
+        await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme);
         await noOverflow(page, width);
         await expect(page.locator('.article-body')).toBeVisible();
         await expect(page.locator('article')).toHaveAttribute('lang', lang);
       }
     }
+  }
+});
+
+test('static archive follows the site language; theme persists through reading, reload and history', async ({ page }) => {
+  for (const lang of langs) {
+    for (const theme of ['light', 'dark']) {
+      await page.goto(`./?lang=${lang}`);
+      // 保存的选择应优先于相反的系统主题。
+      if (await page.locator('html').getAttribute('data-theme') === theme) await page.locator('.theme-toggle').click();
+      if (await page.locator('html').getAttribute('data-theme') !== theme) await page.locator('.theme-toggle').click();
+      await page.emulateMedia({ colorScheme: theme === 'dark' ? 'light' : 'dark' });
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      await page.locator('#static-archive summary').click();
+      await expect(page.locator('#static-archive a')).toHaveCount(3);
+      const link = page.locator(`#static-archive a[href="posts/cloud/${lang}.html"]`);
+      await expect(link).toHaveAttribute('lang', lang);
+      const expectedLabel = await page.locator('.theme-toggle').getAttribute('aria-label');
+      await link.click();
+      await expect(page.locator('html')).toHaveAttribute('lang', lang);
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute('lang', lang);
+      await expect(page.locator('.theme-toggle')).toHaveAttribute('aria-label', expectedLabel);
+      await page.reload();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      await expect(page.locator('.article-body')).toContainText(bodyMarkers[langs.indexOf(lang)]);
+      await page.locator('.theme-toggle').click();
+      const opposite = theme === 'dark' ? 'light' : 'dark';
+      await expect(page.locator('html')).toHaveAttribute('data-theme', opposite);
+      await page.goBack();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', opposite);
+      await expect(page.locator('#language-select')).toHaveValue(lang);
+    }
+  }
+  await page.goto('./posts/cloud/en.html');
+  await page.locator('nav a[lang="ja"]').click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
+  await page.locator('.brand').click();
+  await expect(page.locator('#language-select')).toHaveValue('ja');
+  await page.selectOption('#language-select', 'en');
+  await page.locator('#static-archive summary').click();
+  const fallback = page.locator('#static-archive li').filter({hasText:'尚无译文的原文'});
+  await expect(fallback).toContainText('No translation is available');
+  await expect(fallback.locator('a')).toHaveAttribute('href', 'posts/original/zh-CN.html');
+  // 独立页路径的语言确定性也必须保留，不能被主站保存的英文覆盖。
+  await page.goto('./posts/cloud/zh-CN.html');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+  await expect(page.locator('.article-body')).toContainText('中文正文');
+});
+
+test('FAQ starts collapsed and reload collapses every opened answer', async ({ page }) => {
+  await page.goto('./');
+  await expect(page.locator('.faq details')).toHaveCount(3);
+  await expect(page.locator('.faq details[open]')).toHaveCount(0);
+  for (const summary of await page.locator('.faq summary').all()) await summary.click();
+  await expect(page.locator('.faq details[open]')).toHaveCount(3);
+  await page.reload();
+  await expect(page.locator('.faq details[open]')).toHaveCount(0);
+  await expect(page.locator('#archive-date-by')).toHaveValue('writtenAt');
+  expect(await ids(page)).toEqual(['rain', 'cloud', 'original']);
+});
+
+test('static reading remains usable with blocked preferences, no JavaScript or missing enhancement', async ({ browser }) => {
+  for (const failure of ['storage', 'javascript', 'reading.js']) {
+    const context = await browser.newContext({ javaScriptEnabled: failure !== 'javascript', colorScheme:'dark' });
+    const page = await context.newPage();
+    if (failure === 'storage') await page.addInitScript(() => {
+      Storage.prototype.getItem = Storage.prototype.setItem = () => { throw new Error('Storage unavailable'); };
+    });
+    if (failure === 'reading.js') await page.route('**/reading.js*', route => route.abort());
+    await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/posts/rain/en.html');
+    await expect(page.locator('.article-body')).toContainText('English body');
+    expect(await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(32, 37, 49)');
+    if (failure === 'storage') {
+      await page.locator('.theme-toggle').click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme','light');
+      await page.reload();
+      await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+    } else await expect(page.locator('.theme-toggle')).toBeHidden();
+    await context.close();
   }
 });
 

@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { createHash } from 'node:crypto';
 
 // 明确包含项目子路径；静态页与 sitemap 共用，避免部署到用户站点根目录。
 export const SITE_URL = 'https://xiwu-yu.github.io/xiwu-cloud-notes/';
@@ -11,6 +12,7 @@ const homeLabel = { 'zh-CN': '回到云间来信', 'zh-TW': '回到雲間來信'
 
 export async function generateStatic(rootPath, posts, localized, ui, assetVersions) {
   const dist = join(rootPath, 'dist');
+  const readingVersion = createHash('sha256').update(await readFile(join(dist, 'reading.js'))).digest('hex').slice(0, 10);
   const css = (await readFile(join(dist, 'index.html'), 'utf8')).match(/href="(style\.css[^\"]*)"/)?.[1] || 'style.css';
   const byId = new Map();
   for (const post of posts) {
@@ -37,7 +39,7 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
       const variant = variants.find(item => item.lang === lang);
       return variant ? `<a href="../../${postPath(variant)}" lang="${lang}" hreflang="${lang}"${lang === post.lang ? ' aria-current="page"' : ''}>${labels[lang]}</a>` : `<span lang="${lang}">${labels[lang]} (暂无译文 / unavailable)</span>`;
     }).join(' · ');
-    // 跟首页/弹窗使用相同正文样式；静态文章完全不依赖脚本或 profile.js。
+    // 正文、语言和元数据均在 HTML 中；reading.js 仅增强主题切换。
     const html = `<!doctype html>
 <html lang="${post.lang}">
 <head>
@@ -59,13 +61,14 @@ ${variants.filter(v => v.lang !== post.lang).map(v => `<meta property="og:locale
 <meta property="article:published_time" content="${post.publishedAt}">
 <meta property="article:modified_time" content="${post.updatedAt}">
 <link rel="icon" href="../../assets/favicon.svg?v=${assetVersions['assets/favicon.svg'] || ''}" type="image/svg+xml">
+<script src="../../reading.js?v=${readingVersion}"></script>
 <link rel="stylesheet" href="../../${escape(css)}">
 </head>
 <body class="static-reading">
 <div class="sky-background" aria-hidden="true"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span></div>
-<header class="wrap"><a class="brand" href="../../?lang=${post.lang}">☁ ${escape(homeLabel[post.lang])}</a></header>
+<header class="wrap"><a class="brand" href="../../?lang=${post.lang}">☁ ${escape(homeLabel[post.lang])}</a><button class="theme-toggle" type="button" hidden aria-label="${escape(ui[post.lang]['theme.toDark'])}" aria-pressed="false" data-to-dark="${escape(ui[post.lang]['theme.toDark'])}" data-to-light="${escape(ui[post.lang]['theme.toLight'])}"><span aria-hidden="true">◐</span></button></header>
 <main class="static-article wrap">
-<nav aria-label="Language">${languageNav}</nav>
+<nav aria-label="${escape(ui[post.lang]['language.label'])}">${languageNav}</nav>
 <article lang="${post.lang}">
 <p class="eyebrow">${escape(post.category)}</p>
 <h1>${escape(post.title)}</h1>

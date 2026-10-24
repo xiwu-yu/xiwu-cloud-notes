@@ -98,10 +98,15 @@ test('contact has a spacious desktop image, mobile top-left heading and bottom-l
           const desktop = await page.locator('#contact').evaluate(el => {
             const box = el.getBoundingClientRect();
             const previous = document.querySelector('.boundaries').getBoundingClientRect();
-            return {width:box.width,previousWidth:previous.width,captionInset:el.querySelector('.eyebrow').getBoundingClientRect().left-box.left};
+            const action = el.querySelector('.contact-action').getBoundingClientRect();
+            const copy = el.querySelector('.contact-copy').getBoundingClientRect();
+            return {width:box.width,previousWidth:previous.width,captionInset:el.querySelector('.eyebrow').getBoundingClientRect().left-box.left,right:box.right-action.right,bottom:box.bottom-action.bottom,gap:action.left-copy.right};
           });
           expect(desktop.width).toBeGreaterThan(desktop.previousWidth);
           expect(desktop.captionInset).toBeGreaterThanOrEqual(15);
+          expect(Math.abs(desktop.right-32)).toBeLessThanOrEqual(1);
+          expect(Math.abs(desktop.bottom-28)).toBeLessThanOrEqual(1);
+          expect(desktop.gap).toBeGreaterThan(12);
         }
       }
     }

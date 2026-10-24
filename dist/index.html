@@ -7,10 +7,10 @@
 <meta name="theme-color" content="#f8f8fc">
 <title>夕雾 · 云间来信</title>
 <link rel="icon" href="assets/favicon.svg?v=79847ec957" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=17aa2766c1">
-<script defer src="profile.js?v=07e9b81b6d"></script>
-<script defer src="archive.js?v=6fa7c5f08b"></script>
-<script defer src="script.js?v=56fe5a6197"></script>
+<link rel="stylesheet" href="style.css?v=98a5196e8c">
+<script defer src="profile.js?v=86fa9dce06"></script>
+<script defer src="archive.js?v=8a209936c6"></script>
+<script defer src="script.js?v=f516283d50"></script>
 <!-- SITE_META_START -->
 <link rel="canonical" href="https://xiwu-yu.github.io/xiwu-cloud-notes/">
 <!-- SITE_META_END -->
@@ -81,13 +81,13 @@
   <div class="archive-toolbar" aria-label="时间归档工具" data-i18n-aria-label="notes.archiveAria">
     <label class="archive-search" for="archive-search"><input id="archive-search" type="search" placeholder="搜索文章…" aria-label="搜索文章" data-i18n-aria-label="notes.searchAria" data-i18n-placeholder="notes.search" autocomplete="off" spellcheck="false"></label>
     <div class="archive-selects">
-      <label for="archive-date-by"><span data-i18n="notes.sortBy">排序依据</span><select id="archive-date-by"><option value="publishedAt" data-i18n="notes.byPublished">按上传时间</option><option value="writtenAt" data-i18n="notes.byWritten">按写作时间</option></select></label>
-      <label for="archive-month"><span id="archive-month-label">上传月份</span><select id="archive-month"><option value="all" data-i18n="notes.allMonths">全部月份</option></select></label>
+      <label for="archive-date-by"><span data-i18n="notes.sortBy">排序依据</span><select id="archive-date-by"><option value="publishedAt" data-i18n="notes.byPublished">按上传时间</option><option value="writtenAt" selected data-i18n="notes.byWritten">按写作时间</option></select></label>
+      <label for="archive-month"><span id="archive-month-label">写作月份</span><select id="archive-month"><option value="all" data-i18n="notes.allMonths">全部月份</option></select></label>
       <label for="archive-order"><span data-i18n="notes.order">时间排序</span><select id="archive-order"><option value="newest" data-i18n="notes.newest">从新到旧</option><option value="oldest" data-i18n="notes.oldest">从旧到新</option></select></label>
     </div>
     <div class="view-switch" role="group" aria-label="随笔显示方式" data-i18n-aria-label="notes.viewAria"><button type="button" data-view="cards" aria-pressed="true" data-i18n="notes.cards">卡片</button><button type="button" data-view="timeline" aria-pressed="false" data-i18n="notes.timeline">时间轴</button></div>
   </div>
-  <p class="archive-note">按本站收录时间整理，文中的经历日期以正文为准。</p>
+  <p class="archive-note">按写作日期整理，未填写写作日期的文章列于最后。</p>
   <div class="interest-grid" id="interest-grid"></div>
   <div id="essay-timeline" hidden></div>
   <div id="archive-empty" class="archive-empty" hidden><p data-i18n="notes.empty">这段时间还没有这个主题的随笔。</p><button id="archive-reset" type="button" data-i18n="notes.reset">查看全部随笔</button></div>
@@ -118,7 +118,7 @@
 <section class="boundaries wrap section-space" aria-labelledby="boundaries-title">
   <div><p class="eyebrow">04 / BEFORE YOU ASK</p><h2 id="boundaries-title" data-i18n-html="boundaries.title">有几件事，<br>提前说一下。</h2></div>
   <div class="faq">
-    <details open><summary data-i18n="boundaries.q1">怎么称呼？</summary><p data-i18n="boundaries.a1">夕雾，代词用「她」。</p></details>
+    <details><summary data-i18n="boundaries.q1">怎么称呼？</summary><p data-i18n="boundaries.a1">夕雾，代词用「她」。</p></details>
     <details><summary data-i18n="boundaries.q2">可以问哪些问题？</summary><p data-i18n="boundaries.a2">跨性别相关，游戏动漫，诗词文章都可以。</p></details>
     <details><summary data-i18n="boundaries.q3">可以转发吗？</summary><p data-i18n="boundaries.a3">需要征求夕雾的同意喵，联系方式在最后</p></details>
   </div>
