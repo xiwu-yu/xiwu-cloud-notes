@@ -10,3 +10,11 @@ dist/profile.js
 test-results/
 playwright-report/
 blob-report/
+.test-site/
+.build-*/
+dist/posts/
+dist/sitemap.xml
+dist/robots.txt
+artifacts/*/*.js
+artifacts/*/*.css
+artifacts/*/*.html

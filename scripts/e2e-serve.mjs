@@ -1,0 +1,13 @@
+import { cp, mkdir, rm } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { build } from './build.mjs';
+import { serve } from './serve.mjs';
+const root = fileURLToPath(new URL('../.test-site/', import.meta.url));
+await rm(root, { recursive: true, force: true });
+await mkdir(root, { recursive: true });
+await cp(new URL('../dist/', import.meta.url), new URL('../.test-site/dist/', import.meta.url), { recursive: true });
+await cp(new URL('../content/', import.meta.url), new URL('../.test-site/content/', import.meta.url), { recursive: true });
+await rm(`${root}/content/posts`, { recursive: true });
+await cp(new URL('../tests/fixtures/posts/', import.meta.url), `${root}/content/posts`, { recursive: true });
+await build(root);
+serve({ root: `${root}/dist`, port: 4174 });

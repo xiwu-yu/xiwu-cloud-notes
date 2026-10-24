@@ -12,8 +12,11 @@
   const siteFor = lang => profile.localized?.[lang] || profile.localized?.[DEFAULT_LOCALE];
 
   function requestedLocale() {
-    const fromUrl = new URLSearchParams(location.search).get('lang');
+    const params = new URLSearchParams(location.search);
+    const fromUrl = params.get('lang');
     if (LOCALES.includes(fromUrl)) return fromUrl;
+    // 旧版文章链接固定使用原文语言；普通首页才读取浏览器偏好。
+    if (params.has('post')) return DEFAULT_LOCALE;
     try {
       const stored = localStorage.getItem(LANG_STORAGE);
       if (LOCALES.includes(stored)) return stored;
@@ -48,8 +51,8 @@
     return `${year} 年 ${month} 月`;
   }
   function readingInfo(item) {
-    const words = archive.wordCount(item.text ?? item.body ?? '');
-    const minutes = Math.max(1, Math.ceil(words / (locale === 'en' ? 200 : 300)));
+    const words = archive.wordCount(item.text || '');
+    const minutes = Math.max(1, Math.ceil(words / (item.lang === 'en' ? 200 : 300)));
     return t('notes.reading', { count: formatNumber(words), minutes: formatNumber(minutes) });
   }
   function dateLine(item) {
@@ -94,8 +97,7 @@
     const url = new URL(location.href);
     if (currentId) url.searchParams.set('post', currentId);
     else url.searchParams.delete('post');
-    if (locale === DEFAULT_LOCALE) url.searchParams.delete('lang');
-    else url.searchParams.set('lang', locale);
+    url.searchParams.set('lang', locale);
     if (push) history.pushState({ post: currentId, lang: locale }, '', url);
     else if (replace) history.replaceState({ post: currentId, lang: locale }, '', url);
   }
@@ -118,10 +120,17 @@
       meta.append(document.createTextNode(' · ' + t('notes.updatedOn', { date: formatDay(item.updatedAt) })));
     }
     meta.append(tagLine(item));
+    const notice = $('#dialog-fallback');
+    notice.hidden = !item.fallback;
+    notice.textContent = t('notes.fallback');
     const bodyElement = $('#dialog-body');
+    bodyElement.lang = item.lang;
+    $('#dialog-title').lang = item.lang;
+    $('#dialog-category').lang = item.lang;
+    $('#dialog-static').href = item.url;
     // bodyHtml 仅来自构建时关闭了原始 HTML 的 Markdown 解析器。
     if (typeof item.bodyHtml === 'string') bodyElement.innerHTML = item.bodyHtml;
-    else bodyElement.replaceChildren(...(item.body || '').split(/\n\n+/).map(text => node('p', '', text)));
+    else bodyElement.textContent = item.text || '';
     const sourceLink = $('#dialog-source');
     sourceLink.hidden = !item.source;
     if (item.source) sourceLink.href = item.source;
@@ -152,8 +161,8 @@
   function createCard(item, index) {
     const article = node('article', 'interest-card');
     article.dataset.essayId = item.id;
-    const button = node('button', 'card-button');
-    button.type = 'button';
+    const button = node('a', 'card-button');
+    button.href = item.url;
     button.setAttribute('aria-label', t('notes.readCard', { title: item.title }));
     const imageWrap = node('div', 'card-image');
     const img = node('img');
@@ -166,7 +175,11 @@
     const number = node('span', 'card-number', String(index + 1).padStart(2, '0'));
     imageWrap.append(img, number);
     button.append(imageWrap, node('p', 'card-meta', item.subtitle), node('h3', '', item.title), dateLine(item), node('p', 'card-description', item.description), tagLine(item), node('span', 'card-more', t('notes.readMore')));
-    button.addEventListener('click', () => openEssay(item, button));
+    button.addEventListener('click', event => {
+      if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      openEssay(item, button);
+    });
     article.append(button);
     return article;
   }
@@ -181,12 +194,16 @@
     group.items.forEach(item => {
       const li = node('li', 'timeline-entry');
       li.dataset.essayId = item.id;
-      const button = node('button', 'timeline-button');
-      button.type = 'button';
+      const button = node('a', 'timeline-button');
+      button.href = item.url;
       button.setAttribute('aria-label', t('notes.readCard', { title: item.title }));
       button.append(node('span', 'timeline-category', item.category), node('span', 'timeline-title', item.title), node('span', 'timeline-description', item.description), node('span', 'timeline-reading', readingInfo(item)));
       button.append(tagLine(item));
-      button.addEventListener('click', () => openEssay(item, button));
+      button.addEventListener('click', event => {
+        if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        openEssay(item, button);
+      });
       li.append(button);
       list.append(li);
     });
@@ -341,27 +358,37 @@
     if (!closingFromHistory) writeUrl({ replace: true });
     closingFromHistory = false;
     setDocumentTitle(null);
-    if (openedFrom?.isConnected) openedFrom.focus({ preventScroll: true });
+    const originId = openedFrom?.closest('[data-essay-id]')?.dataset.essayId;
+    const container = state.view === 'timeline' ? timeline : grid;
+    const replacement = originId ? container.querySelector(`[data-essay-id="${originId}"] a`) : null;
+    const returnTarget = openedFrom?.isConnected ? openedFrom : replacement || container.querySelector('a') || languageSelect;
+    returnTarget.focus({ preventScroll: true });
     openedFrom = null;
   });
   $('#essay-share').addEventListener('click', async () => {
     const status = $('#dialog-share-status');
+    const item = posts.find(entry => entry.id === currentId);
+    if (!item) return;
+    // 使用实际正文版本的静态地址，让分享爬虫直接取得正文与元数据。
+    const shareUrl = new URL(item.url, location.href).href;
     try {
-      await navigator.clipboard.writeText(location.href);
+      await navigator.clipboard.writeText(shareUrl);
       status.textContent = t('dialog.shareCopied');
     } catch {
-      status.textContent = t('dialog.shareManual') + ' ' + location.href;
+      status.textContent = t('dialog.shareManual') + ' ' + shareUrl;
     }
     status.hidden = false;
   });
   function syncFromUrl() {
     const url = new URL(location.href);
-    const langParam = url.searchParams.get('lang');
-    // 历史记录里没有 lang 时保留当前选择，避免后退时意外切回中文。
-    if (langParam && LOCALES.includes(langParam) && langParam !== locale) applyLanguage(langParam, { updateUrl: false });
+    const nextLocale = requestedLocale();
+    if (nextLocale !== locale) applyLanguage(nextLocale, { updateUrl: false });
     const id = url.searchParams.get('post');
     const item = id ? posts.find(entry => entry.id === id) : null;
-    if (item) openEssay(item, null, { push: false, focus: false, scroll: false });
+    if (item) {
+      openEssay(item, null, { push: false, focus: false, scroll: false });
+      writeUrl({ replace: true });
+    }
     else if (dialog.open) closeDialogFromHistory();
   }
   window.addEventListener('popstate', syncFromUrl);
@@ -400,7 +427,10 @@
   const initialPost = new URLSearchParams(location.search).get('post');
   if (initialPost) {
     const item = posts.find(entry => entry.id === initialPost);
-    if (item) openEssay(item, null, { push: false });
+    if (item) {
+      openEssay(item, null, { push: false });
+      writeUrl({ replace: true });
+    }
     else writeUrl({ replace: true });
   }
 })();

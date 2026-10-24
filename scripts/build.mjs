@@ -1,8 +1,9 @@
-import { readFile, readdir, writeFile, access } from 'node:fs/promises';
+import { readFile, readdir, writeFile, access, mkdtemp, cp, rm, rename } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { compilePosts, SUPPORTED_LANGS } from './content.mjs';
+import { generateStatic, postPath } from './static.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const DEFAULT_LOCALE = 'zh-CN';
@@ -111,17 +112,9 @@ export async function build(rootPath = root) {
 
   const basePosts = posts.filter(post => post.lang === DEFAULT_LOCALE).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
   if (!basePosts.length) throw new Error(`content/posts 至少需要一篇 ${DEFAULT_LOCALE} 原文`);
-  const baseIds = new Set(basePosts.map(post => post.id));
-  for (const post of posts) {
-    if (!baseIds.has(post.id)) throw new Error(`${post.id}（${post.lang}）缺少 ${DEFAULT_LOCALE} 原文；译文需要使用相同的 id`);
-    if (post.lang !== DEFAULT_LOCALE && post.order !== basePosts.find(base => base.id === post.id).order) {
-      throw new Error(`${post.id}（${post.lang}）的 order 必须与原文一致`);
-    }
-  }
-
   await Promise.all(posts.map(async post => {
     try { await access(join(rootPath, 'dist', post.image)); }
-    catch { throw new Error(`${post.id}: 找不到配图 dist/${post.image}`); }
+    catch { throw new Error(`${post.filename}: image 找不到配图 dist/${post.image}`); }
   }));
   const assetVersions = await hashAssetFiles(rootPath);
 
@@ -141,14 +134,13 @@ export async function build(rootPath = root) {
     const siteStrings = localizedSite(site, lang);
     const interests = basePosts.map(base => {
       const variant = posts.find(post => post.id === base.id && post.lang === lang) || base;
-      const { body, order, ...post } = variant;
+      const { body, order, filename, ...post } = variant;
       return {
         ...post,
         image: assetVersions[post.image] ? `${post.image}?v=${assetVersions[post.image]}` : post.image,
         categoryKey: base.category,
         fallback: variant.lang !== lang,
-        // body 兼容浏览器缓存中的旧版阅读脚本，仍只由 Markdown 生成。
-        body: variant.text
+        url: postPath(variant)
       };
     });
     localized[lang] = { ...siteStrings, interests };
@@ -159,14 +151,24 @@ export async function build(rootPath = root) {
     locales: SUPPORTED_LANGS,
     isDemo: site.isDemo === true,
     ui,
-    // 保留旧字段，默认语言仍是网站原始语言。
-    ...localized[DEFAULT_LOCALE],
-    interests: localized[DEFAULT_LOCALE].interests,
     localized
   };
-  const json = JSON.stringify(data, null, 2).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
-  await writeFile(join(rootPath, 'dist/profile.js'), '// 自动生成，请修改 content/site.json、content/ui.json 或 content/posts/*.md，再运行 pnpm build。\nwindow.siteProfile = ' + json + ';\n');
-  await versionAssets(rootPath, assetVersions);
+  const json = JSON.stringify(data).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+  // 内容与元数据全部校验完再写临时构建；失败不会覆盖上次成功的网页。
+  const staging = await mkdtemp(join(rootPath, '.build-'));
+  try {
+    await cp(join(rootPath, 'dist'), join(staging, 'dist'), { recursive: true });
+    await rm(join(staging, 'dist/posts'), { recursive: true, force: true });
+    await writeFile(join(staging, 'dist/profile.js'), '// 自动生成，请修改 content/ 后运行 pnpm build。\nwindow.siteProfile = ' + json + ';\n');
+    await versionAssets(staging, assetVersions);
+    await generateStatic(staging, posts, localized, ui, assetVersions);
+    for (const file of ['style.css', 'index.html', 'profile.js', 'sitemap.xml', 'robots.txt']) {
+      try { await rename(join(staging, 'dist', file), join(rootPath, 'dist', file)); }
+      catch (error) { if (error.code !== 'ENOENT') throw error; }
+    }
+    await rm(join(rootPath, 'dist/posts'), { recursive: true, force: true });
+    await rename(join(staging, 'dist/posts'), join(rootPath, 'dist/posts'));
+  } finally { await rm(staging, { recursive: true, force: true }); }
   console.log(`已从 Markdown 生成 ${basePosts.length} 篇随笔、${SUPPORTED_LANGS.length} 种语言。`);
   return posts;
 }

@@ -11,6 +11,8 @@ function requireDate(value, field, filename) {
   const match = typeof value === 'string' && value.match(/^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$/);
   if (!match || !Number.isFinite(Date.parse(value))) throw new Error(`${filename}: ${field} 请填写带时区的时间，例如 2026-10-23T20:00:00+08:00`);
   const [, year, month, day] = match;
+  const [hour, minute, second] = value.slice(11, 19).split(':').map(Number);
+  if (hour > 23 || minute > 59 || second > 59) throw new Error(`${filename}: ${field} 的时间不存在`);
   if (+day > new Date(Date.UTC(+year, +month, 0)).getUTCDate()) throw new Error(`${filename}: ${field} 的日期不存在`);
 }
 
@@ -61,7 +63,7 @@ export function parsePost(source, filename) {
   if (!body) throw new Error(`${filename}: 正文不能为空`);
   const tokens = markdown.parse(body, {});
   return {
-    id, lang, title: data.title, category: data.category, tags: [...new Set((data.tags || []).map(tag => tag.trim()))],
+    filename, id, lang, title: data.title, category: data.category, tags: [...new Set((data.tags || []).map(tag => tag.trim()))],
     description: data.description, subtitle: data.subtitle || (lang === 'zh-CN' ? `随笔 / ${data.category}` : data.category),
     image, alt: data.alt || '淡蓝与浅粉色的云朵',
     writtenAt: data.writtenAt ?? null, publishedAt: data.publishedAt, updatedAt: data.updatedAt || data.publishedAt,
@@ -73,11 +75,19 @@ export function parsePost(source, filename) {
 
 export function compilePosts(entries) {
   const posts = entries.map(({source, filename}) => parsePost(source, filename));
-  const ids = new Set();
+  const ids = new Map();
   for (const post of posts) {
     const key = `${post.lang}:${post.id}`;
-    if (ids.has(key)) throw new Error(`重复的文章 id：${post.id}（${post.lang}），请为每篇文章使用不同的 id`);
-    ids.add(key);
+    if (ids.has(key)) throw new Error(`${post.filename}: 重复的文章 id ${post.id}（${post.lang}），已在 ${ids.get(key)} 定义`);
+    ids.set(key, post.filename);
+  }
+  const originals = new Map(posts.filter(post => post.lang === 'zh-CN').map(post => [post.id, post]));
+  for (const post of posts) {
+    const original = originals.get(post.id);
+    if (!original) throw new Error(`${post.filename}: id ${post.id} 缺少 zh-CN 原文；译文需要使用相同的 id`);
+    for (const field of ['publishedAt', 'writtenAt', 'order', 'image']) {
+      if (post[field] !== original[field]) throw new Error(`${post.filename}: ${field} (${JSON.stringify(post[field])}) 必须与原文 ${original.filename} (${JSON.stringify(original[field])}) 一致`);
+    }
   }
   return posts.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id) || a.lang.localeCompare(b.lang));
 }

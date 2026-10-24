@@ -45,7 +45,7 @@
     "notes.count": "{count} 篇随笔",
     "notes.empty": "这段时间还没有这个主题的随笔。",
     "notes.reset": "查看全部随笔",
-    "notes.noscript": "请启用 JavaScript 阅读主题文章。",
+    "notes.noscript": "无需脚本也可通过静态目录阅读文章。",
     "notes.undatedWrittenGroup": "写作日期未填写",
     "notes.undatedPublishedGroup": "上传日期未填写",
     "notes.groupCount": " / {count} 篇",
@@ -103,7 +103,9 @@
     "ticker.poemLine1": "昔雾曾隔长夜望，",
     "ticker.poemLine2": "不知彼岸是今朝。",
     "notes.search": "搜索文章…",
-    "notes.searchAria": "搜索文章"
+    "notes.searchAria": "搜索文章",
+    "notes.fallback": "当前语言暂无译文，正在展示简体中文原文。",
+    "dialog.static": "独立文章页 ↗"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -151,7 +153,7 @@
     "notes.count": "{count} 篇隨筆",
     "notes.empty": "這段時間還沒有這個主題的隨筆。",
     "notes.reset": "查看全部隨筆",
-    "notes.noscript": "請啟用 JavaScript 閱讀主題文章。",
+    "notes.noscript": "無需腳本也可透過靜態目錄閱讀文章。",
     "notes.undatedWrittenGroup": "寫作日期未填寫",
     "notes.undatedPublishedGroup": "上傳日期未填寫",
     "notes.groupCount": " / {count} 篇",
@@ -209,7 +211,9 @@
     "ticker.poemLine1": "昔霧曾隔長夜望，",
     "ticker.poemLine2": "不知彼岸是今朝。",
     "notes.search": "搜尋文章…",
-    "notes.searchAria": "搜尋文章"
+    "notes.searchAria": "搜尋文章",
+    "notes.fallback": "目前語言暫無譯文，正在顯示簡體中文原文。",
+    "dialog.static": "獨立文章頁 ↗"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -257,7 +261,7 @@
     "notes.count": "{count} essays",
     "notes.empty": "No essays in this theme yet.",
     "notes.reset": "Show all essays",
-    "notes.noscript": "Please enable JavaScript to read the essays.",
+    "notes.noscript": "Read articles through the static archive without JavaScript.",
     "notes.undatedWrittenGroup": "Writing date unknown",
     "notes.undatedPublishedGroup": "Upload date unknown",
     "notes.groupCount": " / {count}",
@@ -315,7 +319,9 @@
     "ticker.poemLine1": "Xi Wu once gazed across the long night,",
     "ticker.poemLine2": "not knowing the far shore was this dawn.",
     "notes.search": "Search essays…",
-    "notes.searchAria": "Search essays"
+    "notes.searchAria": "Search essays",
+    "notes.fallback": "No translation is available in this language. Showing the original in Simplified Chinese.",
+    "dialog.static": "Static article page ↗"
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -363,7 +369,7 @@
     "notes.count": "{count} 篇",
     "notes.empty": "このテーマのエッセイはまだありません。",
     "notes.reset": "すべてのエッセイを見る",
-    "notes.noscript": "エッセイを読むには JavaScript を有効にしてください。",
+    "notes.noscript": "JavaScript がなくても静的な記事一覧から読めます。",
     "notes.undatedWrittenGroup": "執筆日未記入",
     "notes.undatedPublishedGroup": "公開日未記入",
     "notes.groupCount": " / {count} 篇",
@@ -421,6 +427,8 @@
     "ticker.poemLine1": "昔、霧は長き夜の彼方を見つめ、",
     "ticker.poemLine2": "彼岸が今朝だと知らぬまま。",
     "notes.search": "エッセイを検索…",
-    "notes.searchAria": "エッセイを検索"
+    "notes.searchAria": "エッセイを検索",
+    "notes.fallback": "この言語の翻訳はまだありません。簡体字中国語の原文を表示しています。",
+    "dialog.static": "個別の記事ページ ↗"
   }
 }

@@ -7,10 +7,13 @@
 <meta name="theme-color" content="#f8f8fc">
 <title>夕雾 · 云间来信</title>
 <link rel="icon" href="assets/favicon.svg?v=79847ec957" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=f94ee18b8d">
-<script defer src="profile.js?v=be0b2fc338"></script>
+<link rel="stylesheet" href="style.css?v=d00a0c17e6">
+<script defer src="profile.js?v=7a8206ce9e"></script>
 <script defer src="archive.js?v=6fa7c5f08b"></script>
-<script defer src="script.js?v=31e11445f6"></script>
+<script defer src="script.js?v=56fe5a6197"></script>
+<!-- SITE_META_START -->
+<link rel="canonical" href="https://xiwu-yu.github.io/xiwu-cloud-notes/">
+<!-- SITE_META_END -->
 </head>
 <body>
 <div class="sky-background" aria-hidden="true"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span><span class="cloud cloud-three"></span></div>
@@ -88,7 +91,11 @@
   <div class="interest-grid" id="interest-grid"></div>
   <div id="essay-timeline" hidden></div>
   <div id="archive-empty" class="archive-empty" hidden><p data-i18n="notes.empty">这段时间还没有这个主题的随笔。</p><button id="archive-reset" type="button" data-i18n="notes.reset">查看全部随笔</button></div>
-  <noscript><p data-i18n="notes.noscript">请启用 JavaScript 阅读主题文章。</p></noscript>
+  <!-- STATIC_ARCHIVE_START -->
+<details class="static-archive" id="static-archive"><summary>静态文章目录 / Static archive / 記事一覧</summary><ul><li><a lang="en" hreflang="en" href="posts/hrt-preface/en.html">English · HRT: A Preface</a> · <a lang="ja" hreflang="ja" href="posts/hrt-preface/ja.html">日本語 · HRT のまえがき</a> · <a lang="zh-CN" hreflang="zh-CN" href="posts/hrt-preface/zh-CN.html">简体中文 · HRT 前言</a> · <a lang="zh-TW" hreflang="zh-TW" href="posts/hrt-preface/zh-TW.html">繁體中文 · HRT 前言</a></li>
+<li><a lang="en" hreflang="en" href="posts/claw-marks/en.html">English · Leave Claw Marks While I Still Can</a> · <a lang="ja" hreflang="ja" href="posts/claw-marks/ja.html">日本語 · 死が来る前に、爪痕を残したい</a> · <a lang="zh-CN" hreflang="zh-CN" href="posts/claw-marks/zh-CN.html">简体中文 · 在死亡来临之前，用力留下爪痕喵</a> · <a lang="zh-TW" hreflang="zh-TW" href="posts/claw-marks/zh-TW.html">繁體中文 · 在死亡來臨之前，用力留下爪痕喵</a></li>
+<li><a lang="en" hreflang="en" href="posts/xiwu/en.html">English · Evening Mist</a> · <a lang="ja" hreflang="ja" href="posts/xiwu/ja.html">日本語 · 夕霧</a> · <a lang="zh-CN" hreflang="zh-CN" href="posts/xiwu/zh-CN.html">简体中文 · 夕雾</a> · <a lang="zh-TW" hreflang="zh-TW" href="posts/xiwu/zh-TW.html">繁體中文 · 夕霧</a></li></ul><p>无需 JavaScript 即可阅读。 / Read without JavaScript.</p></details>
+<!-- STATIC_ARCHIVE_END -->
 </section>
 <section class="gentle-note wrap" aria-label="云间便笺" data-i18n-aria-label="gentle.aria">
   <span aria-hidden="true">“</span>
@@ -137,7 +144,9 @@
   </div>
   <h2 id="dialog-title"></h2>
   <p id="dialog-meta" class="dialog-meta"></p>
+  <p id="dialog-fallback" class="fallback-notice" role="status" hidden></p>
   <div id="dialog-body"></div>
+  <a id="dialog-static" class="text-link" data-i18n="dialog.static">独立文章页 ↗</a>
   <div class="dialog-pagination">
     <button id="essay-prev" type="button" data-i18n="dialog.prev">← 上一篇</button>
     <div class="dialog-pagination-center"><span id="essay-position"></span><button id="essay-share" class="dialog-share" type="button" data-i18n="dialog.share">复制链接</button></div>

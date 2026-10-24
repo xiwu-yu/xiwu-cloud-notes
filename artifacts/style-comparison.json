@@ -1,0 +1,806 @@
+{
+  "revision": "2017559",
+  "cases": 32,
+  "differences": [
+    {
+      "width": 320,
+      "lang": "zh-CN",
+      "theme": "light",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "103.188px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "zh-CN",
+      "theme": "light",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "9px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "280px"
+        ],
+        "height": [
+          "auto",
+          "26.1875px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "zh-CN",
+      "theme": "dark",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "103.188px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "zh-CN",
+      "theme": "dark",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "9px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "280px"
+        ],
+        "height": [
+          "auto",
+          "26.1875px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "zh-TW",
+      "theme": "light",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "103.188px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "zh-TW",
+      "theme": "light",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "9px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "280px"
+        ],
+        "height": [
+          "auto",
+          "26.1875px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "zh-TW",
+      "theme": "dark",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "103.188px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "zh-TW",
+      "theme": "dark",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "9px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "280px"
+        ],
+        "height": [
+          "auto",
+          "26.1875px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "en",
+      "theme": "light",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "103.188px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "en",
+      "theme": "light",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "9px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "280px"
+        ],
+        "height": [
+          "auto",
+          "26.1875px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "en",
+      "theme": "dark",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "103.188px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "en",
+      "theme": "dark",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "9px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "280px"
+        ],
+        "height": [
+          "auto",
+          "26.1875px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "ja",
+      "theme": "light",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "103.188px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "ja",
+      "theme": "light",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "9px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "280px"
+        ],
+        "height": [
+          "auto",
+          "26.1875px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "ja",
+      "theme": "dark",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "103.188px"
+        ]
+      }
+    },
+    {
+      "width": 320,
+      "lang": "ja",
+      "theme": "dark",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "9px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "280px"
+        ],
+        "height": [
+          "auto",
+          "26.1875px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "zh-CN",
+      "theme": "light",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "gap": [
+          "13px",
+          "10px 13px"
+        ],
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "108.594px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "zh-CN",
+      "theme": "light",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "15px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "335px"
+        ],
+        "height": [
+          "auto",
+          "28px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "zh-CN",
+      "theme": "dark",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "gap": [
+          "13px",
+          "10px 13px"
+        ],
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "108.594px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "zh-CN",
+      "theme": "dark",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "15px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "335px"
+        ],
+        "height": [
+          "auto",
+          "28px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "zh-TW",
+      "theme": "light",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "gap": [
+          "13px",
+          "10px 13px"
+        ],
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "108.594px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "zh-TW",
+      "theme": "light",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "15px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "335px"
+        ],
+        "height": [
+          "auto",
+          "28px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "zh-TW",
+      "theme": "dark",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "gap": [
+          "13px",
+          "10px 13px"
+        ],
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "108.594px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "zh-TW",
+      "theme": "dark",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "15px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "335px"
+        ],
+        "height": [
+          "auto",
+          "28px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "en",
+      "theme": "light",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "gap": [
+          "13px",
+          "10px 13px"
+        ],
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "108.594px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "en",
+      "theme": "light",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "15px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "335px"
+        ],
+        "height": [
+          "auto",
+          "28px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "en",
+      "theme": "dark",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "gap": [
+          "13px",
+          "10px 13px"
+        ],
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "108.594px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "en",
+      "theme": "dark",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "15px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "335px"
+        ],
+        "height": [
+          "auto",
+          "28px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "ja",
+      "theme": "light",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "gap": [
+          "13px",
+          "10px 13px"
+        ],
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "108.594px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "ja",
+      "theme": "light",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "15px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "335px"
+        ],
+        "height": [
+          "auto",
+          "28px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "ja",
+      "theme": "dark",
+      "element": "0:HEADER.site-header wrap",
+      "changed": {
+        "gap": [
+          "13px",
+          "10px 13px"
+        ],
+        "padding-top": [
+          "0px",
+          "15px"
+        ],
+        "padding-bottom": [
+          "0px",
+          "15px"
+        ],
+        "height": [
+          "82px",
+          "108.594px"
+        ]
+      }
+    },
+    {
+      "width": 375,
+      "lang": "ja",
+      "theme": "dark",
+      "element": "1:NAV.",
+      "changed": {
+        "display": [
+          "none",
+          "flex"
+        ],
+        "gap": [
+          "15px",
+          "12px"
+        ],
+        "justify-content": [
+          "normal",
+          "space-between"
+        ],
+        "width": [
+          "auto",
+          "335px"
+        ],
+        "height": [
+          "auto",
+          "28px"
+        ]
+      }
+    }
+  ]
+}

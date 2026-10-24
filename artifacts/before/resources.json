@@ -1,0 +1,82 @@
+{
+  "files": {
+    "profile.js": {
+      "bytes": 315634,
+      "gzip": 54849
+    },
+    "style.css": {
+      "bytes": 29088,
+      "gzip": 8080
+    },
+    "script.js": {
+      "bytes": 19984,
+      "gzip": 5957
+    },
+    "archive.js": {
+      "bytes": 2645,
+      "gzip": 1171
+    },
+    "index.html": {
+      "bytes": 13506,
+      "gzip": 4735
+    }
+  },
+  "firstViewport": [
+    {
+      "url": "/style.css",
+      "transferSize": 29388,
+      "decodedBodySize": 29088
+    },
+    {
+      "url": "/profile.js",
+      "transferSize": 315934,
+      "decodedBodySize": 315634
+    },
+    {
+      "url": "/archive.js",
+      "transferSize": 2945,
+      "decodedBodySize": 2645
+    },
+    {
+      "url": "/assets/cloudscape.svg",
+      "transferSize": 3344,
+      "decodedBodySize": 3044
+    },
+    {
+      "url": "/script.js",
+      "transferSize": 20284,
+      "decodedBodySize": 19984
+    },
+    {
+      "url": "/assets/contact.jpg",
+      "transferSize": 40374,
+      "decodedBodySize": 40074
+    },
+    {
+      "url": "/assets/avatar-trans-flag.jpg",
+      "transferSize": 27721,
+      "decodedBodySize": 27421
+    },
+    {
+      "url": "/assets/avatar-knife.jpg",
+      "transferSize": 73860,
+      "decodedBodySize": 73560
+    },
+    {
+      "url": "/assets/cloud-white.svg",
+      "transferSize": 1232,
+      "decodedBodySize": 932
+    },
+    {
+      "url": "/assets/cloud-blue.svg",
+      "transferSize": 1232,
+      "decodedBodySize": 932
+    },
+    {
+      "url": "/assets/favicon.svg",
+      "transferSize": 655,
+      "decodedBodySize": 355
+    }
+  ],
+  "totalTransferred": 516969
+}
