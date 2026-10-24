@@ -1,0 +1,20 @@
+[
+  {
+    "device": "iphone",
+    "mode": "external",
+    "musicRequests": 0,
+    "errors": []
+  },
+  {
+    "device": "android",
+    "mode": "external",
+    "musicRequests": 0,
+    "errors": []
+  },
+  {
+    "device": "desktop",
+    "mode": "embedded",
+    "musicRequests": 11,
+    "errors": []
+  }
+]

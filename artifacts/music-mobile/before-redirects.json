@@ -1,0 +1,44 @@
+[
+  {
+    "device": "webkit-iphone",
+    "testedVersion": "095159d",
+    "redirects": [
+      {
+        "url": "https://music.163.com/outchain/player?type=0&id=18522359099&auto=0&height=430",
+        "status": 302
+      },
+      {
+        "url": "http://music.163.com/m/outchain/player?type=0&id=18522359099&auto=0&height=430",
+        "status": 302
+      },
+      {
+        "url": "https://music.163.com/m/outchain/player?type=0&id=18522359099&auto=0&height=430",
+        "status": 200
+      }
+    ],
+    "crossOriginErrors": [
+      "Blocked a frame with origin \"https://music.163.com\" from accessing a cross-origin frame. Protocols, domains, and ports must match."
+    ]
+  },
+  {
+    "device": "chrome-android",
+    "testedVersion": "095159d",
+    "redirects": [
+      {
+        "url": "https://music.163.com/outchain/player?type=0&id=18522359099&auto=0&height=430",
+        "status": 302
+      },
+      {
+        "url": "http://music.163.com/m/outchain/player?type=0&id=18522359099&auto=0&height=430",
+        "status": 302
+      },
+      {
+        "url": "https://music.163.com/m/outchain/player?type=0&id=18522359099&auto=0&height=430",
+        "status": 200
+      }
+    ],
+    "crossOriginErrors": [
+      "Failed to read a named property 'document' from 'Window': Blocked a frame with origin \"https://music.163.com\" from accessing a cross-origin frame."
+    ]
+  }
+]

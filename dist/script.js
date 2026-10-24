@@ -447,19 +447,28 @@
   const musicWidget = $('#music-widget');
   const musicToggle = $('#music-toggle');
   const musicPanel = $('#music-panel');
+  // 网易云会将手机 UA 重定向到不能跨域嵌入的移动页面；小窗口桌面浏览器仍可内嵌。
+  const mobileMusic = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
   function updateMusicLabel() {
     if (musicToggle) musicToggle.setAttribute('aria-label', t(musicPanel.hidden ? 'music.open' : 'music.collapse'));
+    document.querySelectorAll('[data-music-track-title]').forEach(link => {
+      link.setAttribute('aria-label', t('music.openTrack', { title: link.dataset.musicTrackTitle }));
+    });
   }
   function setMusicExpanded(expanded) {
     musicPanel.hidden = !expanded;
     musicToggle.setAttribute('aria-expanded', String(expanded));
     updateMusicLabel();
     const frame = $('#music-frame');
-    if (expanded && !frame.hasAttribute('src')) frame.src = frame.dataset.src;
+    if (expanded && !mobileMusic && !frame.hasAttribute('src')) frame.src = frame.dataset.src;
     (expanded ? $('#music-close') : musicToggle).focus({ preventScroll: true });
   }
   if (musicWidget) {
     musicWidget.hidden = false;
+    musicWidget.dataset.mode = mobileMusic ? 'external' : 'embedded';
+    $('#music-catalog').hidden = !mobileMusic;
+    $('.music-frame-viewport').hidden = mobileMusic;
+    if (mobileMusic) $('#music-hint').dataset.i18n = 'music.mobileHint';
     $('#music-static-link').hidden = true;
     document.body.classList.add('has-music');
     musicToggle.addEventListener('click', () => setMusicExpanded(musicPanel.hidden));

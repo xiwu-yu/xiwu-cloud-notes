@@ -117,7 +117,11 @@
     "music.hint": "点击播放器内的按钮播放或切歌。",
     "music.fallback": "无法加载或播放？",
     "music.openPlaylist": "在网易云打开歌单 ↗",
-    "music.region": "音乐歌单"
+    "music.region": "音乐歌单",
+    "music.mobileHint": "点击曲目，前往网易云播放。",
+    "music.catalogTitle": "歌单曲目",
+    "music.openTrack": "在网易云播放：{title}",
+    "music.emptyCatalog": "曲目目录尚未配置，请在网易云打开歌单。"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -237,7 +241,11 @@
     "music.hint": "點擊播放器內的按鈕播放或切歌。",
     "music.fallback": "無法載入或播放？",
     "music.openPlaylist": "在網易雲開啟歌單 ↗",
-    "music.region": "音樂歌單"
+    "music.region": "音樂歌單",
+    "music.mobileHint": "點擊曲目，前往網易雲播放。",
+    "music.catalogTitle": "歌單曲目",
+    "music.openTrack": "在網易雲播放：{title}",
+    "music.emptyCatalog": "曲目目錄尚未設定，請在網易雲開啟歌單。"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -357,7 +365,11 @@
     "music.hint": "Use the player’s controls to play or change tracks.",
     "music.fallback": "Unable to load or play?",
     "music.openPlaylist": "Open playlist on NetEase ↗",
-    "music.region": "Music playlist"
+    "music.region": "Music playlist",
+    "music.mobileHint": "Choose a track to play on NetEase.",
+    "music.catalogTitle": "Playlist tracks",
+    "music.openTrack": "Play on NetEase: {title}",
+    "music.emptyCatalog": "Track list is not configured. Open the playlist on NetEase."
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -477,6 +489,10 @@
     "music.hint": "再生や曲の切り替えはプレーヤー内のボタンで。",
     "music.fallback": "読み込み・再生ができない場合は",
     "music.openPlaylist": "NetEase でプレイリストを開く ↗",
-    "music.region": "音楽プレイリスト"
+    "music.region": "音楽プレイリスト",
+    "music.mobileHint": "曲を選ぶと NetEase で再生できます。",
+    "music.catalogTitle": "プレイリストの曲",
+    "music.openTrack": "NetEase で再生：{title}",
+    "music.emptyCatalog": "曲目が未設定です。NetEase でプレイリストを開いてください。"
   }
 }
