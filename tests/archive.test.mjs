@@ -34,3 +34,19 @@ test('Equal writing dates keep a stable order, missing dates never fall back to 
   assert.deepEqual(archive.select(tied,{dateBy:'writtenAt'}).map(x=>x.id),['a','b','c']);
   assert.equal(archive.itemDate(tied[2],'writtenAt'),undefined);
 });
+
+test('Category filters use the language-neutral category key when present', () => {
+  const localized=[
+    {id:'a',category:'Gender & Life',categoryKey:'性别与生活',publishedAt:'2026-10-24T16:00:00+08:00'},
+    {id:'b',category:'Life & Feelings',categoryKey:'生活与情绪',publishedAt:'2026-10-23T16:00:00+08:00'}
+  ];
+  assert.deepEqual(archive.select(localized,{category:'性别与生活'}).map(x=>x.id),['a']);
+  assert.deepEqual(archive.select(localized,{category:'生活与情绪'}).map(x=>x.id),['b']);
+  assert.equal(archive.select(localized,{category:'不存在'}).length,0);
+});
+
+test('Japanese kana count toward reading length alongside Han characters and Latin words', () => {
+  assert.ok(archive.wordCount('こんにちは、世界。') >= 7);
+  assert.ok(archive.wordCount('Hello 世界') >= 3);
+  assert.equal(archive.wordCount(''),0);
+});

@@ -42,6 +42,13 @@ test('Existing sequence is retained and duplicate article IDs are rejected', () 
   assert.throws(()=>compilePosts([entries[0],entries[0]]), /重复的文章 id/);
 });
 
+test('The same article id may be translated once per language, but not twice in one language', () => {
+  const translated=[{filename:'a.md',source:source('一')},{filename:'a.en.md',source:source('one','id: "a"\nlang: "en"\n')},{filename:'a.ja.md',source:source('一つ','id: "a"\nlang: "ja"\n')}];
+  assert.equal(compilePosts(translated).length,3);
+  assert.throws(()=>compilePosts([translated[0],{filename:'a.zh.md',source:source('再次','id: "a"\n')}]), /重复的文章 id/);
+  assert.throws(()=>parsePost(source('正文','lang: "fr"\n'),'bad.md'), /lang/);
+});
+
 test('Article tags are optional, support Chinese text, and reject invalid values', () => {
   assert.deepEqual(parsePost(source(), 'untagged.md').tags, []);
   assert.deepEqual(parsePost(source('正文', 'tags: [HRT, 性别认同, HRT]\n'), 'tagged.md').tags, ['HRT', '性别认同']);
@@ -66,6 +73,10 @@ test('Adding and removing Markdown updates the build; a bad file preserves the l
     await mkdir(join(root,'dist/assets'),{recursive:true});
     await writeFile(join(root,'dist/assets/cloud-blue.svg'),'<svg/>');
     await writeFile(join(root,'content/site.json'),JSON.stringify({name:'夕雾',pronouns:'她',intro:'介绍',about:'关于',email:'',tags:[]}));
+    await writeFile(join(root,'content/ui.json'),await readFile(new URL('../content/ui.json',import.meta.url),'utf8'));
+    await writeFile(join(root,'dist/index.html'),'<link rel="stylesheet" href="style.css?v=old"><script src="script.js?v=old"></script>');
+    await writeFile(join(root,'dist/style.css'),'body{}');
+    await writeFile(join(root,'dist/script.js'),'console.log(1);');
     await writeFile(join(root,'content/posts/one.md'),source('第一篇'));
     await build(root);
     await writeFile(join(root,'content/posts/two.md'),source('第二篇'));
@@ -73,6 +84,15 @@ test('Adding and removing Markdown updates the build; a bad file preserves the l
     let context={window:{}};
     runInNewContext(await readFile(join(root,'dist/profile.js'),'utf8'),context);
     assert.equal(context.window.siteProfile.interests.length,2);
+    assert.equal(context.window.siteProfile.localized.en.interests.length,2);
+    assert.equal(context.window.siteProfile.localized.en.interests[0].categoryKey,'日常');
+    const versioned=await readFile(join(root,'dist/index.html'),'utf8');
+    assert.match(versioned,/style\.css\?v=[a-f0-9]{10}/);
+    assert.match(versioned,/script\.js\?v=[a-f0-9]{10}/);
+    assert.doesNotMatch(versioned,/v=old/);
+    const firstVersion=versioned;
+    await build(root);
+    assert.equal(await readFile(join(root,'dist/index.html'),'utf8'),firstVersion);
     await rm(join(root,'content/posts/one.md'));
     await build(root);
     const good=await readFile(join(root,'dist/profile.js'),'utf8');

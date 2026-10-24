@@ -4,7 +4,8 @@ import { basename } from 'node:path';
 
 // Markdown 在发布前转换；关闭原始 HTML，保留解析器默认的危险链接检查。
 const markdown = new MarkdownIt({ html: false, breaks: false, typographer: false });
-const fields = new Set(['id', 'title', 'category', 'tags', 'writtenAt', 'publishedAt', 'updatedAt', 'description', 'subtitle', 'image', 'alt', 'order', 'source']);
+const fields = new Set(['id', 'lang', 'title', 'category', 'tags', 'writtenAt', 'publishedAt', 'updatedAt', 'description', 'subtitle', 'image', 'alt', 'order', 'source']);
+export const SUPPORTED_LANGS = ['zh-CN', 'zh-TW', 'en', 'ja'];
 
 function requireDate(value, field, filename) {
   const match = typeof value === 'string' && value.match(/^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$/);
@@ -35,6 +36,8 @@ export function parsePost(source, filename) {
   }
   const id = data.id ?? basename(filename, '.md');
   if (typeof id !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) throw new Error(`${filename}: id 请使用小写英文字母、数字和连字符`);
+  const lang = data.lang ?? 'zh-CN';
+  if (!SUPPORTED_LANGS.includes(lang)) throw new Error(`${filename}: lang 只能是 ${SUPPORTED_LANGS.join('、')}`);
   for (const field of ['title', 'category', 'description']) {
     if (typeof data[field] !== 'string' || !data[field].trim()) throw new Error(`${filename}: 缺少 ${field}`);
   }
@@ -58,8 +61,8 @@ export function parsePost(source, filename) {
   if (!body) throw new Error(`${filename}: 正文不能为空`);
   const tokens = markdown.parse(body, {});
   return {
-    id, title: data.title, category: data.category, tags: [...new Set((data.tags || []).map(tag => tag.trim()))],
-    description: data.description, subtitle: data.subtitle || `随笔 / ${data.category}`,
+    id, lang, title: data.title, category: data.category, tags: [...new Set((data.tags || []).map(tag => tag.trim()))],
+    description: data.description, subtitle: data.subtitle || (lang === 'zh-CN' ? `随笔 / ${data.category}` : data.category),
     image, alt: data.alt || '淡蓝与浅粉色的云朵',
     writtenAt: data.writtenAt ?? null, publishedAt: data.publishedAt, updatedAt: data.updatedAt || data.publishedAt,
     order: data.order ?? Number.MAX_SAFE_INTEGER,
@@ -72,8 +75,9 @@ export function compilePosts(entries) {
   const posts = entries.map(({source, filename}) => parsePost(source, filename));
   const ids = new Set();
   for (const post of posts) {
-    if (ids.has(post.id)) throw new Error(`重复的文章 id：${post.id}，请为每篇文章使用不同的 id`);
-    ids.add(post.id);
+    const key = `${post.lang}:${post.id}`;
+    if (ids.has(key)) throw new Error(`重复的文章 id：${post.id}（${post.lang}），请为每篇文章使用不同的 id`);
+    ids.add(key);
   }
-  return posts.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+  return posts.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id) || a.lang.localeCompare(b.lang));
 }

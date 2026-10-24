@@ -1,4 +1,5 @@
 ---
+lang: "zh-CN" # zh-CN、zh-TW、en 或 ja
 title: "在这里写标题"
 category: "日常碎碎念"
 tags: ["随笔"]

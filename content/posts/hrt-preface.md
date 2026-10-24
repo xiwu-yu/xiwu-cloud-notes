@@ -1,5 +1,6 @@
 ---
 id: "hrt-preface"
+lang: "zh-CN"
 title: "HRT 前言"
 category: "性别与生活"
 tags: ["HRT","性别认同","成长回忆"]

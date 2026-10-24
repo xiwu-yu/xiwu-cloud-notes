@@ -5,7 +5,7 @@
     return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(value));
   }
   function wordCount(text) {
-    return (text.match(/[\p{Script=Han}]|[A-Za-z]+(?:['’-][A-Za-z]+)*|\d+(?:\.\d+)?/gu) || []).length;
+    return (text.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]|[A-Za-z]+(?:['’-][A-Za-z]+)*|\d+(?:\.\d+)?/gu) || []).length;
   }
   function itemDate(item, dateBy = 'publishedAt') {
     const value = dateBy === 'writtenAt' ? item.writtenAt : item.publishedAt;
@@ -14,10 +14,10 @@
   function months(items, dateBy = 'publishedAt') {
     return [...new Set(items.map(item => dateKey(itemDate(item, dateBy))?.slice(0, 7)).filter(Boolean))].sort().reverse();
   }
-  function select(items, {category = '全部', month = 'all', order = 'newest', dateBy = 'publishedAt'} = {}) {
+  function select(items, {category = 'all', month = 'all', order = 'newest', dateBy = 'publishedAt'} = {}) {
     return items.filter(item => {
       const key = dateKey(itemDate(item, dateBy));
-      return (category === '全部' || item.category === category) &&
+      return (category === 'all' || (item.categoryKey ?? item.category) === category) &&
         (month === 'all' || (month === 'undated' ? !key : key?.slice(0, 7) === month));
     }).sort((a, b) => {
       const at = dateKey(itemDate(a, dateBy)) ? Date.parse(itemDate(a, dateBy)) : null;

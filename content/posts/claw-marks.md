@@ -1,5 +1,6 @@
 ---
 id: "claw-marks"
+lang: "zh-CN"
 title: "在死亡来临之前，用力留下爪痕喵"
 category: "生活与情绪"
 tags: ["旧文","情绪记录","朋友与陪伴"]

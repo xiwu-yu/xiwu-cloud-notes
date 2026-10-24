@@ -1,173 +1,402 @@
-// 1. 从资料文件读取内容，用 textContent 安全地更新文字。
-const profile = window.siteProfile;
-document.querySelector('#profile-name').textContent = profile.greetingName || profile.name;
-document.querySelector('#profile-intro').textContent = profile.intro;
-document.querySelector('#profile-about').textContent = profile.about;
-const tags = document.querySelector('#profile-tags');
-tags.replaceChildren(...profile.tags.map(text => { const tag = document.createElement('span'); tag.textContent = text; return tag; }));
-document.querySelector('.draft-note').hidden = !profile.isDemo;
-document.querySelector('.dialog-note').hidden = !profile.isDemo;
-const email = profile.email.trim();
-if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-  const link = document.querySelector('#email-link');
-  link.href = 'mailto:' + encodeURIComponent(email);
-  link.hidden = false;
-  document.querySelector('#contact-placeholder').hidden = true;
-}
+// 1. 读取构建生成的资料；所有页面文字和文章都按当前语言重新绘制。
+(() => {
+  const profile = window.siteProfile;
+  const archive = window.essayArchive;
+  if (!profile || !archive) return;
 
-// 2. 同一份筛选结果用于卡片、时间轴和上一篇／下一篇。
-const archive = window.essayArchive;
-const grid = document.querySelector('#interest-grid');
-const timeline = document.querySelector('#essay-timeline');
-const dialog = document.querySelector('#interest-dialog');
-const monthSelect = document.querySelector('#archive-month');
-const orderSelect = document.querySelector('#archive-order');
-const dateBySelect = document.querySelector('#archive-date-by');
-const state = { category: '全部', month: 'all', order: 'newest', view: 'cards', dateBy: 'publishedAt' };
-let visibleItems = [];
-let currentId = null;
-let openedFrom = null;
-const node = (tag, className, text) => { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = text; return el; };
-const formatDay = value => { const key = archive.dateKey(value); return key ? key.replace(/-/g, '.') : '日期待补充'; };
-const readingInfo = item => { const words = archive.wordCount(item.text ?? item.body ?? ''); return words.toLocaleString('zh-CN') + ' 字 · 约 ' + Math.max(1, Math.ceil(words / 300)) + ' 分钟'; };
-function tagLine(item) {
-  const line = node('span', 'entry-tags');
-  line.setAttribute('aria-label', '文章标签');
-  (item.tags || []).forEach(tag => line.append(node('span', 'entry-tag', tag)));
-  line.hidden = !item.tags?.length;
-  return line;
-}
-function dateLine(item) {
-  const line = node('span', 'entry-date');
-  const written = node('span', 'written-date');
-  if (archive.dateKey(item.writtenAt)) {
-    const writtenTime = node('time', '', formatDay(item.writtenAt));
-    writtenTime.dateTime = item.writtenAt;
-    written.append(document.createTextNode('写于 '), writtenTime);
-  } else written.textContent = '写作日期未填写';
-  line.append(written, document.createTextNode(' · '));
-  const time = node('time', '', formatDay(item.publishedAt));
-  if (archive.dateKey(item.publishedAt)) time.dateTime = item.publishedAt;
-  line.append(time, document.createTextNode(' 上传 · ' + readingInfo(item)));
-  return line;
-}
-function openEssay(item, trigger) {
-  currentId = item.id;
-  if (trigger) openedFrom = trigger;
-  document.querySelector('#dialog-title').textContent = item.title;
-  document.querySelector('#dialog-category').textContent = item.category;
-  const meta = document.querySelector('#dialog-meta');
-  meta.replaceChildren(dateLine(item));
-  if (item.updatedAt && Date.parse(item.updatedAt) > Date.parse(item.publishedAt)) meta.append(document.createTextNode(' · ' + formatDay(item.updatedAt) + ' 更新'));
-  meta.append(tagLine(item));
-  // HTML 仅来自构建时关闭了原始 HTML 的 Markdown 解析器。
-  const bodyElement = document.querySelector('#dialog-body');
-  if (typeof item.bodyHtml === 'string') bodyElement.innerHTML = item.bodyHtml;
-  else bodyElement.replaceChildren(...(item.body || '').split(/\n\n+/).map(text => node('p', '', text)));
-  const sourceLink = document.querySelector('#dialog-source');
-  sourceLink.hidden = !item.source;
-  if (item.source) sourceLink.href = item.source;
-  const index = visibleItems.findIndex(entry => entry.id === item.id);
-  document.querySelector('#essay-prev').disabled = index <= 0;
-  document.querySelector('#essay-next').disabled = index === visibleItems.length - 1;
-  document.querySelector('#essay-position').textContent = (index + 1) + ' / ' + visibleItems.length;
-  if (!dialog.open) dialog.showModal();
-  dialog.scrollTop = 0;
-  document.querySelector('.dialog-close').focus({preventScroll: true});
-}
-function createCard(item) {
-  const article = node('article', 'interest-card');
-  article.dataset.essayId = item.id;
-  const button = node('button', 'card-button'); button.type = 'button';
-  button.setAttribute('aria-label', '阅读：' + item.title);
-  const imageWrap = node('div', 'card-image');
-  const img = node('img'); img.src = item.image; img.alt = item.alt; img.width = 600; img.height = 350; img.loading = 'lazy';
-  const number = node('span', 'card-number', String(profile.interests.indexOf(item) + 1).padStart(2, '0'));
-  imageWrap.append(img, number);
-  button.append(imageWrap, node('p','card-meta',item.subtitle), node('h3','',item.title), dateLine(item), node('p','card-description',item.description), tagLine(item), node('span','card-more','继续读 ↗'));
-  button.addEventListener('click', () => openEssay(item, button));
-  article.append(button); return article;
-}
-function createTimelineGroup(group) {
-  const section = node('section', 'timeline-group');
-  const date = group.key === 'undated' ? (state.dateBy === 'writtenAt' ? '写作日期未填写' : '上传日期未填写') : group.key.replace(/-/g, '.');
-  const heading = node('h3','timeline-heading',date);
-  heading.append(node('span','',' / ' + group.items.length + ' 篇'));
-  section.append(heading);
-  const list = node('ol','timeline-list');
-  group.items.forEach(item => {
-    const li = node('li','timeline-entry'); li.dataset.essayId = item.id;
-    const button = node('button','timeline-button'); button.type = 'button'; button.setAttribute('aria-label','阅读：'+item.title);
-    button.append(node('span','timeline-category',item.category),node('span','timeline-title',item.title),node('span','timeline-description',item.description),node('span','timeline-reading',readingInfo(item)));
-    button.append(tagLine(item));
-    button.addEventListener('click',()=>openEssay(item,button)); li.append(button); list.append(li);
-  });
-  section.append(list); return section;
-}
-function renderInterests() {
-  visibleItems = archive.select(profile.interests, state);
-  grid.replaceChildren(...visibleItems.map(createCard));
-  grid.classList.toggle('single-entry', visibleItems.length === 1);
-  timeline.replaceChildren(...archive.groups(visibleItems, state.dateBy).map(createTimelineGroup));
-  document.querySelector('.archive-note').textContent = state.dateBy === 'writtenAt' ? '按文章写作日期整理；未填写写作日期的文章排在最后。' : '按本站上传时间整理；写作日期单独标注，未填写时不作推测。';
-  grid.hidden = state.view !== 'cards'; timeline.hidden = state.view !== 'timeline';
-  document.querySelector('#archive-empty').hidden = visibleItems.length > 0;
-  document.querySelector('#item-count').textContent = String(visibleItems.length).padStart(2,'0') + ' 篇随笔';
-  document.querySelectorAll('.filter').forEach(button=>{const active=button.dataset.filter===state.category;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
-  document.querySelectorAll('[data-view]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.view===state.view)));
-}
-const filterGroup = document.querySelector('.filters'); filterGroup.replaceChildren();
-['全部',...new Set(profile.interests.map(item=>item.category))].forEach(category=>{
-  const button=node('button','filter',category);button.type='button';button.dataset.filter=category;
-  button.addEventListener('click',()=>{state.category=category;renderInterests();});filterGroup.append(button);
-});
-function updateMonths() {
-  const all = node('option', '', '全部月份'); all.value = 'all'; monthSelect.replaceChildren(all);
-  archive.months(profile.interests, state.dateBy).forEach(month=>{const option=node('option','',month.replace('-',' 年 ')+' 月');option.value=month;monthSelect.append(option);});
-  if(profile.interests.some(item=>!archive.dateKey(archive.itemDate(item,state.dateBy)))){const option=node('option','',state.dateBy==='writtenAt'?'写作日期未填写':'上传日期未填写');option.value='undated';monthSelect.append(option);}
-  document.querySelector('#archive-month-label').textContent = state.dateBy === 'writtenAt' ? '写作月份' : '上传月份';
-  monthSelect.value = state.month;
-}
-updateMonths();
-dateBySelect.addEventListener('change',()=>{state.dateBy=dateBySelect.value;state.month='all';updateMonths();renderInterests();});
-monthSelect.addEventListener('change',()=>{state.month=monthSelect.value;renderInterests();});
-orderSelect.addEventListener('change',()=>{state.order=orderSelect.value;renderInterests();});
-document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{state.view=button.dataset.view;renderInterests();}));
-document.querySelector('#archive-reset').addEventListener('click',()=>{state.category='全部';state.month='all';monthSelect.value='all';renderInterests();});
-['prev','next'].forEach(direction=>document.querySelector('#essay-'+direction).addEventListener('click',()=>{
-  const index=visibleItems.findIndex(item=>item.id===currentId)+(direction==='next'?1:-1);
-  if(visibleItems[index])openEssay(visibleItems[index]);
-}));
-renderInterests();
-document.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());
-dialog.addEventListener('close',()=>{if(openedFrom?.isConnected)openedFrom.focus({preventScroll:true});});
-dialog.addEventListener('click',event=>{if(event.target===dialog){const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)dialog.close();}});
+  const DEFAULT_LOCALE = profile.defaultLocale || 'zh-CN';
+  const LOCALES = Array.isArray(profile.locales) ? profile.locales : [DEFAULT_LOCALE];
+  const LANG_STORAGE = 'xiwu-language';
+  const THEME_STORAGE = 'little-corner-theme';
+  const $ = selector => document.querySelector(selector);
+  const siteFor = lang => profile.localized?.[lang] || profile.localized?.[DEFAULT_LOCALE];
 
-// 3. 用浏览器本地存储记住主题；存储不可用也不会影响页面。
-const themeButton = document.querySelector('.theme-toggle');
-function setTheme(dark) {
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  themeButton.setAttribute('aria-pressed', String(dark));
-  themeButton.setAttribute('aria-label', dark ? '切换到浅色模式' : '切换到深色模式');
-}
-let initialDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-try { const stored = localStorage.getItem('little-corner-theme'); if (stored) initialDark = stored === 'dark'; } catch {}
-setTheme(initialDark);
-themeButton.addEventListener('click', () => {
-  const dark = document.documentElement.dataset.theme !== 'dark'; setTheme(dark);
-  try { localStorage.setItem('little-corner-theme', dark ? 'dark' : 'light'); } catch {}
-});
-
-// 4. 称呼卡：只复制到剪贴板，不会发送给任何人。
-document.querySelectorAll('.pronoun').forEach(el => { el.textContent = profile.pronouns; });
-document.querySelector('#identity-name').textContent = profile.name;
-document.querySelector('#identity-pronouns').textContent = '称呼代词：' + profile.pronouns;
-document.querySelector('#copy-profile').addEventListener('click', async () => {
-  const text = profile.name + '｜代词：' + profile.pronouns;
-  try {
-    document.querySelector('#copy-status').textContent = '正在复制…';
-    await Promise.race([navigator.clipboard.writeText(text), new Promise((_, reject) => setTimeout(() => reject(new Error('Clipboard timeout')), 1800))]);
-    document.querySelector('#copy-status').textContent = '已复制：' + text;
+  function requestedLocale() {
+    const fromUrl = new URLSearchParams(location.search).get('lang');
+    if (LOCALES.includes(fromUrl)) return fromUrl;
+    try {
+      const stored = localStorage.getItem(LANG_STORAGE);
+      if (LOCALES.includes(stored)) return stored;
+    } catch {}
+    return DEFAULT_LOCALE;
   }
-  catch { document.querySelector('#copy-status').textContent = '请手动复制：' + text; }
-});
+
+  let locale = requestedLocale();
+  let site = siteFor(locale);
+  let posts = site.interests;
+  let ui = profile.ui?.[locale] || profile.ui?.[DEFAULT_LOCALE] || {};
+
+  function t(key, vars = {}) {
+    const template = ui[key] ?? profile.ui?.[DEFAULT_LOCALE]?.[key] ?? key;
+    return template.replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? '');
+  }
+  const formatNumber = value => new Intl.NumberFormat(locale).format(value);
+  const node = (tag, className, text) => {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+  };
+  const formatDay = value => {
+    const key = archive.dateKey(value);
+    return key ? key.replace(/-/g, '.') : '';
+  };
+  function formatMonth(key) {
+    const [year, month] = key.split('-').map(Number);
+    if (locale === 'en') return new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, 1)));
+    if (locale === 'ja') return `${year}年${month}月`;
+    return `${year} 年 ${month} 月`;
+  }
+  function readingInfo(item) {
+    const words = archive.wordCount(item.text ?? item.body ?? '');
+    const minutes = Math.max(1, Math.ceil(words / (locale === 'en' ? 200 : 300)));
+    return t('notes.reading', { count: formatNumber(words), minutes: formatNumber(minutes) });
+  }
+  function dateLine(item) {
+    const line = node('span', 'entry-date');
+    const written = node('span', 'written-date');
+    if (archive.dateKey(item.writtenAt)) {
+      const writtenTime = node('time', '', t('notes.writtenOn', { date: formatDay(item.writtenAt) }));
+      writtenTime.dateTime = item.writtenAt;
+      written.append(writtenTime);
+    } else written.textContent = t('notes.writtenUnknown');
+    line.append(written, document.createTextNode(' · '));
+    const publishedTime = node('time', '', archive.dateKey(item.publishedAt) ? t('notes.publishedOn', { date: formatDay(item.publishedAt) }) : t('notes.publishedUnknown'));
+    if (archive.dateKey(item.publishedAt)) publishedTime.dateTime = item.publishedAt;
+    line.append(publishedTime, document.createTextNode(' · ' + readingInfo(item)));
+    return line;
+  }
+  function tagLine(item) {
+    const line = node('span', 'entry-tags');
+    line.setAttribute('aria-label', t('notes.tags'));
+    (item.tags || []).forEach(tag => line.append(node('span', 'entry-tag', tag)));
+    line.hidden = !item.tags?.length;
+    return line;
+  }
+
+  const grid = $('#interest-grid');
+  const timeline = $('#essay-timeline');
+  const dialog = $('#interest-dialog');
+  const monthSelect = $('#archive-month');
+  const orderSelect = $('#archive-order');
+  const dateBySelect = $('#archive-date-by');
+  const languageSelect = $('#language-select');
+  const dialogLanguageSelect = $('#dialog-language-select');
+  const state = { category: 'all', month: 'all', order: 'newest', view: 'cards', dateBy: 'publishedAt' };
+  let visibleItems = [];
+  let currentId = null;
+  let openedFrom = null;
+  let closingFromHistory = false;
+
+  // 2. 地址栏记录当前文章，复制地址即可分享；前进、后退会重新打开对应文章。
+  function writeUrl({ push = false, replace = false } = {}) {
+    const url = new URL(location.href);
+    if (currentId) url.searchParams.set('post', currentId);
+    else url.searchParams.delete('post');
+    if (locale === DEFAULT_LOCALE) url.searchParams.delete('lang');
+    else url.searchParams.set('lang', locale);
+    if (push) history.pushState({ post: currentId, lang: locale }, '', url);
+    else if (replace) history.replaceState({ post: currentId, lang: locale }, '', url);
+  }
+  function setDocumentTitle(item) {
+    document.title = item ? t('meta.articleTitle', { title: item.title, site: site.name }) : t('meta.title');
+    $('#meta-description').content = item?.description || t('meta.description');
+  }
+
+  function updateThemeLabel() {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    $('.theme-toggle').setAttribute('aria-label', t(dark ? 'theme.toLight' : 'theme.toDark'));
+  }
+
+  function renderDialog(item, { focus = false, scroll = false } = {}) {
+    $('#dialog-title').textContent = item.title;
+    $('#dialog-category').textContent = item.category;
+    const meta = $('#dialog-meta');
+    meta.replaceChildren(dateLine(item));
+    if (item.updatedAt && Date.parse(item.updatedAt) > Date.parse(item.publishedAt)) {
+      meta.append(document.createTextNode(' · ' + t('notes.updatedOn', { date: formatDay(item.updatedAt) })));
+    }
+    meta.append(tagLine(item));
+    const bodyElement = $('#dialog-body');
+    // bodyHtml 仅来自构建时关闭了原始 HTML 的 Markdown 解析器。
+    if (typeof item.bodyHtml === 'string') bodyElement.innerHTML = item.bodyHtml;
+    else bodyElement.replaceChildren(...(item.body || '').split(/\n\n+/).map(text => node('p', '', text)));
+    const sourceLink = $('#dialog-source');
+    sourceLink.hidden = !item.source;
+    if (item.source) sourceLink.href = item.source;
+    const index = visibleItems.findIndex(entry => entry.id === item.id);
+    $('#essay-prev').disabled = index <= 0;
+    $('#essay-next').disabled = index < 0 || index === visibleItems.length - 1;
+    $('#essay-position').textContent = index >= 0 ? (index + 1) + ' / ' + visibleItems.length : '';
+    const status = $('#dialog-share-status');
+    status.hidden = true;
+    status.textContent = '';
+    setDocumentTitle(item);
+    if (scroll) dialog.scrollTop = 0;
+    if (focus) $('.dialog-close').focus({ preventScroll: true });
+  }
+  function openEssay(item, trigger, { push = true, focus = true, scroll = true } = {}) {
+    currentId = item.id;
+    if (trigger) openedFrom = trigger;
+    renderDialog(item, { focus, scroll });
+    if (!dialog.open) dialog.showModal();
+    if (push) writeUrl({ push: true });
+    if (focus) $('.dialog-close').focus({ preventScroll: true });
+  }
+  function closeDialogFromHistory() {
+    closingFromHistory = true;
+    dialog.close();
+  }
+
+  function createCard(item, index) {
+    const article = node('article', 'interest-card');
+    article.dataset.essayId = item.id;
+    const button = node('button', 'card-button');
+    button.type = 'button';
+    button.setAttribute('aria-label', t('notes.readCard', { title: item.title }));
+    const imageWrap = node('div', 'card-image');
+    const img = node('img');
+    img.src = item.image;
+    img.alt = item.alt;
+    img.width = 600;
+    img.height = 350;
+    img.loading = 'lazy';
+    // 编号跟随当前排序与筛选后的可见顺序，而不是固定的原始数组位置。
+    const number = node('span', 'card-number', String(index + 1).padStart(2, '0'));
+    imageWrap.append(img, number);
+    button.append(imageWrap, node('p', 'card-meta', item.subtitle), node('h3', '', item.title), dateLine(item), node('p', 'card-description', item.description), tagLine(item), node('span', 'card-more', t('notes.readMore')));
+    button.addEventListener('click', () => openEssay(item, button));
+    article.append(button);
+    return article;
+  }
+  function createTimelineGroup(group) {
+    const section = node('section', 'timeline-group');
+    const undated = group.key === 'undated';
+    const date = undated ? t(state.dateBy === 'writtenAt' ? 'notes.undatedWrittenGroup' : 'notes.undatedPublishedGroup') : group.key.replace(/-/g, '.');
+    const heading = node('h3', 'timeline-heading', date);
+    heading.append(node('span', '', t('notes.groupCount', { count: group.items.length })));
+    section.append(heading);
+    const list = node('ol', 'timeline-list');
+    group.items.forEach(item => {
+      const li = node('li', 'timeline-entry');
+      li.dataset.essayId = item.id;
+      const button = node('button', 'timeline-button');
+      button.type = 'button';
+      button.setAttribute('aria-label', t('notes.readCard', { title: item.title }));
+      button.append(node('span', 'timeline-category', item.category), node('span', 'timeline-title', item.title), node('span', 'timeline-description', item.description), node('span', 'timeline-reading', readingInfo(item)));
+      button.append(tagLine(item));
+      button.addEventListener('click', () => openEssay(item, button));
+      li.append(button);
+      list.append(li);
+    });
+    section.append(list);
+    return section;
+  }
+
+  function renderFilters() {
+    const categories = [];
+    const seen = new Set();
+    posts.forEach(item => {
+      if (seen.has(item.categoryKey)) return;
+      seen.add(item.categoryKey);
+      categories.push({ key: item.categoryKey, label: item.category });
+    });
+    if (state.category !== 'all' && !categories.some(category => category.key === state.category)) state.category = 'all';
+    const entries = [{ key: 'all', label: t('notes.all') }, ...categories];
+    const group = $('.filters');
+    group.replaceChildren(...entries.map(entry => {
+      const button = node('button', 'filter', entry.label);
+      button.type = 'button';
+      button.dataset.filter = entry.key;
+      button.addEventListener('click', () => { state.category = entry.key; renderInterests(); });
+      return button;
+    }));
+  }
+  function updateMonths() {
+    const all = node('option', '', t('notes.allMonths'));
+    all.value = 'all';
+    monthSelect.replaceChildren(all);
+    archive.months(posts, state.dateBy).forEach(month => {
+      const option = node('option', '', formatMonth(month));
+      option.value = month;
+      monthSelect.append(option);
+    });
+    if (posts.some(item => !archive.dateKey(archive.itemDate(item, state.dateBy)))) {
+      const option = node('option', '', t('notes.monthUndated'));
+      option.value = 'undated';
+      monthSelect.append(option);
+    }
+    const available = [...monthSelect.options].map(option => option.value);
+    if (!available.includes(state.month)) state.month = 'all';
+    monthSelect.value = state.month;
+    $('#archive-month-label').textContent = t(state.dateBy === 'writtenAt' ? 'notes.writtenMonth' : 'notes.publishedMonth');
+  }
+  function renderInterests() {
+    visibleItems = archive.select(posts, state);
+    grid.replaceChildren(...visibleItems.map(createCard));
+    grid.classList.toggle('single-entry', visibleItems.length === 1);
+    timeline.replaceChildren(...archive.groups(visibleItems, state.dateBy).map(createTimelineGroup));
+    $('.archive-note').textContent = t(state.dateBy === 'writtenAt' ? 'notes.noteWritten' : 'notes.notePublished');
+    grid.hidden = state.view !== 'cards';
+    timeline.hidden = state.view !== 'timeline';
+    $('#archive-empty').hidden = visibleItems.length > 0;
+    $('#item-count').textContent = t('notes.count', { count: String(visibleItems.length).padStart(2, '0') });
+    document.querySelectorAll('.filter').forEach(button => {
+      const active = button.dataset.filter === state.category;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    document.querySelectorAll('[data-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.view === state.view)));
+  }
+
+  function applyStaticText() {
+    document.querySelectorAll('[data-i18n]').forEach(element => { element.textContent = t(element.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-html]').forEach(element => { element.innerHTML = t(element.dataset.i18nHtml); });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(element => { element.setAttribute('aria-label', t(element.dataset.i18nAriaLabel)); });
+    $('#meta-description').content = t('meta.description');
+    document.title = t('meta.title');
+  }
+  function applySite() {
+    document.querySelectorAll('[data-site-name]').forEach(element => { element.textContent = site.name; });
+    $('#brand-home').setAttribute('aria-label', t('brand.homeLabel', { name: site.name }));
+    $('#profile-name').textContent = site.greetingName || site.name;
+    $('#profile-intro').textContent = site.intro;
+    $('#profile-about').textContent = site.about;
+    $('#identity-name').textContent = site.name;
+    $('#identity-avatar').textContent = site.name.slice(0, 1);
+    $('#identity-pronouns').textContent = t('identity.pronouns', { pronouns: site.pronouns });
+    document.querySelectorAll('.pronoun').forEach(element => { element.textContent = site.pronouns; });
+    $('#copy-profile').setAttribute('aria-label', t('copy.button'));
+    const tags = $('#profile-tags');
+    tags.replaceChildren(...site.tags.map(text => node('span', '', text)));
+    $('.draft-note').hidden = !profile.isDemo;
+    $('.dialog-note').hidden = !profile.isDemo;
+    const email = site.email.trim();
+    const emailLink = $('#email-link');
+    const placeholder = $('#contact-placeholder');
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      emailLink.href = 'mailto:' + encodeURIComponent(email);
+      emailLink.hidden = false;
+      placeholder.hidden = true;
+      $('#email-label').textContent = t('contact.email', { name: site.name });
+    } else {
+      emailLink.hidden = true;
+      placeholder.hidden = false;
+    }
+  }
+  function applyLanguage(next, { updateUrl = true } = {}) {
+    if (!LOCALES.includes(next)) next = DEFAULT_LOCALE;
+    locale = next;
+    site = siteFor(locale);
+    posts = site.interests;
+    ui = profile.ui?.[locale] || profile.ui?.[DEFAULT_LOCALE] || {};
+    try { localStorage.setItem(LANG_STORAGE, locale); } catch {}
+    document.documentElement.lang = locale;
+    document.documentElement.dataset.lang = locale;
+    languageSelect.value = locale;
+    dialogLanguageSelect.value = locale;
+    applyStaticText();
+    applySite();
+    $('#copy-status').textContent = '';
+    renderFilters();
+    updateMonths();
+    updateThemeLabel();
+    renderInterests();
+    if (dialog.open && currentId) {
+      const item = posts.find(entry => entry.id === currentId);
+      if (item) renderDialog(item);
+      else closeDialogFromHistory();
+    }
+    if (updateUrl) writeUrl({ replace: true });
+  }
+
+  // 3. 筛选、排序与视图切换共用同一份可见结果。
+  renderFilters();
+  updateMonths();
+  dateBySelect.addEventListener('change', () => { state.dateBy = dateBySelect.value; state.month = 'all'; updateMonths(); renderInterests(); });
+  monthSelect.addEventListener('change', () => { state.month = monthSelect.value; renderInterests(); });
+  orderSelect.addEventListener('change', () => { state.order = orderSelect.value; renderInterests(); });
+  document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => { state.view = button.dataset.view; renderInterests(); }));
+  $('#archive-reset').addEventListener('click', () => { state.category = 'all'; state.month = 'all'; updateMonths(); renderInterests(); });
+
+  [languageSelect, dialogLanguageSelect].forEach(select => select.addEventListener('change', () => applyLanguage(select.value)));
+
+  // 4. 弹窗翻页、关闭与地址栏历史保持同步。
+  ['prev', 'next'].forEach(direction => $('#essay-' + direction).addEventListener('click', () => {
+    const index = visibleItems.findIndex(item => item.id === currentId) + (direction === 'next' ? 1 : -1);
+    if (visibleItems[index]) openEssay(visibleItems[index], null);
+  }));
+  $('.dialog-close').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', event => {
+    if (event.target !== dialog) return;
+    const rect = dialog.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+  });
+  dialog.addEventListener('close', () => {
+    currentId = null;
+    if (!closingFromHistory) writeUrl({ replace: true });
+    closingFromHistory = false;
+    setDocumentTitle(null);
+    if (openedFrom?.isConnected) openedFrom.focus({ preventScroll: true });
+    openedFrom = null;
+  });
+  $('#essay-share').addEventListener('click', async () => {
+    const status = $('#dialog-share-status');
+    try {
+      await navigator.clipboard.writeText(location.href);
+      status.textContent = t('dialog.shareCopied');
+    } catch {
+      status.textContent = t('dialog.shareManual') + ' ' + location.href;
+    }
+    status.hidden = false;
+  });
+  function syncFromUrl() {
+    const url = new URL(location.href);
+    const langParam = url.searchParams.get('lang');
+    // 历史记录里没有 lang 时保留当前选择，避免后退时意外切回中文。
+    if (langParam && LOCALES.includes(langParam) && langParam !== locale) applyLanguage(langParam, { updateUrl: false });
+    const id = url.searchParams.get('post');
+    const item = id ? posts.find(entry => entry.id === id) : null;
+    if (item) openEssay(item, null, { push: false, focus: false, scroll: false });
+    else if (dialog.open) closeDialogFromHistory();
+  }
+  window.addEventListener('popstate', syncFromUrl);
+
+  // 5. 主题：优先本地偏好，其次系统设置；文案随界面语言更新。
+  const themeButton = $('.theme-toggle');
+  function setTheme(dark) {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    themeButton.setAttribute('aria-pressed', String(dark));
+    updateThemeLabel();
+  }
+  let initialDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  try { const stored = localStorage.getItem(THEME_STORAGE); if (stored) initialDark = stored === 'dark'; } catch {}
+  setTheme(initialDark);
+  themeButton.addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme !== 'dark';
+    setTheme(dark);
+    try { localStorage.setItem(THEME_STORAGE, dark ? 'dark' : 'light'); } catch {}
+  });
+
+  // 6. 称呼卡只写入剪贴板，不发送给任何人。
+  $('#copy-profile').addEventListener('click', async () => {
+    const status = $('#copy-status');
+    const text = t('copy.text', { name: site.name, pronouns: site.pronouns });
+    try {
+      status.textContent = t('copy.copying');
+      await Promise.race([navigator.clipboard.writeText(text), new Promise((_, reject) => setTimeout(() => reject(new Error('Clipboard timeout')), 1800))]);
+      status.textContent = t('copy.copied', { text });
+    } catch {
+      status.textContent = t('copy.manual', { text });
+    }
+  });
+
+  // 7. 初次进入：先应用语言和地址中的文章，再开放交互。
+  applyLanguage(locale, { updateUrl: false });
+  const initialPost = new URLSearchParams(location.search).get('post');
+  if (initialPost) {
+    const item = posts.find(entry => entry.id === initialPost);
+    if (item) openEssay(item, null, { push: false });
+    else writeUrl({ replace: true });
+  }
+})();

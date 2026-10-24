@@ -7,3 +7,6 @@ work/
 dist/profile.js
 .sites-runtime/
 .pnpm-store/
+test-results/
+playwright-report/
+blob-report/

@@ -1,0 +1,202 @@
+import { test as base, expect } from '@playwright/test';
+
+const test = base.extend({
+  page: async ({ page }, use) => {
+    const issues = [];
+    page.on('console', message => { if (message.type() === 'error') issues.push(`console: ${message.text()}`); });
+    page.on('pageerror', error => issues.push(`pageerror: ${error.message}`));
+    page.on('requestfailed', request => issues.push(`requestfailed: ${request.url()} (${request.failure()?.errorText})`));
+    page.on('response', response => { if (response.status() >= 400) issues.push(`HTTP ${response.status()}: ${response.url()}`); });
+    await use(page);
+    expect(issues, '页面不应出现控制台错误或资源加载失败').toEqual([]);
+  }
+});
+
+const cardIds = page => page.locator('.interest-card').evaluateAll(nodes => nodes.map(node => node.dataset.essayId));
+const cardNumbers = page => page.locator('.interest-card .card-number').allTextContents();
+const postParam = page => new URL(page.url()).searchParams.get('post');
+const langParam = page => new URL(page.url()).searchParams.get('lang');
+
+test('article cards are numbered in the order they are displayed', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.interest-card')).toHaveCount(2);
+  expect(await cardIds(page)).toEqual(['claw-marks', 'hrt-preface']);
+  expect(await cardNumbers(page)).toEqual(['01', '02']);
+
+  await page.selectOption('#archive-order', 'oldest');
+  expect(await cardIds(page)).toEqual(['hrt-preface', 'claw-marks']);
+  expect(await cardNumbers(page)).toEqual(['01', '02']);
+
+  await page.getByRole('button', { name: '性别与生活', exact: true }).click();
+  await expect(page.locator('.interest-card')).toHaveCount(1);
+  expect(await cardIds(page)).toEqual(['hrt-preface']);
+  expect(await cardNumbers(page)).toEqual(['01']);
+  await expect(page.locator('#item-count')).toHaveText('01 篇随笔');
+
+  await page.getByRole('button', { name: '全部', exact: true }).click();
+  await page.selectOption('#archive-date-by', 'writtenAt');
+  expect(await cardIds(page)).toEqual(['claw-marks', 'hrt-preface']);
+  expect(await cardNumbers(page)).toEqual(['01', '02']);
+});
+
+test('theme, category filters and the timeline all work together', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.locator('.theme-toggle').click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.locator('.theme-toggle').click();
+
+  await page.getByRole('button', { name: '生活与情绪', exact: true }).click();
+  await expect(page.locator('.interest-card')).toHaveCount(1);
+  expect(await cardIds(page)).toEqual(['claw-marks']);
+
+  await page.getByRole('button', { name: '全部', exact: true }).click();
+  await page.getByRole('button', { name: '时间轴', exact: true }).click();
+  await expect(page.locator('#essay-timeline')).toBeVisible();
+  await expect(page.locator('.timeline-group')).toHaveCount(1);
+  await expect(page.locator('.timeline-heading')).toContainText('2026.10.24');
+  await expect(page.locator('.timeline-heading')).toContainText('2 篇');
+  await expect(page.locator('.timeline-entry')).toHaveCount(2);
+
+  await page.selectOption('#archive-date-by', 'writtenAt');
+  await expect(page.locator('.timeline-group')).toHaveCount(2);
+  await expect(page.locator('.timeline-heading').first()).toContainText('2026.10.14');
+  await expect(page.locator('.timeline-heading').last()).toContainText('写作日期未填写');
+
+  await page.getByRole('button', { name: '卡片', exact: true }).click();
+  await page.selectOption('#archive-month', 'undated');
+  await page.getByRole('button', { name: '生活与情绪', exact: true }).click();
+  await expect(page.locator('#archive-empty')).toBeVisible();
+  await expect(page.locator('#item-count')).toHaveText('00 篇随笔');
+  await page.locator('#archive-reset').click();
+  await expect(page.locator('#archive-empty')).toBeHidden();
+  await expect(page.locator('.interest-card')).toHaveCount(2);
+});
+
+test('article dialog has a shareable URL and follows browser back and forward', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.interest-card').first().locator('.card-button').click();
+  await expect(page.locator('#interest-dialog')).toBeVisible();
+  await expect(page.locator('#dialog-title')).toHaveText('在死亡来临之前，用力留下爪痕喵');
+  expect(postParam(page)).toBe('claw-marks');
+  await expect(page.locator('#essay-position')).toHaveText('1 / 2');
+
+  await page.locator('#essay-next').click();
+  await expect(page.locator('#dialog-title')).toHaveText('HRT 前言');
+  expect(postParam(page)).toBe('hrt-preface');
+  await expect(page.locator('#essay-position')).toHaveText('2 / 2');
+
+  await page.goBack();
+  await expect(page.locator('#dialog-title')).toHaveText('在死亡来临之前，用力留下爪痕喵');
+  expect(postParam(page)).toBe('claw-marks');
+  await page.goForward();
+  await expect(page.locator('#dialog-title')).toHaveText('HRT 前言');
+  expect(postParam(page)).toBe('hrt-preface');
+
+  await page.locator('.dialog-close').click();
+  await expect(page.locator('#interest-dialog')).not.toBeVisible();
+  await expect.poll(() => postParam(page)).toBeNull();
+
+  await page.goto('/?post=hrt-preface');
+  await expect(page.locator('#interest-dialog')).toBeVisible();
+  await expect(page.locator('#dialog-title')).toHaveText('HRT 前言');
+  expect(postParam(page)).toBe('hrt-preface');
+
+  await page.goto('/?post=claw-marks&lang=ja');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
+  await expect(page.locator('#interest-dialog')).toBeVisible();
+  await expect(page.locator('#dialog-title')).toHaveText('死が来る前に、爪痕を残したい');
+  expect(langParam(page)).toBe('ja');
+});
+
+test('category filters stay selected when the interface language changes', async ({ page }) => {
+  await page.goto('/');
+  await page.selectOption('#language-select', 'en');
+  await page.getByRole('button', { name: 'Gender & Life', exact: true }).click();
+  await expect(page.locator('.interest-card')).toHaveCount(1);
+  await expect(page.locator('.interest-card')).toContainText('HRT: A Preface');
+
+  await page.selectOption('#language-select', 'ja');
+  const japaneseFilter = page.getByRole('button', { name: 'ジェンダーと暮らし', exact: true });
+  await expect(japaneseFilter).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.interest-card')).toHaveCount(1);
+  await expect(page.locator('.interest-card')).toContainText('HRT のまえがき');
+
+  await page.selectOption('#language-select', 'zh-TW');
+  await expect(page.getByRole('button', { name: '性別與生活', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.interest-card')).toContainText('HRT 前言');
+});
+
+test('language selection changes the interface and the essays, including an open dialog', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+  await expect(page.locator('#hero-title')).toContainText('想说的话很多喵');
+  await page.locator('.interest-card').first().locator('.card-button').click();
+  await expect(page.locator('#dialog-title')).toHaveText('在死亡来临之前，用力留下爪痕喵');
+
+  await page.selectOption('#dialog-language-select', 'en');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('#dialog-title')).toHaveText('Leave Claw Marks While I Still Can');
+  await expect(page.locator('#dialog-body')).toContainText('Even while writing this');
+  expect(langParam(page)).toBe('en');
+  expect(postParam(page)).toBe('claw-marks');
+  await page.locator('.dialog-close').click();
+  await expect(page.locator('#hero-title')).toContainText('So much I want to say');
+  await expect(page.locator('.interest-card').first()).toContainText('Leave Claw Marks While I Still Can');
+
+  await page.selectOption('#language-select', 'ja');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
+  await expect(page.locator('#hero-title')).toContainText('言いたいことはたくさん');
+  await expect(page.locator('.interest-card').first()).toContainText('死が来る前に、爪痕を残したい');
+
+  await page.selectOption('#language-select', 'zh-TW');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-TW');
+  await expect(page.locator('#hero-title')).toContainText('想說的話很多喵');
+  await expect(page.locator('.interest-card').first()).toContainText('在死亡來臨之前，用力留下爪痕喵');
+
+  await page.selectOption('#language-select', 'en');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('#hero-title')).toContainText('So much I want to say');
+});
+
+test('320px, 375px, 768px and 1440px layouts stay inside the viewport in every language', async ({ page }) => {
+  for (const width of [320, 375, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    for (const language of ['zh-CN', 'zh-TW', 'en', 'ja']) {
+      await page.selectOption('#language-select', language);
+      const layout = await page.evaluate(() => {
+        const header = document.querySelector('.site-header');
+        const select = document.querySelector('#language-select').getBoundingClientRect();
+        return {
+          documentWidth: document.documentElement.scrollWidth,
+          bodyWidth: document.body.scrollWidth,
+          viewportWidth: window.innerWidth,
+          headerWidth: header.scrollWidth,
+          headerClientWidth: header.clientWidth,
+          selectRight: select.right,
+          selectLeft: select.left,
+          columns: getComputedStyle(document.querySelector('#interest-grid')).gridTemplateColumns.split(' ').length
+        };
+      });
+      expect(layout.documentWidth, `${width}px ${language}: document overflow`).toBeLessThanOrEqual(layout.viewportWidth + 1);
+      expect(layout.bodyWidth, `${width}px ${language}: body overflow`).toBeLessThanOrEqual(layout.viewportWidth + 1);
+      expect(layout.headerWidth, `${width}px ${language}: header overflow`).toBeLessThanOrEqual(layout.headerClientWidth + 1);
+      expect(layout.selectLeft).toBeGreaterThanOrEqual(0);
+      expect(layout.selectRight, `${width}px ${language}: language selector outside viewport`).toBeLessThanOrEqual(layout.viewportWidth);
+      expect(layout.columns, `${width}px ${language}: card columns`).toBe(width > 720 ? 3 : 1);
+
+      await page.locator('.interest-card').first().locator('.card-button').click();
+      await expect(page.locator('#interest-dialog')).toBeVisible();
+      const dialog = await page.locator('#interest-dialog').boundingBox();
+      expect(dialog.x).toBeGreaterThanOrEqual(0);
+      expect(dialog.x + dialog.width, `${width}px ${language}: dialog overflow`).toBeLessThanOrEqual(width + 1);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth);
+      expect(overflow, `${width}px ${language}: overflow with dialog`).toBeLessThanOrEqual(width + 1);
+      await page.locator('.dialog-close').click();
+    }
+  }
+});
