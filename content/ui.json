@@ -122,7 +122,12 @@
     "music.slow": "等待较久；网络、地区或歌曲权限可能影响加载和播放，可尝试官方歌单入口。",
     "music.keyboard": "播放器内的 Esc 不会收起面板；用 Tab 移到下方收起按钮，部分 Safari 设置需用 Option+Tab。",
     "hero.artAlt": "淡蓝与浅粉的层层云朵环绕一轮柔和的月亮，云间有微小星光",
-    "nav.homeRefresh": "回到首页顶部并刷新"
+    "nav.homeRefresh": "回到首页顶部并刷新",
+    "error.title": "这封信暂时找不到了。",
+    "error.description": "地址可能有误，或这封信已经搬家。可以回到云间，或从文章目录继续阅读。",
+    "error.home": "回到云间来信",
+    "error.archive": "打开文章目录",
+    "meta.shareImageAlt": "夕雾的云间来信，浅蓝与樱花粉的云朵"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -247,7 +252,12 @@
     "music.slow": "等待較久；網路、地區或歌曲權限可能影響載入和播放，可嘗試官方歌單入口。",
     "music.keyboard": "播放器內的 Esc 不會收起面板；用 Tab 移到下方收起按鈕，部分 Safari 設定需用 Option+Tab。",
     "hero.artAlt": "淡藍與淺粉的層層雲朵環繞一輪柔和的月亮，雲間有微小星光",
-    "nav.homeRefresh": "回到首頁頂端並重新整理"
+    "nav.homeRefresh": "回到首頁頂端並重新整理",
+    "error.title": "暫時找不到這封信了。",
+    "error.description": "地址可能有誤，或這封信已經搬家。可以回到雲間，或從文章目錄繼續閱讀。",
+    "error.home": "回到雲間來信",
+    "error.archive": "開啟文章目錄",
+    "meta.shareImageAlt": "夕霧的雲間來信，淡藍與櫻花粉的雲朵"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -372,7 +382,12 @@
     "music.slow": "Still waiting. Network, region or track permissions may affect loading and playback. Try the official playlist link.",
     "music.keyboard": "Esc inside the player cannot close this panel. Tab to the collapse button below; some Safari settings require Option+Tab.",
     "hero.artAlt": "Soft blue and pink clouds surround a gentle moon, with tiny stars between the clouds.",
-    "nav.homeRefresh": "Return to the top of the homepage and reload"
+    "nav.homeRefresh": "Return to the top of the homepage and reload",
+    "error.title": "This letter could not be found.",
+    "error.description": "The address may be incorrect, or the letter may have moved. Return to the clouds or keep reading in the article archive.",
+    "error.home": "Return to Letters in the Clouds",
+    "error.archive": "Open the article archive",
+    "meta.shareImageAlt": "Xiwu’s Letters in the Clouds, with soft blue and pink clouds"
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -497,6 +512,11 @@
     "music.slow": "時間がかかっています。通信環境・地域・楽曲の権限により読み込みや再生ができない場合は、公式プレイリストをお試しください。",
     "music.keyboard": "プレーヤー内の Esc では閉じません。Tab で下の閉じるボタンへ移動します。Safari の設定によっては Option+Tab が必要です。",
     "hero.artAlt": "淡い青と桜色の雲が柔らかな月を囲み、雲の間に小さな星が輝いています。",
-    "nav.homeRefresh": "ホームの先頭に戻って再読み込み"
+    "nav.homeRefresh": "ホームの先頭に戻って再読み込み",
+    "error.title": "この手紙は見つかりませんでした。",
+    "error.description": "アドレスが違うか、手紙が移動したようです。ホームに戻るか、記事一覧から続きをお読みください。",
+    "error.home": "雲間の手紙に戻る",
+    "error.archive": "記事一覧を開く",
+    "meta.shareImageAlt": "夕霧の雲間の手紙、淡い青と桜色の雲"
   }
 }

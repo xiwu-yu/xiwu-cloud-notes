@@ -22,6 +22,16 @@ const homeLabel = { 'zh-CN': '回到云间来信', 'zh-TW': '回到雲間來信'
 export async function generateStatic(rootPath, posts, localized, ui, assetVersions, siteUrl = DEFAULT_SITE_URL) {
   const SITE_URL = resolveSiteUrl(siteUrl);
   const dist = join(rootPath, 'dist');
+  const coverPath = 'assets/share-cover.png';
+  const cover = await readFile(join(dist, coverPath));
+  if (cover.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a' || cover.readUInt32BE(16) !== 1200 || cover.readUInt32BE(20) !== 630) throw new Error('dist/assets/share-cover.png: 分享封面必须为 1200×630 PNG');
+  const coverUrl = new URL(coverPath, SITE_URL);
+  if (assetVersions[coverPath]) coverUrl.searchParams.set('v', assetVersions[coverPath]);
+  const imageMeta = lang => `<meta property="og:image" content="${escape(coverUrl.href)}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${escape(ui[lang]['meta.shareImageAlt'])}">`;
   const readingVersion = createHash('sha256').update(await readFile(join(dist, 'reading.js'))).digest('hex').slice(0, 10);
   const css = (await readFile(join(dist, 'index.html'), 'utf8')).match(/href="(style\.css[^\"]*)"/)?.[1] || 'style.css';
   const byId = new Map();
@@ -38,14 +48,21 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
   index = index.replace(/\n<!-- SITE_META_START -->[\s\S]*?<!-- SITE_META_END -->/, '');
   const homeTitle = index.match(/<title>(.*?)<\/title>/)?.[1] || escape(localized['zh-CN'].name);
   const homeDescription = index.match(/<meta name="description"[^>]*content="([^"]*)"/)?.[1] || '';
-  const homeImage = new URL('assets/contact.jpg', SITE_URL).href;
-  index = index.replace('</head>', `<!-- SITE_META_START -->\n<link rel="canonical" href="${escape(SITE_URL)}">\n${Object.keys(labels).map(lang => `<link rel="alternate" hreflang="${lang}" href="${escape(new URL(`?lang=${lang}`, SITE_URL).href)}">`).join('\n')}\n<link rel="alternate" hreflang="x-default" href="${escape(SITE_URL)}">\n<meta property="og:type" content="website">\n<meta property="og:title" content="${homeTitle}">\n<meta property="og:description" content="${homeDescription}">\n<meta property="og:url" content="${escape(SITE_URL)}">\n<meta property="og:image" content="${escape(homeImage)}">\n<meta property="og:locale" content="zh_CN">\n<!-- SITE_META_END -->\n</head>`);
+  // 本轮保留单个中文静态首页；?lang= 仍是界面增强，不声明不存在的静态译本。
+  index = index.replace('</head>', `<!-- SITE_META_START -->
+<link rel="canonical" href="${escape(SITE_URL)}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${homeTitle}">
+<meta property="og:description" content="${homeDescription}">
+<meta property="og:url" content="${escape(SITE_URL)}">
+${imageMeta('zh-CN')}
+<meta property="og:locale" content="zh_CN">
+<!-- SITE_META_END -->
+</head>`);
   await writeFile(indexPath, index);
   for (const post of posts) {
     const variants = byId.get(post.id);
     const absolute = new URL(postPath(post), SITE_URL).href;
-    const image = new URL(post.image, SITE_URL);
-    if (assetVersions[post.image]) image.searchParams.set('v', assetVersions[post.image]);
     const title = ui[post.lang]['meta.articleTitle'].replace('{title}', post.title).replace('{site}', localized[post.lang].name);
     const alternates = variants.map(variant => `<link rel="alternate" hreflang="${variant.lang}" href="${escape(new URL(postPath(variant), SITE_URL).href)}">`).join('\n');
     const languageNav = Object.keys(labels).map(lang => {
@@ -69,8 +86,7 @@ ${alternates}
 <meta property="og:site_name" content="${escape(localized[post.lang].name)}">
 <meta property="og:locale" content="${ogLocale(post.lang)}">
 ${variants.filter(v => v.lang !== post.lang).map(v => `<meta property="og:locale:alternate" content="${ogLocale(v.lang)}">`).join('\n')}
-<meta property="og:image" content="${escape(image.href)}">
-<meta property="og:image:alt" content="${escape(post.alt)}">
+${imageMeta(post.lang)}
 <meta property="article:published_time" content="${post.publishedAt}">
 <meta property="article:modified_time" content="${post.updatedAt}">
 <link rel="icon" href="../../assets/favicon.svg?v=${assetVersions['assets/favicon.svg'] || ''}" type="image/svg+xml">
@@ -97,6 +113,30 @@ ${post.source ? `<p><a class="dialog-source" href="${escape(post.source)}" rel="
     await mkdir(directory, { recursive: true });
     await writeFile(join(dist, postPath(post)), html);
   }
+  // 404 使用从站点根开始的路径，未知深路径和本地预览都能加载样式、目录。
+  const recoveryPath = value => { const url = new URL(value, SITE_URL); return url.pathname + url.search + url.hash; };
+  const recovery = `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>404 · ${escape(ui['zh-CN']['error.title'])} · ${escape(localized['zh-CN'].name)}</title>
+<link rel="icon" href="${escape(recoveryPath('assets/favicon.svg'))}" type="image/svg+xml">
+<script src="${escape(recoveryPath(`reading.js?v=${readingVersion}`))}"></script>
+<link rel="stylesheet" href="${escape(recoveryPath(css))}">
+</head>
+<body class="static-reading recovery-page">
+<div class="sky-background" aria-hidden="true"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span></div>
+<header class="wrap"><a class="brand" href="${escape(recoveryPath("./"))}">☁ ${escape(localized['zh-CN'].name)} · 云间来信</a><button class="theme-toggle" type="button" hidden aria-label="${escape(ui['zh-CN']['theme.toDark'])}" data-to-dark="${escape(ui['zh-CN']['theme.toDark'])}" data-to-light="${escape(ui['zh-CN']['theme.toLight'])}"><span aria-hidden="true">◐</span></button></header>
+<main class="wrap"><p class="recovery-code" aria-hidden="true">404 ☁</p>
+<nav class="recovery-languages" aria-label="Language">${Object.keys(labels).map(lang => `<a href="#recovery-${lang}" lang="${lang}">${labels[lang]}</a>`).join(' · ')}</nav>
+${Object.keys(labels).map((lang, i) => `<section lang="${lang}" id="recovery-${lang}"><${i ? 'h2' : 'h1'}>${escape(ui[lang]['error.title'])}</${i ? 'h2' : 'h1'}><p>${escape(ui[lang]['error.description'])}</p><p><a class="text-link" href="${escape(recoveryPath(`?lang=${lang}`))}">${escape(ui[lang]['error.home'])} ↗</a> · <a class="text-link" href="${escape(recoveryPath(`?lang=${lang}#static-archive`))}">${escape(ui[lang]['error.archive'])} ↗</a></p></section>`).join('\n')}
+${archive.replace(/href="posts\//g, `href="${escape(recoveryPath("./"))}posts/`)}
+</main>
+</body>
+</html>\n`;
+  await writeFile(join(dist, '404.html'), recovery);
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>${escape(SITE_URL)}</loc></url>\n${posts.map(post => `<url><loc>${escape(new URL(postPath(post), SITE_URL).href)}</loc><lastmod>${post.updatedAt}</lastmod></url>`).join('\n')}\n</urlset>\n`;
   await writeFile(join(dist, 'sitemap.xml'), xml);
   await writeFile(join(dist, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}sitemap.xml\n`);

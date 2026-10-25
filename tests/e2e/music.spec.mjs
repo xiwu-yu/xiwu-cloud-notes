@@ -106,6 +106,8 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
         }
         await page.locator('#music-toggle').click();
         await expect(page.locator('#music-close')).toHaveAttribute('aria-label',ui[lang]['music.close']);
+        // 宿主 load 文案可能改变行数；固定在同一文档状态测量，避免跨帧旧/新矩形混用。
+        await expect(page.locator('#music-status')).toHaveText(ui[lang]['music.document']);
         const panel=await page.locator('#music-panel').boundingBox();
         const toggle=await page.locator('#music-toggle').boundingBox();
         const fallback=await page.locator('.music-fallback a').boundingBox();

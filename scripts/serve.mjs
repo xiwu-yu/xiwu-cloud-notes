@@ -21,7 +21,12 @@ export function serve({ root = defaultRoot, port = Number(process.env.PORT) || 4
       const data = await readFile(path);
       response.writeHead(200, { 'Content-Type': types[extname(path)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
       response.end(data);
-    } catch { response.writeHead(404).end('Not found'); }
+    } catch {
+      try {
+        const fallback = await readFile(resolve(root, '404.html'));
+        response.writeHead(404, {'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-store'}).end(fallback);
+      } catch { response.writeHead(404).end('Not found'); }
+    }
   }).listen(port, '127.0.0.1', () => console.log(`Test server: http://127.0.0.1:${port}`));
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) serve();

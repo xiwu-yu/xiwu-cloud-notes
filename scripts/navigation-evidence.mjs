@@ -21,10 +21,10 @@ try {
     const current=await readFile(`dist/${file}`);
     let before;
     if(file==='profile.js') {
-      try {before=JSON.parse(await readFile('artifacts/morning-mist/after/measurements.json','utf8')).files[file];} catch {before=null;}
+      try {before=JSON.parse(await readFile(process.env.BASELINE_MEASUREMENTS,'utf8')).files[file].after;} catch {before=null;}
     }
     else {
-      try {const old=execFileSync('git',['show',`96eca72:dist/${file}`],{stdio:['ignore','pipe','ignore']});before={bytes:old.length,gzip:gzipSync(old).length};}catch{before=null;}
+      try {const old=execFileSync('git',['show',`e8cfef8:dist/${file}`],{stdio:['ignore','pipe','ignore']});before={bytes:old.length,gzip:gzipSync(old).length};}catch{before=null;}
     }
     files[file]={before,after:{bytes:current.length,gzip:gzipSync(current).length}};
   }
@@ -47,14 +47,23 @@ try {
   await page.mouse.move(1,850);
   await page.evaluate(()=>new Promise(resolve=>{addEventListener('scroll',resolve,{once:true});scrollTo({top:800,behavior:'instant'});}));
   await page.clock.runFor(50);
-  await page.clock.runFor(4000);
-  await page.screenshot({path:`${output}/nav-idle-4s.png`});
-  const fourSeconds=await page.locator('.site-header').evaluate(el=>({hidden:el.inert,box:el.getBoundingClientRect().toJSON()}));
-  await page.clock.runFor(1000);
-  await page.screenshot({path:`${output}/nav-idle-5s.png`});
-  const fiveSeconds=await page.locator('.site-header').evaluate(el=>({hidden:el.inert,box:el.getBoundingClientRect().toJSON()}));
+  await page.clock.runFor(1850);
+  await page.screenshot({path:`${output}/nav-idle-1.9s.png`});
+  const at1900ms=await page.locator('.site-header').evaluate(el=>({hidden:el.inert,box:el.getBoundingClientRect().toJSON()}));
+  await page.clock.runFor(100);
+  await page.screenshot({path:`${output}/nav-idle-2s.png`});
+  const at2000ms=await page.locator('.site-header').evaluate(el=>({hidden:el.inert,box:el.getBoundingClientRect().toJSON()}));
   await page.keyboard.press('Tab');
   await page.screenshot({path:`${output}/nav-keyboard-revealed.png`});
-  await writeFile(`${output}/measurements.json`,JSON.stringify({browser:browser.version(),files,fourSeconds,fiveSeconds,errors},null,2)+'\n');
+  const recovery=await browser.newPage({viewport:{width:375,height:900},reducedMotion:'reduce'});
+  const missing=await recovery.goto(`${base}missing/deep/letter.html`);
+  if(missing.status()!==404)throw Error('Unknown deep path must return 404');
+  await recovery.screenshot({path:`${output}/recovery-404.png`});
+  await recovery.close();
+  await page.goto(`${base}?lang=en`);
+  await page.setViewportSize({width:320,height:900});
+  await page.addStyleTag({content:'.site-header .brand>[data-site-name]{font-size:48px}.site-header nav a,.site-header #language-select{font-size:24px}'});
+  await page.screenshot({path:`${output}/navigation-text-200-percent.png`});
+  await writeFile(`${output}/measurements.json`,JSON.stringify({browser:browser.version(),files,at1900ms,at2000ms,errors},null,2)+'\n');
   if(errors.length)throw Error(JSON.stringify(errors));
 } finally {await browser.close();server.kill();}

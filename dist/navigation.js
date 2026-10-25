@@ -28,6 +28,7 @@
     root.classList.add('has-smart-header');
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     const hover = matchMedia('(hover:hover)');
+    const IDLE_HIDE_MS = 2000;
     const sticky = getComputedStyle(header).position === 'sticky';
     let timer, frame = 0, lastActivity = Date.now(), hidden = false, refreshing = false;
     const clearTimer = () => clearTimeout(timer);
@@ -45,7 +46,7 @@
       if (!sticky || document.hidden || scrollY <= 8 || engaged() || refreshing) return;
       timer = setTimeout(() => {
         if (!document.hidden && scrollY > 8 && !engaged() && !refreshing) display(false);
-      }, Math.max(0, lastActivity + 5000 - Date.now()));
+      }, Math.max(0, lastActivity + IDLE_HIDE_MS - Date.now()));
     };
     const activity = () => {
       lastActivity = Date.now();

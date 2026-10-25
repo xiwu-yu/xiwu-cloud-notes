@@ -16,6 +16,7 @@ dist/posts/
 dist/sitemap.xml
 dist/robots.txt
 dist/build-info.json
+dist/404.html
 artifacts/*/*.js
 artifacts/*/*.css
 artifacts/*/*.html
