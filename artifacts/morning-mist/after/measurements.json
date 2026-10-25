@@ -1,0 +1,138 @@
+{
+  "environment": {
+    "engine": "Chromium",
+    "version": "156.0.8078.4",
+    "viewport": "1440×900",
+    "network": "local uncompressed HTTP",
+    "reducedMotion": true
+  },
+  "files": {
+    "index.html": {
+      "bytes": 18002,
+      "gzip": 6132
+    },
+    "profile.js": {
+      "bytes": 188553,
+      "gzip": 44316
+    },
+    "style.css": {
+      "bytes": 37900,
+      "gzip": 8964
+    },
+    "script.js": {
+      "bytes": 25605,
+      "gzip": 7544
+    },
+    "archive.js": {
+      "bytes": 2637,
+      "gzip": 1168
+    },
+    "motion.js": {
+      "bytes": 1637,
+      "gzip": 760
+    },
+    "motion.css": {
+      "bytes": 1613,
+      "gzip": 633
+    }
+  },
+  "resources": [
+    {
+      "url": "/xiwu-cloud-notes/style.css",
+      "transferSize": 38200,
+      "decodedBodySize": 37900
+    },
+    {
+      "url": "/xiwu-cloud-notes/motion.css",
+      "transferSize": 1913,
+      "decodedBodySize": 1613
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/cloudscape.svg",
+      "transferSize": 3344,
+      "decodedBodySize": 3044
+    },
+    {
+      "url": "/xiwu-cloud-notes/motion.js",
+      "transferSize": 1937,
+      "decodedBodySize": 1637
+    },
+    {
+      "url": "/xiwu-cloud-notes/archive.js",
+      "transferSize": 2937,
+      "decodedBodySize": 2637
+    },
+    {
+      "url": "/xiwu-cloud-notes/script.js",
+      "transferSize": 25905,
+      "decodedBodySize": 25605
+    },
+    {
+      "url": "/xiwu-cloud-notes/profile.js",
+      "transferSize": 188853,
+      "decodedBodySize": 188553
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/contact.jpg",
+      "transferSize": 40374,
+      "decodedBodySize": 40074
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/avatar-trans-flag.jpg",
+      "transferSize": 27721,
+      "decodedBodySize": 27421
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/cloud-white.svg",
+      "transferSize": 1232,
+      "decodedBodySize": 932
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/cloud-blue.svg",
+      "transferSize": 1232,
+      "decodedBodySize": 932
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/avatar-knife.jpg",
+      "transferSize": 73860,
+      "decodedBodySize": 73560
+    }
+  ],
+  "totalTransferred": 407508,
+  "geometry": {
+    "panel": {
+      "x": 1024,
+      "y": 120,
+      "width": 400,
+      "height": 224,
+      "top": 120,
+      "right": 1424,
+      "bottom": 344,
+      "left": 1024
+    },
+    "clientHeight": 222,
+    "scrollHeight": 222,
+    "viewport": {
+      "x": 1049,
+      "y": 218.59375,
+      "width": 350,
+      "height": 66.40625,
+      "top": 218.59375,
+      "right": 1399,
+      "bottom": 285,
+      "left": 1049
+    },
+    "frame": {
+      "x": 1050,
+      "y": 219.59375,
+      "width": 330,
+      "height": 450,
+      "top": 219.59375,
+      "right": 1380,
+      "bottom": 669.59375,
+      "left": 1050
+    },
+    "scrollExtent": 386
+  },
+  "errors": []
+}

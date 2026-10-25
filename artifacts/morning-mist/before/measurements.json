@@ -1,0 +1,120 @@
+{
+  "environment": {
+    "engine": "Chromium",
+    "version": "156.0.8078.4",
+    "viewport": "1440×900",
+    "network": "local uncompressed HTTP",
+    "reducedMotion": true
+  },
+  "files": {
+    "index.html": {
+      "bytes": 17395,
+      "gzip": 5977
+    },
+    "profile.js": {
+      "bytes": 186586,
+      "gzip": 43573
+    },
+    "style.css": {
+      "bytes": 36476,
+      "gzip": 8666
+    },
+    "script.js": {
+      "bytes": 24813,
+      "gzip": 7304
+    },
+    "archive.js": {
+      "bytes": 2637,
+      "gzip": 1168
+    }
+  },
+  "resources": [
+    {
+      "url": "/xiwu-cloud-notes/style.css",
+      "transferSize": 36776,
+      "decodedBodySize": 36476
+    },
+    {
+      "url": "/xiwu-cloud-notes/archive.js",
+      "transferSize": 2937,
+      "decodedBodySize": 2637
+    },
+    {
+      "url": "/xiwu-cloud-notes/profile.js",
+      "transferSize": 186886,
+      "decodedBodySize": 186586
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/cloudscape.svg",
+      "transferSize": 3344,
+      "decodedBodySize": 3044
+    },
+    {
+      "url": "/xiwu-cloud-notes/script.js",
+      "transferSize": 25113,
+      "decodedBodySize": 24813
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/contact.jpg",
+      "transferSize": 40374,
+      "decodedBodySize": 40074
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/avatar-trans-flag.jpg",
+      "transferSize": 27721,
+      "decodedBodySize": 27421
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/cloud-blue.svg",
+      "transferSize": 1232,
+      "decodedBodySize": 932
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/avatar-knife.jpg",
+      "transferSize": 73860,
+      "decodedBodySize": 73560
+    },
+    {
+      "url": "/xiwu-cloud-notes/assets/cloud-white.svg",
+      "transferSize": 1232,
+      "decodedBodySize": 932
+    }
+  ],
+  "totalTransferred": 399475,
+  "geometry": {
+    "panel": {
+      "x": 120,
+      "y": 22,
+      "width": 1200,
+      "height": 264,
+      "top": 22,
+      "right": 1320,
+      "bottom": 286,
+      "left": 120
+    },
+    "clientHeight": 262,
+    "scrollHeight": 390,
+    "viewport": {
+      "x": 555,
+      "y": -39.5,
+      "width": 330,
+      "height": 452,
+      "top": -39.5,
+      "right": 885,
+      "bottom": 412.5,
+      "left": 555
+    },
+    "frame": {
+      "x": 556,
+      "y": -38.5,
+      "width": 328,
+      "height": 450,
+      "top": -38.5,
+      "right": 884,
+      "bottom": 411.5,
+      "left": 556
+    },
+    "scrollExtent": 0
+  },
+  "errors": []
+}

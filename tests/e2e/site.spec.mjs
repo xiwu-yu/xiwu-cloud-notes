@@ -197,7 +197,7 @@ test('static pages work without JavaScript, and with either app script or data m
     await link.click();
     await expect(page.locator('.article-body')).toContainText('English body');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/xiwu-cloud-notes\/posts\/cloud\/en\.html$/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /^https:\/\/cloud\.xiwu\.space\/posts\/cloud\/en\.html$/);
     expect(await page.locator('meta[property="og:locale"]').getAttribute('content')).toBe('en_US');
     await context.close();
   }
@@ -287,7 +287,10 @@ test('static reading remains usable with blocked preferences, no JavaScript or m
     if (failure === 'reading.js') await page.route('**/reading.js*', route => route.abort());
     await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/posts/rain/en.html');
     await expect(page.locator('.article-body')).toContainText('English body');
-    expect(await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(32, 37, 49)');
+    expect(await page.locator('body').evaluate(el => {
+      const style=getComputedStyle(el);
+      return style.colorScheme==='dark' && style.backgroundColor.match(/\d+/g).slice(0,3).every(value=>Number(value)<100);
+    })).toBe(true);
     if (failure === 'storage') {
       await page.locator('.theme-toggle').click();
       await expect(page.locator('html')).toHaveAttribute('data-theme','light');
@@ -334,4 +337,82 @@ test('copy shares the static page of each actual language, including fallback an
   await page.locator('#essay-share').click();
   await expect(page.locator('#dialog-share-status')).toContainText(original);
   await expect(page.locator('#dialog-share-status')).not.toContainText('?post=');
+});
+
+
+test('informative hero illustration follows all four languages', async ({ page }) => {
+  await page.goto('./');
+  for (const lang of langs) {
+    await page.selectOption('#language-select',lang);
+    const expected=await page.evaluate(lang=>window.siteProfile.ui[lang]['hero.artAlt'],lang);
+    await expect(page.locator('.hero-art img')).toHaveAttribute('alt',expected);
+    expect(expected.length).toBeGreaterThan(15);
+  }
+});
+
+test('motion is progressive, pauses offscreen and when hidden, and responds to reduced motion live', async ({ page }) => {
+  await page.goto('./');
+  await expect.poll(()=>page.locator('html').evaluate(el=>el.classList.contains('clouds-running'))).toBe(true);
+  await page.evaluate(()=>{
+    Object.defineProperty(document,'hidden',{configurable:true,value:true});
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await expect(page.locator('html')).not.toHaveClass(/clouds-running/);
+  await page.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});
+  await expect(page.locator('html')).toHaveClass(/clouds-running/);
+  await page.locator('#interests').scrollIntoViewIfNeeded();
+  await expect(page.locator('html')).not.toHaveClass(/clouds-running/);
+  await expect(page.locator('.interest-card').first()).toHaveClass(/card-enter/);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(page.locator('.interest-card').first()).not.toHaveClass(/card-enter/);
+  await page.locator('.hero').scrollIntoViewIfNeeded();
+  await expect(page.locator('html')).not.toHaveClass(/clouds-running/);
+  expect(await page.locator('.cloud-one').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
+  await openFirst(page);
+  expect(await page.locator('dialog').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
+  await page.locator('.dialog-close').click();
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.locator('.hero').scrollIntoViewIfNeeded();
+  await expect(page.locator('html')).toHaveClass(/clouds-running/);
+});
+
+test('missing optional motion script leaves cards visible and readable', async ({ browser }) => {
+  const context=await browser.newContext();const page=await context.newPage();
+  await page.route('**/motion.js*',route=>route.abort());
+  await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
+  expect(await page.locator('.interest-card').first().evaluate(el=>getComputedStyle(el).opacity)).toBe('1');
+  await openFirst(page);
+  await expect(page.locator('#dialog-body')).toContainText('中文正文');
+  await context.close();
+});
+
+test('text and link tokens meet normal-text contrast on composed cloud and component surfaces', async ({ page }) => {
+  await page.goto('./');
+  for (const theme of ['light','dark']) {
+    if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('.theme-toggle').click();
+    const failures=await page.evaluate(()=>{
+      const style=getComputedStyle(document.documentElement);
+      const canvas=document.createElement('canvas');canvas.width=canvas.height=1;
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});
+      const rgb=token=>{
+        ctx.clearRect(0,0,1,1);ctx.fillStyle=style.getPropertyValue(token).trim();ctx.fillRect(0,0,1,1);
+        return [...ctx.getImageData(0,0,1,1).data].slice(0,3);
+      };
+      const blend=(a,b,alpha)=>a.map((v,i)=>v*alpha+b[i]*(1-alpha));
+      const luminance=rgb=>rgb.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+      const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+      const paper=rgb('--paper'),blue=rgb('--blue'),pink=rgb('--pink');
+      // 实际组件底色和装饰叠加的保守上界，含称呼卡、便笺、音乐框与云层。
+      const surfaces=[paper,rgb('--wash'),blend(blue,paper,.5),blend(pink,paper,.5),blend(pink,blend(blue,paper,.38),.3)];
+      const failures=[];
+      for (const token of ['--ink','--muted','--accent'])for(const surface of surfaces) {
+        const ratio=contrast(rgb(token),surface);if(ratio<4.5)failures.push({token,surface,ratio});
+      }
+      const active=contrast(rgb('--primary'),paper);if(active<4.5)failures.push({token:'active',ratio:active});
+      return failures;
+    });
+    expect(failures,theme).toEqual([]);
+    expect(await page.locator('.card-description').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(15);
+    expect(await page.locator('.entry-date').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
+  }
 });

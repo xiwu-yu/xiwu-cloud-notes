@@ -29,9 +29,10 @@ export function musicMarkup(config, ui) {
   <section id="music-panel" class="music-panel" aria-labelledby="music-title" hidden>
     <div class="music-heading"><div><h2 id="music-title" data-i18n="music.title">${t('music.title')}</h2><p class="music-byline">${escape(config.title)} · ${escape(config.creator)}</p></div><button id="music-close" class="music-close" type="button" aria-label="${t('music.close')}" data-i18n-aria-label="music.close"><span aria-hidden="true">×</span></button></div>
     <p class="music-hint" data-i18n="music.hint">${t('music.hint')}</p>
-    <div class="music-frame-viewport"><iframe id="music-frame" title="${t('music.iframeTitle')}" data-i18n-title="music.iframeTitle" data-src="${escape(config.iframeUrl)}" width="330" height="450" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-    <p class="music-help" data-i18n="music.fallback">${t('music.fallback')}</p>
-    <div class="music-fallback">${link}</div>
+    <p id="music-status" class="music-status" role="status" aria-live="polite" aria-atomic="true"></p>
+    <div class="music-frame-viewport" role="region" tabindex="0" aria-describedby="music-keyboard-hint" aria-label="${t('music.iframeTitle')}" data-i18n-aria-label="music.iframeTitle"><iframe id="music-frame" title="${t('music.iframeTitle')}" data-i18n-title="music.iframeTitle" data-src="${escape(config.iframeUrl)}" width="330" height="450" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <p id="music-keyboard-hint" class="music-keyboard-hint" data-i18n="music.keyboard">${t('music.keyboard')}</p>
+    <div class="music-footer"><div class="music-fallback">${link}</div><button id="music-collapse" type="button" data-i18n="music.collapse">${t('music.collapse')}</button></div>
   </section>
 </aside>`;
 }

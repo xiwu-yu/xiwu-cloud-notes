@@ -6,12 +6,18 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+defaults:
+  run:
+    shell: bash
 concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: https://cloud.xiwu.space/
+      EVIDENCE_DIR: work/evidence
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -23,21 +29,31 @@ jobs:
       - name: Install Chromium and system dependencies
         run: pnpm exec playwright install --with-deps chromium
       - name: Unit and content tests
-        run: pnpm test
+        run: |
+          mkdir -p work/evidence
+          pnpm test 2>&1 | tee work/evidence/unit.log
       - name: Build static website
-        run: pnpm build
+        run: |
+          pnpm build 2>&1 | tee work/evidence/build.log
+          node scripts/verify-site.mjs --local dist | tee work/evidence/static-verification.json
       - name: Browser regression and content smoke tests
-        run: pnpm test:e2e
-      - name: Keep browser diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
+        run: pnpm test:e2e 2>&1 | tee work/evidence/e2e.log
+      - name: Capture review screenshots and measurements
+        run: |
+          node scripts/morning-mist-evidence.mjs after
+          node scripts/navigation-evidence.mjs
+      - name: Keep review evidence and browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
         with:
-          name: playwright-diagnostics
+          name: review-evidence-${{ github.sha }}
           path: |
             playwright-report/
             test-results/
+            work/evidence/
+            dist/build-info.json
           retention-days: 14
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         with:
           path: dist
@@ -52,5 +68,35 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5.0.1
         id: deployment
+  verify-deployment:
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Check published commit, static metadata and hashed resources
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p work
+          for attempt in 1 2 3; do
+            if node scripts/verify-site.mjs https://cloud.xiwu.space/ "$EXPECTED_SHA" >work/deployment-verification.json 2>work/deployment-error.log; then
+              cat work/deployment-verification.json
+              exit 0
+            fi
+            cat work/deployment-error.log
+            if [ "$attempt" -lt 3 ]; then sleep 10; fi
+          done
+          exit 1
+      - name: Keep published version verification
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: deployment-verification-${{ github.sha }}
+          path: work/deployment-*
+          retention-days: 14

@@ -1,0 +1,99 @@
+{
+  "browser": "156.0.8078.4",
+  "files": {
+    "index.html": {
+      "before": {
+        "bytes": 18002,
+        "gzip": 6132
+      },
+      "after": {
+        "bytes": 18666,
+        "gzip": 6297
+      }
+    },
+    "style.css": {
+      "before": {
+        "bytes": 37900,
+        "gzip": 8964
+      },
+      "after": {
+        "bytes": 39145,
+        "gzip": 9259
+      }
+    },
+    "motion.css": {
+      "before": {
+        "bytes": 1613,
+        "gzip": 633
+      },
+      "after": {
+        "bytes": 3263,
+        "gzip": 1041
+      }
+    },
+    "motion.js": {
+      "before": {
+        "bytes": 1637,
+        "gzip": 760
+      },
+      "after": {
+        "bytes": 2316,
+        "gzip": 915
+      }
+    },
+    "navigation.js": {
+      "before": null,
+      "after": {
+        "bytes": 6031,
+        "gzip": 2293
+      }
+    },
+    "script.js": {
+      "before": {
+        "bytes": 25605,
+        "gzip": 7544
+      },
+      "after": {
+        "bytes": 26014,
+        "gzip": 7644
+      }
+    },
+    "profile.js": {
+      "before": {
+        "bytes": 188553,
+        "gzip": 44316
+      },
+      "after": {
+        "bytes": 188786,
+        "gzip": 44409
+      }
+    }
+  },
+  "fourSeconds": {
+    "hidden": false,
+    "box": {
+      "x": 120,
+      "y": 0,
+      "width": 1200,
+      "height": 110,
+      "top": 0,
+      "right": 1320,
+      "bottom": 110,
+      "left": 120
+    }
+  },
+  "fiveSeconds": {
+    "hidden": true,
+    "box": {
+      "x": 120,
+      "y": -112,
+      "width": 1200,
+      "height": 110,
+      "top": -112,
+      "right": 1320,
+      "bottom": -2,
+      "left": 120
+    }
+  },
+  "errors": []
+}

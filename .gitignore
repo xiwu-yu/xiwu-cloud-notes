@@ -15,6 +15,16 @@ blob-report/
 dist/posts/
 dist/sitemap.xml
 dist/robots.txt
+dist/build-info.json
 artifacts/*/*.js
 artifacts/*/*.css
 artifacts/*/*.html
+
+# Review screenshots/logs belong in Actions Artifacts, not commits.
+artifacts/morning-mist/**
+!artifacts/morning-mist/**/
+!artifacts/morning-mist/**/measurements.json
+!artifacts/morning-mist/README.md
+artifacts/smart-navigation/**
+!artifacts/smart-navigation/README.md
+!artifacts/smart-navigation/measurements.json

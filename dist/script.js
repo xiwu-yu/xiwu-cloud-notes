@@ -91,6 +91,13 @@
   let currentId = null;
   let openedFrom = null;
   let closingFromHistory = false;
+  let returningHome = false;
+  document.addEventListener('site:home-request', () => {
+    returningHome = true;
+    currentId = null;
+    closingFromHistory = true;
+    if (dialog.open) dialog.close();
+  });
 
   // 2. 地址栏记录当前文章，复制地址即可分享；前进、后退会重新打开对应文章。
   function writeUrl({ push = false, replace = false } = {}) {
@@ -379,6 +386,7 @@
     if (!closingFromHistory) writeUrl({ replace: true });
     closingFromHistory = false;
     setDocumentTitle(null);
+    if (returningHome) { openedFrom = null; return; }
     const originId = openedFrom?.closest('[data-essay-id]')?.dataset.essayId;
     const container = state.view === 'timeline' ? timeline : grid;
     const replacement = originId ? container.querySelector(`[data-essay-id="${originId}"] a`) : null;
@@ -423,6 +431,7 @@
     updateThemeLabel();
   }
   function preferredDark() {
+    if (['light','dark'].includes(document.documentElement.dataset.refreshTheme)) return document.documentElement.dataset.refreshTheme === 'dark';
     try {
       const stored = localStorage.getItem(THEME_STORAGE);
       if (stored === 'dark' || stored === 'light') return stored === 'dark';
@@ -453,7 +462,11 @@
   const musicToggle = $('#music-toggle');
   const musicPanel = $('#music-panel');
   const musicLayout = window.matchMedia('(min-width:721px) and (hover:hover) and (pointer:fine)');
+  let musicWaitTimer;
+  let musicStatus = '';
   function updateMusicLabel() {
+    const status = $('#music-status');
+    if (status) status.textContent = musicStatus ? t(`music.${musicStatus}`) : '';
     if (musicToggle) musicToggle.setAttribute('aria-label', t(musicPanel.hidden ? 'music.open' : 'music.collapse'));
   }
   function setMusicExpanded(expanded) {
@@ -462,10 +475,25 @@
     musicToggle.setAttribute('aria-expanded', String(expanded));
     updateMusicLabel();
     const frame = $('#music-frame');
-    if (expanded && !frame.hasAttribute('src')) frame.src = frame.dataset.src;
+    if (expanded && !frame.hasAttribute('src')) {
+      musicStatus = 'loading';
+      updateMusicLabel();
+      frame.src = frame.dataset.src;
+      musicWaitTimer = setTimeout(() => {
+        musicStatus = 'slow';
+        updateMusicLabel();
+      }, 10000);
+    }
     (expanded ? $('#music-close') : musicToggle).focus({ preventScroll: true });
   }
   if (musicWidget) {
+    $('#music-frame').addEventListener('load', () => {
+      // load 仅说明嵌入文档返回，跨域宿主无法判断歌曲是否可播。
+      if (!$('#music-frame').hasAttribute('src')) return;
+      clearTimeout(musicWaitTimer);
+      musicStatus = 'document';
+      updateMusicLabel();
+    });
     musicWidget.hidden = false;
     musicWidget.dataset.mode = 'embedded';
     $('#music-static-link').hidden = true;
@@ -475,6 +503,8 @@
         musicPanel.hidden = true;
         musicToggle.setAttribute('aria-expanded', 'false');
         // 进入禁用音乐的小屏布局时停止加载，避免出现隐藏的音乐播放。
+        clearTimeout(musicWaitTimer);
+        musicStatus = '';
         $('#music-frame').removeAttribute('src');
         updateMusicLabel();
       }
@@ -482,7 +512,9 @@
     syncMusicLayout();
     musicLayout.addEventListener('change', syncMusicLayout);
     musicToggle.addEventListener('click', () => setMusicExpanded(musicPanel.hidden));
-    $('#music-close').addEventListener('click', () => setMusicExpanded(false));
+    for (const button of [$('#music-close'), $('#music-collapse')]) {
+      button.addEventListener('click', () => setMusicExpanded(false));
+    }
     musicWidget.addEventListener('keydown', event => {
       if (event.key === 'Escape' && !musicPanel.hidden) {
         event.preventDefault();
