@@ -59,6 +59,19 @@ function validateUi(ui) {
 
 const contentHash = contents => createHash('sha256').update(contents).digest('hex').slice(0, 10);
 
+async function buildInputPaths(rootPath, postFiles, assetVersions) {
+  const inputs = ['content/site.json', 'content/ui.json', ...postFiles.map(file => `content/posts/${file}`), ...Object.keys(assetVersions).map(file => `dist/${file}`)];
+  for (const [directory, pattern] of [['scripts', /\.mjs$/], ['dist', /\.(?:html|css|js)$/]]) {
+    let entries;
+    try { entries = await readdir(join(rootPath, directory), {withFileTypes:true}); }
+    catch (error) { if (error.code === 'ENOENT') continue; throw error; }
+    for (const file of entries) {
+      if (file.isFile() && pattern.test(file.name) && !['profile.js', '404.html'].includes(file.name)) inputs.push(`${directory}/${file.name}`);
+    }
+  }
+  return inputs;
+}
+
 async function hashAssetFiles(rootPath) {
   const directory = join(rootPath, 'dist/assets');
   const versions = {};
@@ -122,7 +135,7 @@ export async function build(rootPath = root, options = {}) {
 
   const site = JSON.parse(await readFile(join(rootPath, 'content/site.json'), 'utf8'));
   const siteUrl = resolveSiteUrl(options.siteUrl ?? process.env.SITE_URL ?? site.baseUrl);
-  const info = buildInfo(rootPath, siteUrl, options);
+  const info = buildInfo(rootPath, siteUrl, {...options, buildInputs:await buildInputPaths(rootPath, files, assetVersions)});
   const music = musicConfig(site.music);
   for (const field of SITE_STRINGS) {
     if (typeof site[field] !== 'string') throw new Error(`content/site.json: ${field} 必须是文字`);
@@ -171,7 +184,7 @@ export async function build(rootPath = root, options = {}) {
     await versionAssets(staging, assetVersions);
     await generateStatic(staging, posts, localized, ui, assetVersions, siteUrl);
     await writeFile(join(staging, 'dist/build-info.json'), JSON.stringify(info, null, 2) + '\n');
-    for (const file of ['style.css', 'index.html', 'profile.js', 'sitemap.xml', 'robots.txt', 'build-info.json']) {
+    for (const file of ['style.css', 'index.html', 'profile.js', 'sitemap.xml', 'robots.txt', '404.html', 'build-info.json']) {
       try { await rename(join(staging, 'dist', file), join(rootPath, 'dist', file)); }
       catch (error) { if (error.code !== 'ENOENT') throw error; }
     }

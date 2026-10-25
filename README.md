@@ -72,7 +72,7 @@ order: 3
 
 首页文章卡片和时间轴是可访问的真实链接，普通点击增强为弹窗，按住 Ctrl/Cmd 或在新标签打开可读静态页。首页始终保留「静态文章目录」，即使禁用 JavaScript 或脚本/数据加载失败，也能展开目录阅读。JavaScript 可用时，目录按主站当前语言显示对应文章入口，缺译时标明回退原文；禁用脚本或首页增强失败时仍保留所有语言的静态链接。静态页提供四语言的主题切换按钮，与主站共用保存的深浅主题，刷新、切换译文及浏览器返回后保持一致；没有保存偏好时跟随系统。文章语言始终以独立链接路径为准，译文导航和返回主站链接保留该语言。主题增强脚本 `dist/reading.js` 在样式加载前读取偏好，不依赖 `profile.js`；脚本不可用时正文、译文导航和元数据仍完整，主题跟随系统。浏览器禁止存储时允许切换本页主题，刷新则回到系统主题。原有查询参数链接保持兼容，但分享预览爬虫通常不执行脚本，**「复制链接」已默认使用独立文章页链接**。
 
-`dist/sitemap.xml` 和 `dist/robots.txt` 同步生成。生产基址在 `content/site.json` 的 `baseUrl`，当前为 `https://cloud.xiwu.space/`；可用 `SITE_URL=https://example.org/notes/ pnpm build` 覆盖，优先级为环境变量、配置、生产默认值。基址必须是无账号、查询参数或片段的 HTTPS 目录，自动补末尾斜杠；首页及静态文章的 canonical、Open Graph、hreflang、sitemap 与 robots 共用该值。正文/资源和返回链接仍使用相对路径，兼容旧 `/xiwu-cloud-notes/` 项目子路径。删除文章/译文后，下次构建会移除相应静态页和目录条目。所有内容校验在写入前完成，生成过程也先在临时目录进行；内容错误或生成失败保留上次成功输出。
+`dist/sitemap.xml` 和 `dist/robots.txt` 同步生成。生产基址在 `content/site.json` 的 `baseUrl`，当前为 `https://cloud.xiwu.space/`；可用 `SITE_URL=https://example.org/notes/ pnpm build` 覆盖，优先级为环境变量、配置、生产默认值。基址必须是无账号、查询参数或片段的 HTTPS 目录，自动补末尾斜杠；首页及静态文章的 canonical、Open Graph、文章 hreflang、sitemap 与 robots 共用该值。正文/资源和返回链接仍使用相对路径，兼容旧 `/xiwu-cloud-notes/` 项目子路径。删除文章/译文后，下次构建会移除相应静态页和目录条目。所有内容校验在写入前完成，生成过程也先在临时目录进行；内容错误或生成失败保留上次成功输出。
 
 ## 桌面端网易云歌单
 
@@ -94,7 +94,7 @@ order: 3
 
 桌面首次展开才加载 HTTPS 外链，`auto=0`，不强制播放。折叠、语言、主题、筛选和阅读弹窗不会重建 iframe。若将桌面窗口缩为移动布局，会卸载 iframe 内容，避免出现隐藏播放；恢复桌面尺寸后仍默认收起。手机和平板直接移除音乐 DOM，触屏/小屏样式也屏蔽无脚本时的备用入口。
 
-外层兼容四语言和深浅主题，深色只调整宿主外框，不能改变跨域播放器的皮肤。矮桌面给页头留出空间，只缩短外层滚动视口，不缩放原生控件；可滚动到播放器顶部和底部，关闭与官方入口始终在滚动区外。高度不超过 600px 时，展开后暂时隐藏切换按钮，使用顶部关闭或下方收起按钮，收起后焦点返回切换按钮。阅读弹窗保持原生顶层。
+外层兼容四语言和深浅主题，深色只调整宿主外框，不能改变跨域播放器的皮肤。矮桌面通过 `--header-height` 跟随外层页头实际高度，只缩短外层滚动视口，不缩放原生控件；可滚动到播放器顶部和底部，关闭与官方入口始终在滚动区外。高度不超过 600px 时，展开后暂时隐藏切换按钮，使用顶部关闭或下方收起按钮，收起后焦点返回切换按钮。阅读弹窗保持原生顶层。
 
 首次展开显示等待说明，超过 10 秒仍未收到文档加载事件时，提示网络、地区和歌曲权限可能影响使用。iframe 的 `load` 只用于更新宿主说明，不能证明文档正常呈现、音频可用或正在播放，浏览器错误页也可能触发它。官方歌单入口始终保留；不增加音频解析、代理、VIP 绕过或跨域播放控制。整页导航会离开当前播放器，同页保留节点不能实现跨页续播。
 
@@ -116,7 +116,9 @@ Esc 仅在焦点位于宿主面板时可收起，iframe 内的 Esc 不会冒泡�
 
 首页导航使用 CSS sticky 保留原有占位和无脚本导航能力，滚动后增加柔和阴影；支持安全区，移动端沿用第二行链接和小屏隐藏英文副标题的既有规则。实际导航高度由 ResizeObserver 更新锚点偏移，语言和视口变化后标题仍可见。
 
-离顶部 8px 内常显；离顶后每次滚动立即唤醒，连续 5 秒没有滚动或导航交互才向上隐藏，滑动为 260ms。悬停或焦点在导航内（含原生语言选择器）时不隐藏，离开后重新计时；切回标签页或页面缓存恢复也重置。滚动监听为 passive，仅阴影更新使用单个 rAF，隐藏时设置 inert / aria-hidden 并禁用点击。Tab 会先唤醒导航，焦点进入时取消滑动以确保控件立即可见；减少动态时显隐也即时完成。脚本或样式失败时不启用自动隐藏。
+导航采用全宽背景外层和与正文网格对齐的限宽内层；桌面主体为 76px（另计边线和顶部安全区），小屏和放大文字可自动换行。实色回退保持对比度，支持时增加轻量毛玻璃。导航文字即时随主题更新，背景和下划线反馈为 160ms。
+
+离顶部 8px 内常显；离顶后每次滚动立即唤醒，连续 **2 秒**没有滚动或导航交互才开始向上隐藏，滑动为 **200ms**。实现集中使用 `IDLE_HIDE_MS=2000`；云朵刷新的 2 秒完成兜底用途不同，保持不变。悬停或焦点在导航内（含原生语言选择器）时不隐藏，离开后重新计时；切回标签页或页面缓存恢复也重置。滚动监听为 passive，仅阴影更新使用单个 rAF，隐藏时设置 inert / aria-hidden 并禁用点击。Tab 会先唤醒导航，焦点进入时取消滑动以确保控件立即可见；减少动态时显隐也即时完成。脚本或样式失败时不启用自动隐藏。
 
 左上云朵是独立按钮，站名与副标题仍是原品牌链接。云朵动作会退出阅读状态，滚动至顶部，清理 post / hash，再调用真正的 location.reload()。支持 scrollend，并有短时检查与 2 秒完成兜底；减少动态时直接回顶。一次性的 history.state 标记在重载前启用手动滚动恢复，新文档在页首消费标记、回到顶部后恢复原 scrollRestoration，不循环刷新；语言放入首页 URL，主题沿用偏好（存储被阻止时也可借一次性状态保留这次刷新主题）。真正重载会结束当前音乐文档。
 
@@ -155,9 +157,9 @@ pnpm build       # 从 Markdown 生成数据、静态文章页和 sitemap
 
 默认使用锁定版本的 Chromium；如需用本机 Chrome 调试可运行 `PW_CHANNEL=chrome pnpm test:e2e`。失败截图和 trace 在 `test-results/`，HTML 报告在 `playwright-report/`，运行 `pnpm exec playwright show-report` 查看。
 
-GitHub Actions 在 PR、main push 和手动触发时验证；安装 Chromium 及 Linux 系统依赖。只有 main 的全部验证通过才上传并部署 Pages，部署作业通过 `needs: validate` 依赖验证。验证作业仅有 `contents: read`，`pages: write` 和 `id-token: write` 仅授予部署作业。失败时保留报告/trace 14 天。Node 20 的 action 已按官方发布迁移：诊断上传使用 `upload-artifact@v6`，Pages 上传使用 `upload-pages-artifact@v5`（内部为 Node 24 的上传器），部署使用 `deploy-pages@v5.0.1`；本轮没有触发远端 workflow。
+GitHub Actions 在 PR、main push 和手动触发时验证；安装 Chromium 及 Linux 系统依赖。只有 main 的全部验证通过才上传并部署 Pages，部署作业通过 `needs: validate` 依赖验证。验证作业仅有 `contents: read`，`pages: write` 和 `id-token: write` 仅授予部署作业。失败时保留报告/trace 14 天。Node 20 的 action 已按官方发布迁移：诊断上传使用 `upload-artifact@v6`，Pages 上传使用 `upload-pages-artifact@v5`（内部为 Node 24 的上传器），部署使用 `deploy-pages@v5.0.1`；Actions 的最近运行与本轮结果见对应 PR/运行记录；历史验收数字不代表当前生产状态。
 
-`dist/profile.js`、`dist/posts/`、sitemap、robots 和 `dist/build-info.json` 是自动生成产物，不提交 Git；首页结构和 CSS/JS 源文件仍在 `dist/`。不要直接修改生成文件。构建只将个人资料和文章保留在 `localized`；删除了顶层默认语言副本及每篇的旧 `body` 别名，仓库运行脚本已使用 `localized`、`text`、`bodyHtml`，旧阅读脚本也优先使用这些字段。`text` 支持全文搜索/字数，`bodyHtml` 用于阅读，二者用途不同。没有拆分语言请求，切换仍是同步本地操作，没有新增缓存或网络失败状态；内容哈希继续控制缓存更新。
+`dist/profile.js`、`dist/posts/`、`dist/404.html`、sitemap、robots 和 `dist/build-info.json` 是自动生成产物，不提交 Git；首页结构和 CSS/JS 源文件仍在 `dist/`。不要直接修改生成文件。构建只将个人资料和文章保留在 `localized`；删除了顶层默认语言副本及每篇的旧 `body` 别名，仓库运行脚本已使用 `localized`、`text`、`bodyHtml`，旧阅读脚本也优先使用这些字段。`text` 支持全文搜索/字数，`bodyHtml` 用于阅读，二者用途不同。没有拆分语言请求，切换仍是同步本地操作，没有新增缓存或网络失败状态；内容哈希继续控制缓存更新。
 
 资源实测、验证记录与主要截图见 [本轮修复证据](artifacts/verification.md)。`node scripts/evidence.mjs after` 可用本机 Chrome 重新记录本地冷加载数据和截图（先构建）；测量的是本地无压缩 HTTP 服务，gzip 为离线估算，不代表线上 CDN 的传输压缩。
 
@@ -206,7 +208,7 @@ tests/e2e/content-smoke.spec.mjs 真实内容的动态冒烟检查
 
 旧站 `https://xiwu-yu.github.io/xiwu-cloud-notes/` 已由 GitHub Pages 301 到新域名；实测保留文章深链、查询语言与浏览器 hash。继续沿用仓库 Pages 的自定义域名设置，不创建第二套内容发布，也不增加全站客户端重定向。旧域名与新域名的 localStorage 不共享，旧分享链接须依靠 URL 中的显式语言。迁移证据、PR 三个提交的审查结论和待验风险见 [域名与发布审查](docs/domain-migration-review.md)。
 
-每次成功构建生成 `dist/build-info.json`：`commitSha`、UTC `builtAt`、`source`、`siteUrl`、`workingTreeDirty`，Actions 另含运行链接。本地未提交修改会明确标记，不能仅凭 SHA 声称本地输出等于该提交；构建失败保留上次信息。构建时间不参与资源内容哈希，文章与资源仍可确定性生成。
+每次成功构建生成 `dist/build-info.json`：`commitSha`、UTC `builtAt`、`source`、`siteUrl`、`workingTreeDirty`，Actions 另含运行链接。SHA 从实际仓库 HEAD 读取，不允许传入假 SHA 证明来源；没有仓库信息时为 `null`。`workingTreeDirty` 为三态：`true` 表示有未提交状态（包括未跟踪源码），`false` 表示 Git 状态已知且干净，`null` 表示状态读取失败或构建目录不是仓库根目录。Git 正常忽略依赖和输出，但构建实际读取的文章、脚本、样式和资源即使误加入 ignore 也不能当成干净来源。本地未知状态仍可预览/校验正文；正式来源校验必须 SHA 匹配、来源为 Actions、dirty 严格为 false，拒绝未知状态。构建失败保留上次信息。构建时间不参与资源内容哈希，文章与资源仍可确定性生成。
 
 ```sh
 node scripts/verify-site.mjs --local dist
@@ -217,3 +219,13 @@ node scripts/verify-site.mjs https://cloud.xiwu.space/ <完整GitSHA>
 校验器核对 build-info 的 SHA/来源、首页和 sitemap 中所有文章的静态元数据、语言、正文、robots 及页面引用的带哈希资源；正式检查用独立查询参数避开缓存，不接受跳转到其他版本。PR 仅 validate、不部署；main 仍须先 validate 才能 deploy，部署后新增只读 `verify-deployment`。发布后校验失败会使工作流失败并保存报告，**不会自动回滚已经发布的文件**，应查明缓存/发布原因后人工处理。仅 deploy 作业拥有 Pages 写权限与身份令牌权限。
 
 PR 新增的大批截图、日志和重复补丁不再放入 Git；保留简洁 Markdown 记录与少量体积/几何摘要。Actions 每次验证均上传 `review-evidence-<SHA>`（包括成功时），失败也保留 Playwright 报告/trace，保留期 14 天。可从 Actions 运行页面下载，或 `gh run download <运行ID> -n review-evidence-<SHA>`。本地重新生成用 `EVIDENCE_DIR=work/evidence node scripts/morning-mist-evidence.mjs after` 和 `EVIDENCE_DIR=work/evidence node scripts/navigation-evidence.mjs`；历史截图仅本机备份于 `work/pr-evidence-before-cleanup/`，不重写既有提交历史。
+
+## 静态首页声明、404 与分享封面
+
+本轮选择保留**单个中文静态首页**，不声称完成首页多语言静态 SEO。`?lang=zh-CN/zh-TW/en/ja` 继续作为浏览器界面增强，原始 HTML、title/description/OG 和根 canonical 均是中文首页，移除原来指向查询参数的首页 hreflang。禁用 JavaScript 的分享抓取端仍看到中文首页；四语言文章独立静态页及其真实互相对应的 hreflang 保留，路径未改。没有新增语言子目录、SSR 或客户端重定向，也不声称搜索索引/排名已修复。
+
+`dist/404.html` 在构建阶段生成，四种语言的恢复说明、回首页、文章目录和静态文章链接均不依赖脚本；样式/脚本及链接从站点根路径开始，因此未知深路径不会把它们解析成 `missing/deep/style.css`。本地 serve/dev 和 GitHub Pages 都使用真实 404 状态，404 设为 noindex 且不进入 sitemap。`reading.js` 仅增强主题。
+
+首页和文章 OG 共用站点自有 `dist/assets/share-cover.png`，1200×630，`image/png`，带宽高、四语言 alt 和资源哈希；文章正文配图不改。封面由现有 cloudscape.svg 和系统字体生成，开发时显式运行 `node scripts/share-cover.mjs` 可以重生成，日常 `pnpm build` 只读取提交过的 PNG，不要求浏览器参与构建。它不会作为首页正文图片额外加载。实际 PNG/元数据/MIME 可验证，但没有登录社交平台执行发布、清缓存或验证平台预览成功。
+
+本轮逐项原因、文件、验收与资源变化见 [导航、来源与恢复体验记录](docs/navigation-provenance-review.md)。基线报告仍按其检查日期保留；发布后以实际 main SHA 的 build-info 和工作流校验结果为准。

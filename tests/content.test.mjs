@@ -73,6 +73,7 @@ test('Adding and removing Markdown updates the build; a bad file preserves the l
     await mkdir(join(root,'content/posts'),{recursive:true});
     await mkdir(join(root,'dist/assets'),{recursive:true});
     await writeFile(join(root,'dist/assets/cloud-blue.svg'),'<svg/>');
+    await writeFile(join(root,'dist/assets/share-cover.png'),await readFile(new URL('../dist/assets/share-cover.png',import.meta.url)));
     await writeFile(join(root,'content/site.json'),JSON.stringify({name:'夕雾',pronouns:'她',intro:'介绍',about:'关于',email:'',tags:[]}));
     await writeFile(join(root,'content/ui.json'),await readFile(new URL('../content/ui.json',import.meta.url),'utf8'));
     await writeFile(join(root,'dist/index.html'),'<!-- STATIC_ARCHIVE_START --><!-- STATIC_ARCHIVE_END --><link rel="stylesheet" href="style.css?v=old"><script src="script.js?v=old"></script><img src="assets/cloud-blue.svg" alt="">');

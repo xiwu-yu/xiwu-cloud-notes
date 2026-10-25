@@ -17,7 +17,24 @@ async function scroll(page,top=700) {
 }
 const hidden = page => page.locator('.site-header');
 
-test('sticky navigation stays at top, hides after five idle seconds, reveals on either scroll direction and never hides at page top', async ({ page }) => {
+test('two-second deadline starts a 200ms exit transition, preserves flow and disables hit targets immediately', async ({page})=>{
+  await stationary(page);
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await scroll(page);
+  const header=hidden(page);
+  const offset=await page.locator('#home').evaluate(el=>el.offsetTop);
+  await page.clock.runFor(1850);
+  await expect(header).not.toHaveClass(/nav-hidden/); // 滚动后 1900ms。
+  await page.clock.runFor(100);
+  await expect(header).toHaveClass(/nav-hidden/); // 满 2000ms 开始退出，而非等动画结束。
+  await expect(header).toHaveAttribute('inert','');
+  expect(await header.evaluate(el=>getComputedStyle(el).transitionDuration.split(',')[0].trim())).toBe('0.2s');
+  expect(await header.evaluate(el=>getComputedStyle(el).pointerEvents)).toBe('none');
+  await expect(header).toHaveCSS('visibility','hidden');
+  expect(await page.locator('#home').evaluate(el=>el.offsetTop)).toBe(offset);
+});
+
+test('sticky navigation stays at top, hides after two idle seconds, reveals on either scroll direction and never hides at page top', async ({ page }) => {
   await stationary(page);
   const header=hidden(page);
   await expect(header).not.toHaveClass(/nav-hidden/);
@@ -25,16 +42,16 @@ test('sticky navigation stays at top, hides after five idle seconds, reveals on 
   await expect(header).not.toHaveClass(/nav-hidden/);
   await scroll(page);
   expect((await header.boundingBox()).y).toBe(0);
-  await page.clock.runFor(4000);
+  await page.clock.runFor(1850);
   await expect(header).not.toHaveClass(/nav-hidden/);
-  await page.clock.runFor(1000);
+  await page.clock.runFor(100);
   await expect(header).toHaveClass(/nav-hidden/);
   await expect(header).toHaveAttribute('inert','');
   expect(await header.evaluate(el=>{el.querySelector('a').focus();return el.contains(document.activeElement);})).toBe(false);
   expect(await page.evaluate(()=>Boolean(document.elementFromPoint(150,10)?.closest('.site-header')))).toBe(false);
   await scroll(page,800);
   await expect(header).not.toHaveClass(/nav-hidden/);
-  await page.clock.runFor(5100);
+  await page.clock.runFor(2100);
   await scroll(page,600);
   await expect(header).not.toHaveClass(/nav-hidden/);
   await scroll(page,0);
@@ -42,16 +59,17 @@ test('sticky navigation stays at top, hides after five idle seconds, reveals on 
   await expect(header).not.toHaveClass(/nav-hidden/);
 });
 
-test('hover, keyboard focus and native selector use prevent hiding; leaving starts a fresh five-second deadline', async ({ page }) => {
+test('hover, keyboard focus and native selector use prevent hiding; leaving starts a fresh two-second deadline', async ({ page }) => {
   await stationary(page);await scroll(page);
   const header=hidden(page);
   await header.hover();
   await page.clock.runFor(8000);
   await expect(header).not.toHaveClass(/nav-hidden/);
   await page.mouse.move(1,850);
-  await page.clock.runFor(4000);
+  await page.clock.runFor(50);
+  await page.clock.runFor(1850);
   await expect(header).not.toHaveClass(/nav-hidden/);
-  await page.clock.runFor(1000);
+  await page.clock.runFor(100);
   await expect(header).toHaveClass(/nav-hidden/);
   await page.keyboard.press('Tab');
   await expect(header).not.toHaveClass(/nav-hidden/);
@@ -63,22 +81,23 @@ test('hover, keyboard focus and native selector use prevent hiding; leaving star
   await expect(page.locator('.site-header .brand-mark')).toHaveAttribute('aria-label','ホームの先頭に戻って再読み込み');
   await page.locator('#archive-search').evaluate(el=>el.focus({preventScroll:true}));
   await page.clock.runFor(50);
-  await page.clock.runFor(4000);
+  await page.clock.runFor(1850);
   await expect(header).not.toHaveClass(/nav-hidden/);
-  await page.clock.runFor(1000);
+  await page.clock.runFor(100);
   await expect(header).toHaveClass(/nav-hidden/);
 });
 
 test('backgrounding clears the timer and returning or keyboard activity reveals navigation with a fresh deadline', async ({ page }) => {
   await stationary(page);await scroll(page);
-  await page.clock.runFor(4000);
+  await page.clock.runFor(1850);
   await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
   await page.clock.runFor(10000);
   await expect(hidden(page)).not.toHaveClass(/nav-hidden/);
   await page.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});
-  await page.clock.runFor(4000);
+  await page.clock.runFor(50);
+  await page.clock.runFor(1850);
   await expect(hidden(page)).not.toHaveClass(/nav-hidden/);
-  await page.clock.runFor(1000);
+  await page.clock.runFor(100);
   await expect(hidden(page)).toHaveClass(/nav-hidden/);
   await page.keyboard.press('Tab');
   await expect(hidden(page)).not.toHaveClass(/nav-hidden/);
@@ -137,11 +156,19 @@ for (const width of [320,375,768,1024,1440]) {
       await expect(page.locator('.site-header .brand-mark')).toHaveAttribute('aria-label',label);
       for (const theme of ['light','dark']) {
         if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('.theme-toggle').click();
+        // 主题切换时不让小字停留在旧色的过渡起点；不用等待来掩盖瞬时不可读。
+        expect(await page.locator('.site-header nav a').first().evaluate(el=>getComputedStyle(el).color)).toBe(theme==='dark'?'rgb(245, 246, 251)':'rgb(53, 64, 82)');
         await page.locator('.site-header a[href="#resources"]').click();
         await expect.poll(()=>new URL(page.url()).hash).toBe('#resources');
         const header=await page.locator('.site-header').boundingBox();
         const title=await page.locator('#resources-title').boundingBox();
         expect(header.y).toBe(0);
+        expect(Math.abs(header.x)).toBeLessThanOrEqual(1);
+        expect(Math.abs(header.width-width)).toBeLessThanOrEqual(1);
+        const inner=await page.locator('.site-header-inner').boundingBox();
+        const mainGrid=await page.locator('#about').boundingBox();
+        expect(Math.abs(inner.x-mainGrid.x)).toBeLessThanOrEqual(1);
+        if(width===1440) expect(header.height).toBeLessThanOrEqual(80);
         expect(title.y).toBeGreaterThanOrEqual(header.y+header.height);
         await noOverflow(page,width);
         for(const selector of ['.site-header .brand-mark','#language-select','.theme-toggle']) {
@@ -153,10 +180,44 @@ for (const width of [320,375,768,1024,1440]) {
   });
 }
 
+test('200% navigation text wraps without clipping; outer height drives anchors and the desktop music clearance',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto('./');
+  await page.addStyleTag({content:'.site-header .brand>[data-site-name]{font-size:48px}.site-header .brand-sub{font-size:24px}.site-header nav a,.site-header #language-select{font-size:24px}'});
+  for(const width of [320,375,768,1440]) {
+    await page.setViewportSize({width,height:900});
+    for(const lang of ['zh-CN','zh-TW','en','ja']) {
+      await page.selectOption('#language-select',lang);
+      for(const theme of ['light','dark']) {
+        if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('.theme-toggle').click();
+        await page.locator('.site-header a[href="#resources"]').click();
+        const header=await page.locator('.site-header').boundingBox();
+        const title=await page.locator('#resources-title').boundingBox();
+        expect(title.y).toBeGreaterThanOrEqual(header.height);
+        expect(Math.abs(header.x)).toBeLessThanOrEqual(1);
+        expect(Math.abs(header.width-width)).toBeLessThanOrEqual(1);
+        const controls=await page.locator('.site-header nav a,#language-select,.site-header .theme-toggle').evaluateAll(nodes=>nodes.map(el=>{const b=el.getBoundingClientRect();return {x:b.x,right:b.right,y:b.y,bottom:b.bottom,height:b.height};}));
+        for(const control of controls) {
+          expect(control.x).toBeGreaterThanOrEqual(0);expect(control.right).toBeLessThanOrEqual(width+1);
+          expect(control.bottom).toBeLessThanOrEqual(header.height+1);expect(control.height).toBeGreaterThanOrEqual(40);
+        }
+        await noOverflow(page,width);
+        if(width===1440) {
+          await page.route('https://music.163.com/outchain/player?**',route=>route.fulfill({contentType:'text/html',body:'<p>Native host fixture</p>'}));
+          await page.locator('#music-toggle').click();
+          const panel=await page.locator('#music-panel').boundingBox();
+          expect(panel.y).toBeGreaterThanOrEqual(header.height);
+          await page.locator('#music-close').click();
+        }
+      }
+    }
+  }
+});
+
 test('reduced motion stops decorative movement while sticky hiding still functions; no script keeps usable native navigation', async ({ browser, page }) => {
   await stationary(page);await scroll(page);
   for(const selector of ['.cloud-one','.cloud-two','.cloud-three','.hero-art img','#hero-title'])expect(await page.locator(selector).evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
-  await page.clock.runFor(5100);await expect(hidden(page)).toHaveClass(/nav-hidden/);
+  await page.clock.runFor(2100);await expect(hidden(page)).toHaveClass(/nav-hidden/);
   expect(await hidden(page).evaluate(el=>getComputedStyle(el).transitionDuration)).toBe('0s');
   for (const failure of ['javascript','navigation.js']) {
     const context=await browser.newContext({javaScriptEnabled:failure!=='javascript',viewport:{width:375,height:900},reducedMotion:'reduce'});
