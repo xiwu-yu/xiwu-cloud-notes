@@ -218,3 +218,20 @@ test('cloud refresh also preserves current theme when preference storage is bloc
   await expect.poll(()=>page.evaluate(()=>scrollY)).toBe(0);
   await context.close();
 });
+
+
+test('native selector Enter never implicitly activates the cloud refresh button', async ({ page }) => {
+  await page.goto('./');
+  await page.evaluate(()=>window.sameDocumentToken=crypto.randomUUID());
+  const token=await page.evaluate(()=>window.sameDocumentToken);
+  let navigations=0;
+  page.on('request',request=>{if(request.isNavigationRequest()&&request.frame()===page.mainFrame())navigations++;});
+  await page.locator('#language-select').focus();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Escape');
+  await page.evaluate(()=>new Promise(requestAnimationFrame));
+  expect(navigations).toBe(0);
+  expect(await page.evaluate(()=>window.sameDocumentToken)).toBe(token);
+  await expect(page.locator('.site-header')).not.toHaveClass(/nav-hidden/);
+});

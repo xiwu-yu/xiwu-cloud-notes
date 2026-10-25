@@ -8,7 +8,7 @@
       },
       "after": {
         "bytes": 18666,
-        "gzip": 6296
+        "gzip": 6297
       }
     },
     "style.css": {
@@ -44,8 +44,8 @@
     "navigation.js": {
       "before": null,
       "after": {
-        "bytes": 5784,
-        "gzip": 2176
+        "bytes": 6031,
+        "gzip": 2293
       }
     },
     "script.js": {

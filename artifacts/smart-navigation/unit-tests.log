@@ -1,33 +1,33 @@
 $ node --test tests/*.test.mjs
-✔ Upload and writing dates sort independently in both directions (25.853375ms)
-✔ Months, combined filters and undated groups use the selected date field (0.928375ms)
-✔ Equal writing dates keep a stable order, missing dates never fall back to uploads (0.165375ms)
-✔ Category filters use the language-neutral category key when present (0.060083ms)
-✔ Japanese kana count toward reading length alongside Han characters and Latin words (0.252417ms)
-✔ Search matches localized titles, tags and body text, requiring every term (0.124209ms)
-✔ Markdown formats render; reading text excludes markup and link URLs (5.5935ms)
-✔ Raw HTML and javascript links cannot become executable article markup (0.718583ms)
-✔ Invalid metadata fails with the filename rather than silently dropping content (0.923166ms)
-✔ Existing sequence is retained and duplicate article IDs are rejected (0.772084ms)
-✔ The same article id may be translated once per language, but not twice in one language (4.557584ms)
-✔ Article tags are optional, support Chinese text, and reject invalid values (0.744375ms)
-✔ Writing dates accept real calendar dates without inventing a time or upload fallback (2.050042ms)
+✔ Upload and writing dates sort independently in both directions (29.431125ms)
+✔ Months, combined filters and undated groups use the selected date field (0.93175ms)
+✔ Equal writing dates keep a stable order, missing dates never fall back to uploads (0.166583ms)
+✔ Category filters use the language-neutral category key when present (0.059625ms)
+✔ Japanese kana count toward reading length alongside Han characters and Latin words (0.274292ms)
+✔ Search matches localized titles, tags and body text, requiring every term (0.127834ms)
+✔ Markdown formats render; reading text excludes markup and link URLs (4.894667ms)
+✔ Raw HTML and javascript links cannot become executable article markup (0.688084ms)
+✔ Invalid metadata fails with the filename rather than silently dropping content (0.905541ms)
+✔ Existing sequence is retained and duplicate article IDs are rejected (0.7825ms)
+✔ The same article id may be translated once per language, but not twice in one language (4.78275ms)
+✔ Article tags are optional, support Chinese text, and reject invalid values (0.745041ms)
+✔ Writing dates accept real calendar dates without inventing a time or upload fallback (1.841834ms)
 已从 Markdown 生成 1 篇随笔、4 种语言。
 已从 Markdown 生成 2 篇随笔、4 种语言。
 已从 Markdown 生成 2 篇随笔、4 种语言。
 已从 Markdown 生成 1 篇随笔、4 种语言。
-✔ Adding and removing Markdown updates the build; a bad file preserves the last good output (38.248125ms)
-✔ shared metadata mismatch reports both files, field and conflicting values (2.267083ms)
-✔ real Markdown meets the content contract without fixing the article count (6.394666ms)
+✔ Adding and removing Markdown updates the build; a bad file preserves the last good output (37.165125ms)
+✔ shared metadata mismatch reports both files, field and conflicting values (1.781292ms)
+✔ real Markdown meets the content contract without fixing the article count (7.267458ms)
 已从 Markdown 生成 4 篇随笔、4 种语言。
 已从 Markdown 生成 4 篇随笔、4 种语言。
 已从 Markdown 生成 4 篇随笔、4 种语言。
 已从 Markdown 生成 3 篇随笔、4 种语言。
-✔ new article, missing translations, static metadata, deletion and failed rebuild preserve all outputs (120.428291ms)
-✔ music config accepts playlist IDs only and builds official HTTPS links with autoplay off (0.494209ms)
+✔ new article, missing translations, static metadata, deletion and failed rebuild preserve all outputs (124.43875ms)
+✔ music config accepts playlist IDs only and builds official HTTPS links with autoplay off (0.512083ms)
 已从 Markdown 生成 3 篇随笔、4 种语言。
 已从 Markdown 生成 3 篇随笔、4 种语言。
-✔ changing or removing the playlist config updates markup; invalid config preserves the last build (83.656167ms)
+✔ changing or removing the playlist config updates markup; invalid config preserves the last build (86.890167ms)
 ℹ tests 19
 ℹ suites 0
 ℹ pass 19
@@ -35,4 +35,4 @@ $ node --test tests/*.test.mjs
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 246.095083
+ℹ duration_ms 256.852333

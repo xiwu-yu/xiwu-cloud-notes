@@ -117,7 +117,12 @@
       history.replaceState(state, '', url);
       location.reload(); // 真正重载当前首页，不用 hash 跳转替代。
     };
-    document.querySelector('.home-refresh-form').addEventListener('submit', event => { event.preventDefault(); refreshHome(); });
+    const form = document.querySelector('.home-refresh-form');
+    const cloudButton = form.querySelector('button');
+    // 增强后只接受明确的按钮激活，防止原生 select 的 Enter 隐式提交刷新。
+    cloudButton.type = 'button';
+    cloudButton.addEventListener('click', refreshHome);
+    form.addEventListener('submit', event => event.preventDefault());
     document.querySelector('.dialog-home-refresh').addEventListener('click', refreshHome);
   }, {once:true});
 })();

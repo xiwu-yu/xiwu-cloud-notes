@@ -12,7 +12,7 @@
 | `dist/motion.js` / `motion.css` | 逐层可见性暂停、第三层云、插画漂浮、一次首屏淡入、不同相位和移动简化；沿用卡片机制 |
 | `dist/script.js` | 退出阅读时不再跳回文章焦点；刷新瞬间的主题回填；其余路由、偏好机制沿用 |
 | `content/ui.json` | 新增 `nav.homeRefresh` 四语言无障碍文案；profile.js 仍仅由构建生成 |
-| `tests/e2e/navigation.spec.mjs`（新增） | 13 项专项用例，覆盖计时、交互保持、刷新、动态、偏好、原生回退、五种宽度与四语言双主题 |
+| `tests/e2e/navigation.spec.mjs`（新增） | 14 项专项用例，覆盖计时、交互保持、刷新、动态、偏好、原生回退、五种宽度与四语言双主题 |
 | `playwright.config.mjs` | 将导航专项纳入默认验证，支持可选 PW_BROWSER=webkit |
 | `scripts/navigation-evidence.mjs`（新增） | 可复现截图、4/5 秒状态及离线资源体积 |
 | `README.md` | 同步实际行为、动画参数、刷新边界、无脚本与 WebKit 验证方式 |
@@ -57,7 +57,8 @@ CSS sticky 保留原位置，不插入突然出现的占位。ResizeObserver 只
 3. 普通模式平滑回顶，检测 scrollend / 短时位置检查；2 秒兜底会立即归零后完成。减少动态直接归零。只在这次动作期间检查，不长期轮询。
 4. 构造项目子路径首页，只保留当前 lang，移除 post 和 hash；history.replaceState 写入一次性标记，再调用 `location.reload()`，确实重载文档。
 5. 新文档在 head 先消费标记、暂设 scrollRestoration=manual，pageshow 回到 0，随后恢复原来的恢复策略。标记不会再次刷新页面。主题偏好照常保留，存储被阻止时用一次性主题回填保留这次选择。
-6. 无 JS 或 navigation.js 失败时，通过 GET 表单返回首页，语言选择器由原生 form 属性关联，不依赖隐藏字段同步。
+6. 增强后云朵按钮设为 type=button，独立 click 执行动作；表单 submit 仅取消隐式提交，因此语言选择器原生 Enter 不会触发刷新。
+7. 无 JS 或 navigation.js 失败时，通过 GET 表单返回首页，语言选择器由原生 form 属性关联，不依赖隐藏字段同步。
 
 专项测试核对主文档请求数、`PerformanceNavigationTiming.type === 'reload'`、旧 JS 全局消失、卸载前与重载后 scrollY=0、标记消费、原恢复策略恢复；同时验证第二次点击只再发起一次刷新、品牌锚点不会刷新。整页刷新会结束播放器文档，不能跨页续播；普通滚动、语言、筛选、弹窗仍沿用稳定 iframe。
 
@@ -67,18 +68,18 @@ CSS sticky 保留原位置，不插入突然出现的占位。ResizeObserver 只
 | --- | --- |
 | `pnpm test` | 19 / 19，[日志](unit-tests.log) |
 | `pnpm build` | 通过，[日志](build.log)，3 篇文章 / 4 语言，12 个真实静态页 |
-| `pnpm test:e2e` | Chromium **52 / 52**，[日志](e2e.log)，含原有 39 项及新 13 项 |
-| `PW_BROWSER=webkit pnpm test:e2e tests/e2e/navigation.spec.mjs` | Playwright WebKit 引擎 **13 / 13**，[日志](webkit.log)，不是 Safari 真机 |
+| `pnpm test:e2e` | Chromium **53 / 53**，[日志](e2e.log)，含原有 39 项及新 14 项 |
+| `PW_BROWSER=webkit pnpm test:e2e tests/e2e/navigation.spec.mjs` | Playwright WebKit 引擎 **14 / 14**，[日志](webkit.log)，不是 Safari 真机 |
 | `node scripts/navigation-evidence.mjs` | 截图与资源记录完成；4 秒未隐藏 / 5 秒隐藏，正常路径无控制台错误、资源失败或 HTTP≥400，[数据](measurements.json) |
 | 差异检查 | `git diff --check` 通过，作者文章和依赖无变化 |
 
 默认测试覆盖 320/375/768/1024/1440px、四语言双主题、悬停、焦点、原生语言选择器、可见性切换、无 JS、缺少 navigation.js、减少动态、两种动效偏好的真实刷新、存储失败、锚点和原有历史/阅读回归。原音乐 17 项验证继续通过，包括移动/平板/桌面触屏不显示和不请求音乐、稳定节点、矮桌面和备用入口。计时使用可控时钟；标签可见性事件为宿主状态测试，不伪装真机测试。
 
-开发中修正了滚动唤醒等待 rAF 的延迟；计时用例也明确区分原生 Tab 回到页面顶部（应常显）与离顶后的失焦计时。动画尺寸检查容忍不到 0.01px 的合成浮点误差，不用逐像素相等断言替代布局检查。
+开发中修正了滚动唤醒等待 rAF 的延迟，以及原生选择器 Enter 隐式提交表单而误刷新的问题；后一项有 Chromium / WebKit 回归。计时用例也明确区分原生 Tab 回到页面顶部（应常显）与离顶后的失焦计时。动画尺寸检查容忍不到 0.01px 的合成浮点误差，不用逐像素相等断言替代布局检查。
 
 ## 资源和截图
 
-所有体积均为本地原始字节及离线 gzip，非 CDN 或 Lighthouse 分数；无新增依赖。导航脚本 gzip 为 2,176 B；当前导航及动效三文件 gzip 合计 4,132 B（约 4.04 KiB，包含已有动效），没有大图或远程字体。逐文件前后体积见 [measurements.json](measurements.json)。截图使用减少动态以稳定复现，动态参数、实际位移与实时降级由专项测试核对。
+所有体积均为本地原始字节及离线 gzip，非 CDN 或 Lighthouse 分数；无新增依赖。导航脚本及动效的最新 gzip 体积见下方数据文件（包含已有动效），没有大图或远程字体。逐文件前后体积见 [measurements.json](measurements.json)。截图使用减少动态以稳定复现，动态参数、实际位移与实时降级由专项测试核对。
 
 | 视图 | 截图 |
 | --- | --- |
