@@ -5,11 +5,26 @@
   const grid = document.querySelector('.interest-grid');
   if (!('IntersectionObserver' in window)) return;
   let heroVisible = false;
+  let introSeen = false;
+  const cloudVisibility = new Map();
   const seen = new Set();
-  const syncClouds = () => document.documentElement.classList.toggle('clouds-running', heroVisible && !document.hidden && !reduced.matches);
+  const syncClouds = () => {
+    const allowed = !document.hidden && !reduced.matches;
+    document.documentElement.classList.toggle('clouds-running', heroVisible && allowed);
+    for (const [cloud, visible] of cloudVisibility) cloud.classList.toggle('cloud-running', visible && allowed);
+  };
+  const clouds = new IntersectionObserver(entries => {
+    for (const {target,isIntersecting} of entries) cloudVisibility.set(target,isIntersecting);
+    syncClouds();
+  });
+  document.querySelectorAll('.sky-background .cloud').forEach(cloud => clouds.observe(cloud));
   if (hero) {
     new IntersectionObserver(entries => {
       heroVisible = entries[0].isIntersecting;
+      if (heroVisible && !introSeen) {
+        introSeen = true;
+        if (!reduced.matches) hero.classList.add('hero-intro');
+      }
       syncClouds();
     }).observe(hero);
     document.addEventListener('visibilitychange', syncClouds);
@@ -33,6 +48,9 @@
   }).observe(grid, {childList:true});
   reduced.addEventListener('change', () => {
     syncClouds();
-    if (reduced.matches) document.querySelectorAll('.card-enter').forEach(card => card.classList.remove('card-enter'));
+    if (reduced.matches) {
+      hero?.classList.remove('hero-intro');
+      document.querySelectorAll('.card-enter').forEach(card => card.classList.remove('card-enter'));
+    }
   });
 })();

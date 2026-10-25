@@ -1,8 +1,29 @@
 /* 轻量动效仅使用 transform / opacity；不会把默认内容设为隐藏。 */
-.cloud-one, .cloud-two { animation:cloud-drift 30s ease-in-out infinite alternate; animation-play-state:paused; }
-.cloud-two { animation-duration:36s; animation-direction:alternate-reverse; }
-.clouds-running .cloud-one, .clouds-running .cloud-two { animation-play-state:running; }
-@keyframes cloud-drift { from { transform:translate3d(0,0,0); } to { transform:translate3d(12px,-8px,0); } }
+.cloud-one, .cloud-two, .cloud-three { animation:cloud-drift 30s ease-in-out infinite; animation-delay:-4s; animation-play-state:paused; }
+.cloud-two { animation-duration:36s; animation-delay:-13s; animation-direction:reverse; }
+.cloud-three { animation-duration:28s; animation-delay:-9s; }
+.cloud.cloud-running { animation-play-state:running; }
+@keyframes cloud-drift { 0%,100% { transform:translate3d(-7px,2px,0); } 50% { transform:translate3d(7px,-3px,0); } }
+.hero-art img { animation:hero-float 10s ease-in-out infinite; animation-play-state:paused; }
+.clouds-running .hero-art img { animation-play-state:running; }
+@keyframes hero-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-7px); } }
+.hero-intro h1, .hero-intro .hero-description { animation:hero-enter 380ms ease-out; }
+.hero-intro .hero-description { animation-delay:60ms; animation-fill-mode:backwards; }
+@keyframes hero-enter { from { opacity:.5; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.sky-star { position:absolute; width:3px; height:3px; background:var(--accent-decor); opacity:.28; border-radius:50%; }
+.sky-star:nth-of-type(1) { top:170px; left:23%; }
+.sky-star:nth-of-type(2) { top:380px; left:57%; }
+.sky-star:nth-of-type(3) { top:640px; left:85%; }
+.sky-star:nth-of-type(4) { top:920px; left:9%; }
+.sky-star:nth-of-type(5) { top:1180px; left:74%; }
+.sky-star:nth-of-type(6) { top:1510px; left:45%; }
+@media(max-width:720px), (pointer:coarse) {
+  .cloud-one, .cloud-two { animation-name:cloud-drift-small; animation-duration:40s; }
+  .cloud-three, .sky-star:nth-of-type(n+4) { display:none; }
+  .hero-art img { animation-duration:14s; animation-name:hero-float-small; }
+}
+@keyframes cloud-drift-small { 0%,100% { transform:translate3d(-3px,1px,0); } 50% { transform:translate3d(3px,-1px,0); } }
+@keyframes hero-float-small { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
 .card-button { transition:transform 160ms,box-shadow 160ms,border-color 160ms; }
 .card-button:is(:hover,:focus-visible) { transform:translateY(-2px); border-color:var(--primary); box-shadow:var(--shadow); }
 .card-button:focus-visible .card-more { text-decoration:underline; text-underline-offset:4px; }
@@ -13,7 +34,7 @@ dialog[open] { animation:dialog-enter 180ms ease-out; }
 .music-panel:not([hidden]) { animation:music-enter 180ms ease-out; }
 @keyframes music-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 @media(prefers-reduced-motion:reduce) {
-  .cloud, .card-enter, dialog[open], .music-panel:not([hidden]) { animation:none!important; }
+  .cloud, .hero-art img, .hero-intro h1, .hero-intro .hero-description, .card-enter, dialog[open], .music-panel:not([hidden]) { animation:none!important; }
   .card-button { transition:none; }
-  .card-button:is(:hover,:focus-visible), .card-button:is(:hover,:focus-visible) img, .hero-button:hover { transform:none; }
+  .card-button:is(:hover,:focus-visible), .card-button:is(:hover,:focus-visible) img, .hero-button:hover, .brand-mark:is(:hover,:focus-visible,:active) { transform:none; }
 }

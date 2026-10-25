@@ -91,6 +91,13 @@
   let currentId = null;
   let openedFrom = null;
   let closingFromHistory = false;
+  let returningHome = false;
+  document.addEventListener('site:home-request', () => {
+    returningHome = true;
+    currentId = null;
+    closingFromHistory = true;
+    if (dialog.open) dialog.close();
+  });
 
   // 2. 地址栏记录当前文章，复制地址即可分享；前进、后退会重新打开对应文章。
   function writeUrl({ push = false, replace = false } = {}) {
@@ -379,6 +386,7 @@
     if (!closingFromHistory) writeUrl({ replace: true });
     closingFromHistory = false;
     setDocumentTitle(null);
+    if (returningHome) { openedFrom = null; return; }
     const originId = openedFrom?.closest('[data-essay-id]')?.dataset.essayId;
     const container = state.view === 'timeline' ? timeline : grid;
     const replacement = originId ? container.querySelector(`[data-essay-id="${originId}"] a`) : null;
@@ -423,6 +431,7 @@
     updateThemeLabel();
   }
   function preferredDark() {
+    if (['light','dark'].includes(document.documentElement.dataset.refreshTheme)) return document.documentElement.dataset.refreshTheme === 'dark';
     try {
       const stored = localStorage.getItem(THEME_STORAGE);
       if (stored === 'dark' || stored === 'light') return stored === 'dark';

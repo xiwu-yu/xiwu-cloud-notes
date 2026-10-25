@@ -11,6 +11,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:4174/xiwu-cloud-notes/',
     ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}),
+    ...(process.env.PW_BROWSER ? { browserName: process.env.PW_BROWSER } : {}),
     headless: true,
     locale: 'zh-CN',
     colorScheme: 'light',
@@ -19,7 +20,7 @@ export default defineConfig({
     screenshot: 'only-on-failure'
   },
   projects: [
-    { name: 'interaction', testMatch: ['site.spec.mjs', 'music.spec.mjs'] },
+    { name: 'interaction', testMatch: ['site.spec.mjs', 'music.spec.mjs', 'navigation.spec.mjs'] },
     { name: 'content-smoke', testMatch: 'content-smoke.spec.mjs', use: { baseURL: 'http://127.0.0.1:4173/xiwu-cloud-notes/' } }
   ],
   webServer: [

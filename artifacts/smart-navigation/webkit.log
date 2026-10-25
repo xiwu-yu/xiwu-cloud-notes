@@ -1,0 +1,25 @@
+$ playwright test tests/e2e/navigation.spec.mjs
+[WebServer] (node:4715) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:4724) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 13 tests using 1 worker
+
+(node:4739) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [interaction] › tests/e2e/navigation.spec.mjs:20:1 › sticky navigation stays at top, hides after five idle seconds, reveals on either scroll direction and never hides at page top (806ms)
+  ✓   2 [interaction] › tests/e2e/navigation.spec.mjs:45:1 › hover, keyboard focus and native selector use prevent hiding; leaving starts a fresh five-second deadline (482ms)
+  ✓   3 [interaction] › tests/e2e/navigation.spec.mjs:72:1 › backgrounding clears the timer and returning or keyboard activity reveals navigation with a fresh deadline (319ms)
+  ✓   4 [interaction] › tests/e2e/navigation.spec.mjs:88:3 › cloud performs one real reload at the top, clears article route, preserves language/theme (reduce) (566ms)
+  ✓   5 [interaction] › tests/e2e/navigation.spec.mjs:88:3 › cloud performs one real reload at the top, clears article route, preserves language/theme (no-preference) (1.1s)
+  ✓   6 [interaction] › tests/e2e/navigation.spec.mjs:130:3 › 320px: fixed header, four languages/two themes and unoccluded native anchors (1.2s)
+  ✓   7 [interaction] › tests/e2e/navigation.spec.mjs:130:3 › 375px: fixed header, four languages/two themes and unoccluded native anchors (1.3s)
+  ✓   8 [interaction] › tests/e2e/navigation.spec.mjs:130:3 › 768px: fixed header, four languages/two themes and unoccluded native anchors (1.3s)
+  ✓   9 [interaction] › tests/e2e/navigation.spec.mjs:130:3 › 1024px: fixed header, four languages/two themes and unoccluded native anchors (1.3s)
+  ✓  10 [interaction] › tests/e2e/navigation.spec.mjs:130:3 › 1440px: fixed header, four languages/two themes and unoccluded native anchors (1.5s)
+  ✓  11 [interaction] › tests/e2e/navigation.spec.mjs:156:1 › reduced motion stops decorative movement while sticky hiding still functions; no script keeps usable native navigation (1.1s)
+  ✓  12 [interaction] › tests/e2e/navigation.spec.mjs:180:1 › cloud layers have distinct phases, hero floats without resizing, small screens simplify and reduced motion stops them live (686ms)
+  ✓  13 [interaction] › tests/e2e/navigation.spec.mjs:208:1 › cloud refresh also preserves current theme when preference storage is blocked (445ms)
+
+  13 passed (13.4s)
