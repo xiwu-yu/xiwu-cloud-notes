@@ -258,6 +258,8 @@
   }
   function renderInterests() {
     visibleItems = archive.select(posts, state);
+    const adjusted = Number(state.month !== 'all') + Number(state.dateBy !== 'writtenAt') + Number(state.order !== 'newest');
+    $('#archive-adjusted').textContent = adjusted ? t('notes.adjusted', { count: String(adjusted) }) : '';
     grid.replaceChildren(...visibleItems.map(createCard));
     grid.classList.toggle('single-entry', visibleItems.length === 1);
     timeline.replaceChildren(...archive.groups(visibleItems, state.dateBy).map(createTimelineGroup));
@@ -343,6 +345,8 @@
     dialogLanguageSelect.value = locale;
     applyStaticText();
     applySite();
+    document.querySelectorAll('[data-i18n-data-system-label]').forEach(el => { el.dataset.systemLabel = t('appearance.system'); });
+    document.dispatchEvent(new Event('site:language-changed'));
     $('#copy-status').textContent = '';
     renderFilters();
     updateMonths();
@@ -452,16 +456,10 @@
     try { localStorage.setItem(THEME_STORAGE, dark ? 'dark' : 'light'); } catch {}
   });
 
-  // 音乐面板只改变可见性；首次展开后不再改写 iframe 的 src 或节点。
-  const mobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-  if (mobileDevice) {
-    $('#music-widget')?.remove();
-    $('#music-static-link')?.remove();
-  }
+  // 桌面与触屏共用官方控件；收起、改变视口与同页交互都不重建 iframe。
   const musicWidget = $('#music-widget');
   const musicToggle = $('#music-toggle');
   const musicPanel = $('#music-panel');
-  const musicLayout = window.matchMedia('(min-width:721px) and (hover:hover) and (pointer:fine)');
   let musicWaitTimer;
   let musicStatus = '';
   function updateMusicLabel() {
@@ -470,7 +468,6 @@
     if (musicToggle) musicToggle.setAttribute('aria-label', t(musicPanel.hidden ? 'music.open' : 'music.collapse'));
   }
   function setMusicExpanded(expanded) {
-    if (!musicLayout.matches) return;
     musicPanel.hidden = !expanded;
     musicToggle.setAttribute('aria-expanded', String(expanded));
     updateMusicLabel();
@@ -478,7 +475,10 @@
     if (expanded && !frame.hasAttribute('src')) {
       musicStatus = 'loading';
       updateMusicLabel();
-      frame.src = frame.dataset.src;
+      // 官方桌面入口在移动 UA 下会 302 到 HTTP，HTTPS 父页会将其拦截。
+      // 首次加载直接使用官方 HTTPS 移动入口；之后不随视口或语言切换重写。
+      const mobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+      frame.src = mobileDevice ? frame.dataset.mobileSrc : frame.dataset.src;
       musicWaitTimer = setTimeout(() => {
         musicStatus = 'slow';
         updateMusicLabel();
@@ -497,20 +497,7 @@
     musicWidget.hidden = false;
     musicWidget.dataset.mode = 'embedded';
     $('#music-static-link').hidden = true;
-    const syncMusicLayout = () => {
-      document.body.classList.toggle('has-music', musicLayout.matches);
-      if (!musicLayout.matches) {
-        musicPanel.hidden = true;
-        musicToggle.setAttribute('aria-expanded', 'false');
-        // 进入禁用音乐的小屏布局时停止加载，避免出现隐藏的音乐播放。
-        clearTimeout(musicWaitTimer);
-        musicStatus = '';
-        $('#music-frame').removeAttribute('src');
-        updateMusicLabel();
-      }
-    };
-    syncMusicLayout();
-    musicLayout.addEventListener('change', syncMusicLayout);
+    document.body.classList.add('has-music');
     musicToggle.addEventListener('click', () => setMusicExpanded(musicPanel.hidden));
     for (const button of [$('#music-close'), $('#music-collapse')]) {
       button.addEventListener('click', () => setMusicExpanded(false));

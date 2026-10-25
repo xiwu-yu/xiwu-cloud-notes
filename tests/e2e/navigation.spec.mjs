@@ -203,7 +203,7 @@ test('200% navigation text wraps without clipping; outer height drives anchors a
         }
         await noOverflow(page,width);
         if(width===1440) {
-          await page.route('https://music.163.com/outchain/player?**',route=>route.fulfill({contentType:'text/html',body:'<p>Native host fixture</p>'}));
+          await page.route(/^https:\/\/music\.163\.com\/(?:m\/)?outchain\/player\?/,route=>route.fulfill({contentType:'text/html',body:'<p>Native host fixture</p>'}));
           await page.locator('#music-toggle').click();
           const panel=await page.locator('#music-panel').boundingBox();
           expect(panel.y).toBeGreaterThanOrEqual(header.height);

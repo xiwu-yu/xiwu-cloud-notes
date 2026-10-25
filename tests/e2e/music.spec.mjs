@@ -3,11 +3,12 @@ import { devices } from '@playwright/test';
 import { test, expect, noOverflow } from './helpers.mjs';
 const ui=JSON.parse(await readFile(new URL('../../content/ui.json',import.meta.url),'utf8'));
 const {music}=JSON.parse(await readFile(new URL('../../content/site.json',import.meta.url),'utf8'));
+const playerRoute=/^https:\/\/music\.163\.com\/(?:m\/)?outchain\/player\?/;
 const playerUrl=`https://music.163.com/outchain/player?type=0&id=${music.playlistId}&auto=0&height=430`;
 // CI 不依赖网易云网络、地区限制或真实音频；此响应只验证宿主面板生命周期。
 const stub='<!doctype html><html><meta charset="utf-8"><style>body{margin:0}p{margin:0;height:400px}button{height:44px}</style><body><p>External player test fixture</p><button>Native bottom control fixture</button></body></html>';
 async function stubPlayer(page,onRequest=()=>{}) {
-  await page.route('https://music.163.com/outchain/player?**',route=>{
+  await page.route(playerRoute,route=>{
     onRequest();
     return route.fulfill({contentType:'text/html',body:stub});
   });
@@ -47,9 +48,14 @@ test('music loads on demand once and preserves its iframe across folding, langua
     await unchanged();
   }
   await page.locator('.theme-toggle').click();
+  // 收起悬浮栏后浏览文章，原播放器继续保留，不遮挡正文操作。
+  await page.locator('#music-close').click();
+  await unchanged();
   await page.locator('#archive-search').fill('rain');
   await page.locator('[data-filter="随笔"]').click();
+  if (await page.locator('#archive-advanced').getAttribute('open') === null) await page.locator('#archive-advanced summary').click();
   await page.selectOption('#archive-month','2026-10');
+  if (await page.locator('#archive-advanced').getAttribute('open') === null) await page.locator('#archive-advanced summary').click();
   await page.selectOption('#archive-order','oldest');
   await page.locator('.card-button').click();
   await expect(page.locator('#interest-dialog')).toBeVisible();
@@ -60,8 +66,10 @@ test('music loads on demand once and preserves its iframe across folding, langua
   await unchanged();
   await page.locator('.dialog-close').click();
   await expect(page.locator('.card-button')).toBeFocused();
-  await expect(page.locator('#music-panel')).toBeVisible();
+  await expect(page.locator('#music-panel')).toBeHidden();
   await page.locator('#music-toggle').click();
+  await unchanged();
+  await page.locator('#music-close').click();
   await page.locator('[data-view="timeline"]').click();
   await page.locator('.timeline-button').click();
   await page.keyboard.press('Escape');
@@ -97,13 +105,6 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
       await page.selectOption('#language-select',lang);
       for (const theme of ['light','dark']) {
         if (await page.locator('html').getAttribute('data-theme')!==theme) await page.locator('.theme-toggle').click();
-        if (width <= 720) {
-          await expect(page.locator('#music-toggle')).toBeHidden();
-          await expect(page.locator('#music-static-link')).toBeHidden();
-          expect(await page.locator('#music-frame').getAttribute('src')).toBeNull();
-          await noOverflow(page,width);
-          continue;
-        }
         await page.locator('#music-toggle').click();
         await expect(page.locator('#music-close')).toHaveAttribute('aria-label',ui[lang]['music.close']);
         // 宿主 load 文案可能改变行数；固定在同一文档状态测量，避免跨帧旧/新矩形混用。
@@ -116,7 +117,7 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
         expect(panel.y).toBeGreaterThanOrEqual(0);
         expect(panel.x+panel.width).toBeLessThanOrEqual(width);
         if (toggle) expect(panel.y+panel.height).toBeLessThanOrEqual(toggle.y-8);
-        else expect(panel.y+panel.height).toBeLessThanOrEqual(height-16);
+        else expect(panel.y+panel.height).toBeLessThanOrEqual(height-12);
         expect(panel.width).toBeLessThanOrEqual(420);
         const header=await page.locator('.site-header').boundingBox();
         expect(panel.y).toBeGreaterThanOrEqual(header.y+header.height);
@@ -130,7 +131,11 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
         expect(top.height).toBeGreaterThan(20);
         expect(top.frame.y).toBeGreaterThanOrEqual(top.box.y);
         expect(top.frame.width).toBe(330);
-        expect(top.width).toBeGreaterThanOrEqual(top.frame.width);
+        // 小屏内部允许横向滚动官方 330px 文档，整页不产生横向溢出。
+        expect(top.width).toBeGreaterThan(200);
+        await viewport.evaluate(el=>el.scrollLeft=el.scrollWidth);
+        const right=await viewport.evaluate(el=>({box:el.getBoundingClientRect().toJSON(),frame:el.querySelector('iframe').getBoundingClientRect().toJSON()}));
+        expect(right.frame.right).toBeLessThanOrEqual(right.box.right+1);
         expect(top.frame.height).toBe(450);
         await viewport.evaluate(el=>el.scrollTop=el.scrollHeight);
         const bottom=await viewport.evaluate(el=>({box:el.getBoundingClientRect().toJSON(),frame:el.querySelector('iframe').getBoundingClientRect().toJSON()}));
@@ -163,7 +168,7 @@ test('playlist fallback remains available when the iframe fails or JavaScript is
   for (const failure of ['player','javascript','script.js','profile.js']) {
     const context=await browser.newContext({javaScriptEnabled:failure!=='javascript'});
     const page=await context.newPage();
-    if (failure==='player') await page.route('https://music.163.com/outchain/player?**',route=>route.abort());
+    if (failure==='player') await page.route(playerRoute,route=>route.abort());
     if (failure==='script.js' || failure==='profile.js') await page.route(`**/${failure}*`,route=>route.abort());
     await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
     if (failure==='player') await page.locator('#music-toggle').click();
@@ -176,54 +181,61 @@ test('playlist fallback remains available when the iframe fails or JavaScript is
   }
 });
 
-test('phones and tablets have no music controls, links, footer gap or third-party requests', async ({ browser }) => {
+test('phones and tablets expose the official player on demand, with no MP3 or automatic requests', async ({ browser }) => {
   for (const device of ['iPhone 13','Pixel 5','iPad (gen 7)']) {
     const context=await browser.newContext({...devices[device]});
     const page=await context.newPage();
-    const errors=[];let requests=0;
+    const errors=[]; let requests=0;
     page.on('pageerror',error=>errors.push(error.message));
-    await page.route('**/*music.163.com/**',route=>{requests++;return route.abort();});
+    page.on('request',request=>{if(/\.mp[34](?:\?|$)/.test(request.url()))errors.push('unexpected media upload/request');});
+    await stubPlayer(page,()=>requests++);
     await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
+    await expect(page.locator('#music-toggle')).toBeVisible();
+    await expect(page.locator('#music-panel')).toBeHidden();
+    expect(requests).toBe(0);
+    expect(await page.locator('#music-frame').getAttribute('src')).toBeNull();
+    await page.locator('#music-toggle').tap();
+    await expect(page.frameLocator('#music-frame').getByText('External player test fixture')).toBeVisible();
     for (const lang of ['zh-CN','zh-TW','en','ja']) {
       await page.selectOption('#language-select',lang);
-      await expect(page.locator('#music-widget')).toHaveCount(0);
-      await expect(page.locator('#music-static-link')).toHaveCount(0);
-      await expect(page.locator('a[href*="music.163.com"]')).toHaveCount(0);
-      expect(await page.locator('body').evaluate(el=>el.classList.contains('has-music'))).toBe(false);
-      expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+      await expect(page.locator('#music-title')).toHaveText(ui[lang]['music.title']);
+      expect(await page.locator('#music-frame').getAttribute('src')).toBe(playerUrl.replace('/outchain/', '/m/outchain/'));
+      await noOverflow(page,devices[device].viewport.width);
     }
-    expect(requests).toBe(0);
-    expect(errors).toEqual([]);
+    await page.locator('#music-close').tap();
+    await expect(page.locator('#music-toggle')).toBeFocused();
+    await page.locator('#music-toggle').tap();
+    expect(requests).toBe(1); expect(errors).toEqual([]);
     await context.close();
     const noScript=await browser.newContext({...devices[device],javaScriptEnabled:false});
     const plain=await noScript.newPage();
     await plain.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
     await expect(plain.locator('#music-widget')).toBeHidden();
-    await expect(plain.locator('#music-static-link')).toBeHidden();
+    await expect(plain.locator('#music-static-link')).toBeVisible();
     await noScript.close();
   }
 });
 
-test('switching a desktop window to mobile layout disables the player instead of hiding active audio', async ({ page }) => {
+test('changing desktop/mobile viewports preserves the same player document without restarting', async ({ page }) => {
   let requests=0;await stubPlayer(page,()=>requests++);
   await page.goto('./');await page.locator('#music-toggle').click();
-  await expect(page.locator('#music-frame')).toHaveAttribute('src',playerUrl);
   await expect(page.frameLocator('#music-frame').getByText('External player test fixture')).toBeVisible();
-  await page.setViewportSize({width:375,height:812});
-  await expect(page.locator('#music-toggle')).toBeHidden();
-  await expect.poll(()=>page.locator('#music-frame').getAttribute('src')).toBeNull();
-  expect(await page.locator('body').evaluate(el=>el.classList.contains('has-music'))).toBe(false);
-  await page.setViewportSize({width:1440,height:900});
-  await expect(page.locator('#music-toggle')).toBeVisible();
-  await expect(page.locator('#music-panel')).toBeHidden();
+  await page.evaluate(()=>{window.savedMusic=document.querySelector('#music-frame'); window.savedMusicWindow=window.savedMusic.contentWindow;});
+  for(const viewport of [{width:375,height:812},{width:1440,height:900}]) {
+    await page.setViewportSize(viewport);
+    await expect(page.locator('#music-toggle')).toBeVisible();
+    await expect(page.locator('#music-panel')).toBeVisible();
+    await expect(page.locator('#music-frame')).toHaveAttribute('src',playerUrl);
+    expect(await page.evaluate(()=>savedMusic===document.querySelector('#music-frame') && savedMusicWindow===savedMusic.contentWindow)).toBe(true);
+    expect(requests).toBe(1);
+  }
 });
-
 
 test('slow official document has translated host feedback without claiming playback; load and collapse preserve the frame', async ({ page }) => {
   let release;
   const gate=new Promise(resolve=>release=resolve);
   let requests=0;
-  await page.route('https://music.163.com/outchain/player?**',async route=>{
+  await page.route(playerRoute,async route=>{
     requests++;await gate;await route.fulfill({contentType:'text/html',body:stub});
   });
   await page.clock.install();
@@ -268,7 +280,7 @@ test('iframe Escape stays inside its document; native keyboard navigation reache
   await expect(page.locator('#music-toggle')).toBeFocused();
 });
 
-test('200% zoom equivalent layout keeps controls reachable and disables music at the narrow breakpoint', async ({ browser }) => {
+test('200% zoom equivalent layout keeps official controls reachable across narrow breakpoints', async ({ browser }) => {
   // 物理 2560×960 / 200% => 1280×480 CSS px。非原生浏览器工具栏缩放。
   const context=await browser.newContext({viewport:{width:1280,height:480},deviceScaleFactor:2});
   const page=await context.newPage();
@@ -279,24 +291,55 @@ test('200% zoom equivalent layout keeps controls reachable and disables music at
   await expect(page.locator('#music-collapse')).toBeInViewport();
   await page.locator('#music-collapse').click();
   await noOverflow(page,1280);
-  // 物理 1440×900 / 200% => 720×450，遵循现有禁用音乐的小屏策略。
+  // 物理 1440×900 / 200% => 720×450 CSS px。小屏现在也保留官方音乐功能。
   await page.setViewportSize({width:720,height:450});
-  await expect(page.locator('#music-widget')).toBeHidden();
-  await expect.poll(()=>page.locator('#music-frame').getAttribute('src')).toBeNull();
+  await expect(page.locator('#music-toggle')).toBeVisible();
+  await page.locator('#music-toggle').click();
+  await expect(page.locator('#music-panel')).toBeVisible();
+  await expect(page.locator('#music-frame')).toHaveAttribute('src',playerUrl);
+  await expect(page.locator('#music-collapse')).toBeInViewport();
   await noOverflow(page,720);
   await context.close();
 });
 
 
-test('desktop touch layout also has no controls, fallback link, requests or music footer gap', async ({ browser }) => {
+test('large touch screens also use the same lazy official player', async ({ browser }) => {
   const context=await browser.newContext({viewport:{width:1440,height:900},hasTouch:true});
   const page=await context.newPage();let requests=0;
-  await page.route('**/*music.163.com/**',route=>{requests++;return route.abort();});
+  await stubPlayer(page,()=>requests++);
   await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
-  await expect(page.locator('#music-widget')).toBeHidden();
-  await expect(page.locator('#music-static-link')).toBeHidden();
-  expect(await page.locator('#music-frame').getAttribute('src')).toBeNull();
-  expect(await page.locator('body').evaluate(el=>el.classList.contains('has-music'))).toBe(false);
+  await expect(page.locator('#music-toggle')).toBeVisible();
   expect(requests).toBe(0);
+  await page.locator('#music-toggle').tap();
+  await expect(page.frameLocator('#music-frame').getByText('External player test fixture')).toBeVisible();
+  expect(requests).toBe(1);
+  await context.close();
+});
+
+test('HTTPS mobile host avoids the official desktop redirect to blocked HTTP content', async ({ browser }) => {
+  const context=await browser.newContext({...devices['iPhone 13']});
+  const page=await context.newPage();let desktopRequests=0,mobileRequests=0;
+  const failures=[];
+  page.on('requestfailed',request=>failures.push(request.url()));
+  page.on('pageerror',error=>failures.push(error.message));
+  await page.route('https://cloud.xiwu.space/**',async route=>{
+    const url=new URL(route.request().url());
+    const response=await route.fetch({url:`http://127.0.0.1:4174/xiwu-cloud-notes${url.pathname}${url.search}`});
+    await route.fulfill({response});
+  });
+  await page.route('https://music.163.com/outchain/player?**',route=>{
+    desktopRequests++;
+    return route.fulfill({status:302,headers:{location:playerUrl.replace('https://','http://').replace('/outchain/','/m/outchain/')}});
+  });
+  await page.route('https://music.163.com/m/outchain/player?**',route=>{
+    mobileRequests++;
+    return route.fulfill({contentType:'text/html',body:stub});
+  });
+  await page.goto('https://cloud.xiwu.space/');
+  expect(mobileRequests).toBe(0);expect(desktopRequests).toBe(0);
+  await page.locator('#music-toggle').tap();
+  await expect(page.frameLocator('#music-frame').getByText('External player test fixture')).toBeVisible();
+  await expect(page.locator('#music-frame')).toHaveAttribute('src',playerUrl.replace('/outchain/','/m/outchain/'));
+  expect(mobileRequests).toBe(1);expect(desktopRequests).toBe(0);expect(failures).toEqual([]);
   await context.close();
 });

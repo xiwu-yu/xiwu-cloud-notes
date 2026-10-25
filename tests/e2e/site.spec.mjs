@@ -10,18 +10,23 @@ test('fixture ordering, numbering, full-text search and combined archive filters
   await expect(page.locator('#archive-order')).toHaveValue('newest');
   expect(await ids(page)).toEqual(['rain', 'cloud', 'original']);
   expect(await page.locator('.card-number').allTextContents()).toEqual(['01', '02', '03']);
+  if (await page.locator('#archive-advanced').getAttribute('open') === null) await page.locator('#archive-advanced summary').click();
   await page.selectOption('#archive-order', 'oldest');
   expect(await ids(page)).toEqual(['cloud', 'rain', 'original']);
+  if (await page.locator('#archive-advanced').getAttribute('open') === null) await page.locator('#archive-advanced summary').click();
   await page.selectOption('#archive-date-by', 'publishedAt');
   expect(await ids(page)).toEqual(['original', 'rain', 'cloud']);
+  if (await page.locator('#archive-advanced').getAttribute('open') === null) await page.locator('#archive-advanced summary').click();
   await page.selectOption('#archive-date-by', 'writtenAt');
   expect(await ids(page)).toEqual(['cloud', 'rain', 'original']);
+  if (await page.locator('#archive-advanced').getAttribute('open') === null) await page.locator('#archive-advanced summary').click();
   await page.selectOption('#archive-month', '2026-09');
   expect(await ids(page)).toEqual(['cloud']);
   await page.locator('[data-filter="随笔"]').click();
   await expect(page.locator('#archive-empty')).toBeVisible();
   await page.locator('#archive-reset').click();
   await expect(page.locator('.interest-card')).toHaveCount(3);
+  if (await page.locator('#archive-advanced').getAttribute('open') === null) await page.locator('#archive-advanced summary').click();
   await page.selectOption('#archive-order', 'newest');
   expect(await ids(page)).toEqual(['rain', 'cloud', 'original']);
   await page.locator('#archive-search').fill('独特原文词');
@@ -87,6 +92,7 @@ test('explicit Chinese share overrides saved English, including reload and clipb
 
 test('opening, changing language, pagination, history, closing and focus remain consistent', async ({ page }) => {
   await page.goto('./');
+  if (await page.locator('#archive-advanced').getAttribute('open') === null) await page.locator('#archive-advanced summary').click();
   await page.selectOption('#archive-date-by', 'publishedAt');
   await openFirst(page);
   for (let i = 0; i < langs.length; i++) {
@@ -140,6 +146,7 @@ test('missing translation announces fallback and uses actual body language for r
   await page.locator('.dialog-close').click();
   await page.locator('#archive-search').fill('独特原文词');
   await page.locator('[data-filter="生活"]').click();
+  if (await page.locator('#archive-advanced').getAttribute('open') === null) await page.locator('#archive-advanced summary').click();
   await page.selectOption('#archive-month', 'undated');
   expect(await ids(page)).toEqual(['original']);
   await openFirst(page);
@@ -172,7 +179,9 @@ for (const width of [320, 375, 768, 1440]) {
         expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
         expect(await dialog.evaluate(n => n.scrollWidth - n.clientWidth)).toBeLessThanOrEqual(1);
         await expect(page.locator('.dialog-close')).toBeFocused();
-        await page.keyboard.press('Tab');
+        await page.keyboard.press('Shift+Tab');
+        await expect(page.locator('#interest-dialog .transparency-toggle')).toBeFocused();
+        await page.keyboard.press('Shift+Tab');
         await expect(page.locator('#dialog-language-select')).toBeFocused();
         expect(await page.locator('#dialog-language-select').evaluate(n => getComputedStyle(n).outlineStyle)).not.toBe('none');
         await page.keyboard.press('Escape');
