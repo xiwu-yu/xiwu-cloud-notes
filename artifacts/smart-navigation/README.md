@@ -1,5 +1,7 @@
 # 云朵动态与智能导航升级
 
+历史证据说明：批量截图、日志和补丁已移出 Git 跟踪；本机备份位于 `work/pr-evidence-before-cleanup/`。CI 重新生成的截图、报告和日志统一保存为 `review-evidence-<SHA>` Actions Artifact，保留 14 天；以下文件名相对于对应的 Artifact 目录。记录中的测试数字属于当时版本，最新结果见 `docs/domain-migration-review.md`。
+
 本地基线：`96eca72`（上轮修复分支），工作区开始时干净，仓库及祖先目录没有适用的 AGENTS.md。先运行基线：19 项单元测试、构建、39 项 E2E 通过。本次复用已有主题、卡片进入、按钮悬停和导航颜色过渡，保留作者原文、搜索/分类/时间轴/弹窗/历史与桌面音乐策略。本轮不合并 main 或部署。
 
 ## 实际修改文件
@@ -66,10 +68,10 @@ CSS sticky 保留原位置，不插入突然出现的占位。ResizeObserver 只
 
 | 命令 | 实际结果 |
 | --- | --- |
-| `pnpm test` | 19 / 19，[日志](unit-tests.log) |
-| `pnpm build` | 通过，[日志](build.log)，3 篇文章 / 4 语言，12 个真实静态页 |
-| `pnpm test:e2e` | Chromium **53 / 53**，[日志](e2e.log)，含原有 39 项及新 14 项 |
-| `PW_BROWSER=webkit pnpm test:e2e tests/e2e/navigation.spec.mjs` | Playwright WebKit 引擎 **14 / 14**，[日志](webkit.log)，不是 Safari 真机 |
+| `pnpm test` | 19 / 19，日志（Artifacts: `unit-tests.log`） |
+| `pnpm build` | 通过，日志（Artifacts: `build.log`），3 篇文章 / 4 语言，12 个真实静态页 |
+| `pnpm test:e2e` | Chromium **53 / 53**，日志（Artifacts: `e2e.log`），含原有 39 项及新 14 项 |
+| `PW_BROWSER=webkit pnpm test:e2e tests/e2e/navigation.spec.mjs` | Playwright WebKit 引擎 **14 / 14**，日志（Artifacts: `webkit.log`），不是 Safari 真机 |
 | `node scripts/navigation-evidence.mjs` | 截图与资源记录完成；4 秒未隐藏 / 5 秒隐藏，正常路径无控制台错误、资源失败或 HTTP≥400，[数据](measurements.json) |
 | 差异检查 | `git diff --check` 通过，作者文章和依赖无变化 |
 
@@ -83,14 +85,14 @@ CSS sticky 保留原位置，不插入突然出现的占位。ResizeObserver 只
 
 | 视图 | 截图 |
 | --- | --- |
-| 1440 中文浅色 | [首屏](home-1440-zh-CN-light.png) · [锚点](anchor-1440-zh-CN-light.png) |
-| 1440 英文深色 | [首屏](home-1440-en-dark.png) · [锚点](anchor-1440-en-dark.png) |
-| 1024 英文深色 | [首屏](home-1024-en-dark.png) · [锚点](anchor-1024-en-dark.png) |
-| 768 繁中浅色 | [首屏](home-768-zh-TW-light.png) · [锚点](anchor-768-zh-TW-light.png) |
-| 375 日文深色 | [首屏](home-375-ja-dark.png) · [锚点](anchor-375-ja-dark.png) |
-| 320 英文浅色 | [首屏](home-320-en-light.png) · [锚点](anchor-320-en-light.png) |
-| 静止计时 | [4 秒仍显示](nav-idle-4s.png) · [5 秒隐藏](nav-idle-5s.png) · [Tab 重新显示](nav-keyboard-revealed.png) |
-| 阅读中回顶刷新 | [弹窗云朵入口](reading-refresh-control.png) |
+| 1440 中文浅色 | 首屏（Artifacts: `home-1440-zh-CN-light.png`） · 锚点（Artifacts: `anchor-1440-zh-CN-light.png`） |
+| 1440 英文深色 | 首屏（Artifacts: `home-1440-en-dark.png`） · 锚点（Artifacts: `anchor-1440-en-dark.png`） |
+| 1024 英文深色 | 首屏（Artifacts: `home-1024-en-dark.png`） · 锚点（Artifacts: `anchor-1024-en-dark.png`） |
+| 768 繁中浅色 | 首屏（Artifacts: `home-768-zh-TW-light.png`） · 锚点（Artifacts: `anchor-768-zh-TW-light.png`） |
+| 375 日文深色 | 首屏（Artifacts: `home-375-ja-dark.png`） · 锚点（Artifacts: `anchor-375-ja-dark.png`） |
+| 320 英文浅色 | 首屏（Artifacts: `home-320-en-light.png`） · 锚点（Artifacts: `anchor-320-en-light.png`） |
+| 静止计时 | 4 秒仍显示（Artifacts: `nav-idle-4s.png`） · 5 秒隐藏（Artifacts: `nav-idle-5s.png`） · Tab 重新显示（Artifacts: `nav-keyboard-revealed.png`） |
+| 阅读中回顶刷新 | 弹窗云朵入口（Artifacts: `reading-refresh-control.png`） |
 
 ## 剩余边界
 

@@ -120,7 +120,7 @@
     "music.loading": "正在等待网易云官方页面…",
     "music.document": "请使用网易云原生控件；若播放器空白或无法播放，可尝试官方歌单入口。",
     "music.slow": "等待较久；网络、地区或歌曲权限可能影响加载和播放，可尝试官方歌单入口。",
-    "music.keyboard": "播放器内的 Esc 不会收起面板；可用 Tab 移到下方收起按钮。",
+    "music.keyboard": "播放器内的 Esc 不会收起面板；用 Tab 移到下方收起按钮，部分 Safari 设置需用 Option+Tab。",
     "hero.artAlt": "淡蓝与浅粉的层层云朵环绕一轮柔和的月亮，云间有微小星光",
     "nav.homeRefresh": "回到首页顶部并刷新"
   },
@@ -245,7 +245,7 @@
     "music.loading": "正在等待網易雲官方頁面…",
     "music.document": "請使用網易雲原生控制項；若播放器空白或無法播放，可嘗試官方歌單入口。",
     "music.slow": "等待較久；網路、地區或歌曲權限可能影響載入和播放，可嘗試官方歌單入口。",
-    "music.keyboard": "播放器內的 Esc 不會收起面板；可用 Tab 移到下方收起按鈕。",
+    "music.keyboard": "播放器內的 Esc 不會收起面板；用 Tab 移到下方收起按鈕，部分 Safari 設定需用 Option+Tab。",
     "hero.artAlt": "淡藍與淺粉的層層雲朵環繞一輪柔和的月亮，雲間有微小星光",
     "nav.homeRefresh": "回到首頁頂端並重新整理"
   },
@@ -370,7 +370,7 @@
     "music.loading": "Waiting for the official NetEase page…",
     "music.document": "Use NetEase’s own controls. If the player is blank or cannot play, try the official playlist link.",
     "music.slow": "Still waiting. Network, region or track permissions may affect loading and playback. Try the official playlist link.",
-    "music.keyboard": "Esc inside the player cannot close this panel. Tab to the collapse button below.",
+    "music.keyboard": "Esc inside the player cannot close this panel. Tab to the collapse button below; some Safari settings require Option+Tab.",
     "hero.artAlt": "Soft blue and pink clouds surround a gentle moon, with tiny stars between the clouds.",
     "nav.homeRefresh": "Return to the top of the homepage and reload"
   },
@@ -495,7 +495,7 @@
     "music.loading": "NetEase 公式ページを待っています…",
     "music.document": "NetEase の操作ボタンをご利用ください。空白や再生不可の場合は公式プレイリストをお試しください。",
     "music.slow": "時間がかかっています。通信環境・地域・楽曲の権限により読み込みや再生ができない場合は、公式プレイリストをお試しください。",
-    "music.keyboard": "プレーヤー内の Esc では閉じません。Tab で下の閉じるボタンへ移動できます。",
+    "music.keyboard": "プレーヤー内の Esc では閉じません。Tab で下の閉じるボタンへ移動します。Safari の設定によっては Option+Tab が必要です。",
     "hero.artAlt": "淡い青と桜色の雲が柔らかな月を囲み、雲の間に小さな星が輝いています。",
     "nav.homeRefresh": "ホームの先頭に戻って再読み込み"
   }

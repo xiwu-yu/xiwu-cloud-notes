@@ -168,17 +168,17 @@ test('new article, missing translations, static metadata, deletion and failed re
     assert.match(html, /<h2>新文章<\/h2>/);
     assert.match(html, /<html lang="zh-CN">/);
     assert.match(html, /<title>一篇随笔/);
-    assert.match(html, /<link rel="canonical" href="https:\/\/xiwu-yu.github.io\/xiwu-cloud-notes\/posts\/new-day\/zh-CN.html">/);
+    assert.match(html, /<link rel="canonical" href="https:\/\/cloud.xiwu.space\/posts\/new-day\/zh-CN.html">/);
     assert.match(html, /property="og:locale" content="zh_CN"/);
     assert.match(html, /name="description" content="一点想法"/);
     assert.match(html, /<script src="\.\.\/\.\.\/reading\.js\?v=[a-f0-9]{10}"><\/script>/);
     assert.doesNotMatch(html, /(?:profile|archive|script)\.js/);
     const sitemap = await readFile(join(root,'dist/sitemap.xml'),'utf8');
-    assert.match(sitemap, /xiwu-cloud-notes\/posts\/new-day\/zh-CN.html/);
+    assert.match(sitemap, /cloud.xiwu.space\/posts\/new-day\/zh-CN.html/);
     assert.doesNotMatch(sitemap, /new-day\/en.html/);
     const before = await snapshot(join(root,'dist'));
-    await build(root);
-    assert.deepEqual(await snapshot(join(root,'dist')), before, '重建应确定且不改变输出');
+    await build(root, {builtAt: JSON.parse(before['build-info.json']).builtAt});
+    assert.deepEqual(await snapshot(join(root,'dist')), before, '正文和资源可确定性重建；构建时间显式固定');
     const translationPath = join(root,'content/posts/new-day.en.md');
     const translation = source('English', 'id: new-day\nlang: en\nwrittenAt: "2026-10-01"\n');
     for (const bad of [

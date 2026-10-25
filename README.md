@@ -2,7 +2,7 @@
 
 一个放随笔和日常碎碎念的个人网站。淡蓝、浅粉和白色的云朵，偶尔认真，时常跑题。
 
-[打开网站](https://xiwu-yu.github.io/xiwu-cloud-notes/)
+[打开网站](https://cloud.xiwu.space/)
 
 界面支持简体中文、繁體中文、English 和日本語。右上角切换语言时，页面文字、文章列表和正在阅读的文章会一起切换；选择会保存在浏览器里，分享文章链接时也会带上语言。
 
@@ -72,7 +72,7 @@ order: 3
 
 首页文章卡片和时间轴是可访问的真实链接，普通点击增强为弹窗，按住 Ctrl/Cmd 或在新标签打开可读静态页。首页始终保留「静态文章目录」，即使禁用 JavaScript 或脚本/数据加载失败，也能展开目录阅读。JavaScript 可用时，目录按主站当前语言显示对应文章入口，缺译时标明回退原文；禁用脚本或首页增强失败时仍保留所有语言的静态链接。静态页提供四语言的主题切换按钮，与主站共用保存的深浅主题，刷新、切换译文及浏览器返回后保持一致；没有保存偏好时跟随系统。文章语言始终以独立链接路径为准，译文导航和返回主站链接保留该语言。主题增强脚本 `dist/reading.js` 在样式加载前读取偏好，不依赖 `profile.js`；脚本不可用时正文、译文导航和元数据仍完整，主题跟随系统。浏览器禁止存储时允许切换本页主题，刷新则回到系统主题。原有查询参数链接保持兼容，但分享预览爬虫通常不执行脚本，**「复制链接」已默认使用独立文章页链接**。
 
-`dist/sitemap.xml` 和 `dist/robots.txt` 同步生成；站点基址统一在 `scripts/static.mjs`，默认 `https://xiwu-yu.github.io/xiwu-cloud-notes/`，包含项目子路径。换域名或仓库名时修改这里。删除文章/译文后，下次构建会移除相应静态页和目录条目。所有内容校验在写入前完成，生成过程也先在临时目录进行；内容错误或生成失败保留上次成功输出。
+`dist/sitemap.xml` 和 `dist/robots.txt` 同步生成。生产基址在 `content/site.json` 的 `baseUrl`，当前为 `https://cloud.xiwu.space/`；可用 `SITE_URL=https://example.org/notes/ pnpm build` 覆盖，优先级为环境变量、配置、生产默认值。基址必须是无账号、查询参数或片段的 HTTPS 目录，自动补末尾斜杠；首页及静态文章的 canonical、Open Graph、hreflang、sitemap 与 robots 共用该值。正文/资源和返回链接仍使用相对路径，兼容旧 `/xiwu-cloud-notes/` 项目子路径。删除文章/译文后，下次构建会移除相应静态页和目录条目。所有内容校验在写入前完成，生成过程也先在临时目录进行；内容错误或生成失败保留上次成功输出。
 
 ## 桌面端网易云歌单
 
@@ -98,7 +98,7 @@ order: 3
 
 首次展开显示等待说明，超过 10 秒仍未收到文档加载事件时，提示网络、地区和歌曲权限可能影响使用。iframe 的 `load` 只用于更新宿主说明，不能证明文档正常呈现、音频可用或正在播放，浏览器错误页也可能触发它。官方歌单入口始终保留；不增加音频解析、代理、VIP 绕过或跨域播放控制。整页导航会离开当前播放器，同页保留节点不能实现跨页续播。
 
-Esc 仅在焦点位于宿主面板时可收起，iframe 内的 Esc 不会冒泡到父页。播放器后有说明、官方入口和可用 Tab 到达的收起按钮，外层滚动区也可用键盘操作；不使用透明遮罩拦截原生控件。
+Esc 仅在焦点位于宿主面板时可收起，iframe 内的 Esc 不会冒泡到父页。播放器后有说明、官方入口和可用 Tab 到达的收起按钮（部分 Safari 键盘设置需用 Option+Tab），外层滚动区也可用键盘操作；不使用透明遮罩拦截原生控件。
 
 本轮矮桌面、等待状态、键盘和触屏回归及截图见 [晨雾云笺验收记录](artifacts/morning-mist/README.md)。
 
@@ -157,7 +157,7 @@ pnpm build       # 从 Markdown 生成数据、静态文章页和 sitemap
 
 GitHub Actions 在 PR、main push 和手动触发时验证；安装 Chromium 及 Linux 系统依赖。只有 main 的全部验证通过才上传并部署 Pages，部署作业通过 `needs: validate` 依赖验证。验证作业仅有 `contents: read`，`pages: write` 和 `id-token: write` 仅授予部署作业。失败时保留报告/trace 14 天。Node 20 的 action 已按官方发布迁移：诊断上传使用 `upload-artifact@v6`，Pages 上传使用 `upload-pages-artifact@v5`（内部为 Node 24 的上传器），部署使用 `deploy-pages@v5.0.1`；本轮没有触发远端 workflow。
 
-`dist/profile.js`、`dist/posts/`、sitemap 和 robots 是自动生成产物，不提交 Git；首页结构和 CSS/JS 源文件仍在 `dist/`。不要直接修改生成文件。构建只将个人资料和文章保留在 `localized`；删除了顶层默认语言副本及每篇的旧 `body` 别名，仓库运行脚本已使用 `localized`、`text`、`bodyHtml`，旧阅读脚本也优先使用这些字段。`text` 支持全文搜索/字数，`bodyHtml` 用于阅读，二者用途不同。没有拆分语言请求，切换仍是同步本地操作，没有新增缓存或网络失败状态；内容哈希继续控制缓存更新。
+`dist/profile.js`、`dist/posts/`、sitemap、robots 和 `dist/build-info.json` 是自动生成产物，不提交 Git；首页结构和 CSS/JS 源文件仍在 `dist/`。不要直接修改生成文件。构建只将个人资料和文章保留在 `localized`；删除了顶层默认语言副本及每篇的旧 `body` 别名，仓库运行脚本已使用 `localized`、`text`、`bodyHtml`，旧阅读脚本也优先使用这些字段。`text` 支持全文搜索/字数，`bodyHtml` 用于阅读，二者用途不同。没有拆分语言请求，切换仍是同步本地操作，没有新增缓存或网络失败状态；内容哈希继续控制缓存更新。
 
 资源实测、验证记录与主要截图见 [本轮修复证据](artifacts/verification.md)。`node scripts/evidence.mjs after` 可用本机 Chrome 重新记录本地冷加载数据和截图（先构建）；测量的是本地无压缩 HTTP 服务，gzip 为离线估算，不代表线上 CDN 的传输压缩。
 
@@ -201,3 +201,19 @@ tests/e2e/content-smoke.spec.mjs 真实内容的动态冒烟检查
 此仓库与网站公开访问。文章应是适合公开的版本；不要将原始日记、联系方式、他人的身份信息或令牌写入仓库。
 
 详细练习见 [学习与修改指南](学习与修改指南.md)。
+
+## 自定义域名、版本核对与审查证据
+
+旧站 `https://xiwu-yu.github.io/xiwu-cloud-notes/` 已由 GitHub Pages 301 到新域名；实测保留文章深链、查询语言与浏览器 hash。继续沿用仓库 Pages 的自定义域名设置，不创建第二套内容发布，也不增加全站客户端重定向。旧域名与新域名的 localStorage 不共享，旧分享链接须依靠 URL 中的显式语言。迁移证据、PR 三个提交的审查结论和待验风险见 [域名与发布审查](docs/domain-migration-review.md)。
+
+每次成功构建生成 `dist/build-info.json`：`commitSha`、UTC `builtAt`、`source`、`siteUrl`、`workingTreeDirty`，Actions 另含运行链接。本地未提交修改会明确标记，不能仅凭 SHA 声称本地输出等于该提交；构建失败保留上次信息。构建时间不参与资源内容哈希，文章与资源仍可确定性生成。
+
+```sh
+node scripts/verify-site.mjs --local dist
+# 发布完成后（填入实际发布的完整 SHA）：
+node scripts/verify-site.mjs https://cloud.xiwu.space/ <完整GitSHA>
+```
+
+校验器核对 build-info 的 SHA/来源、首页和 sitemap 中所有文章的静态元数据、语言、正文、robots 及页面引用的带哈希资源；正式检查用独立查询参数避开缓存，不接受跳转到其他版本。PR 仅 validate、不部署；main 仍须先 validate 才能 deploy，部署后新增只读 `verify-deployment`。发布后校验失败会使工作流失败并保存报告，**不会自动回滚已经发布的文件**，应查明缓存/发布原因后人工处理。仅 deploy 作业拥有 Pages 写权限与身份令牌权限。
+
+PR 新增的大批截图、日志和重复补丁不再放入 Git；保留简洁 Markdown 记录与少量体积/几何摘要。Actions 每次验证均上传 `review-evidence-<SHA>`（包括成功时），失败也保留 Playwright 报告/trace，保留期 14 天。可从 Actions 运行页面下载，或 `gh run download <运行ID> -n review-evidence-<SHA>`。本地重新生成用 `EVIDENCE_DIR=work/evidence node scripts/morning-mist-evidence.mjs after` 和 `EVIDENCE_DIR=work/evidence node scripts/navigation-evidence.mjs`；历史截图仅本机备份于 `work/pr-evidence-before-cleanup/`，不重写既有提交历史。

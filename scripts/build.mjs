@@ -3,7 +3,8 @@ import { fileURLToPath } from 'node:url';
 import { resolve, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { compilePosts, SUPPORTED_LANGS } from './content.mjs';
-import { generateStatic, postPath } from './static.mjs';
+import { generateStatic, postPath, resolveSiteUrl } from './static.mjs';
+import { buildInfo } from './build-info.mjs';
 import { musicConfig, musicMarkup } from './music.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -104,7 +105,7 @@ async function versionAssets(rootPath, assetVersions = {}) {
   await writeFile(indexPath, html);
 }
 
-export async function build(rootPath = root) {
+export async function build(rootPath = root, options = {}) {
   const directory = join(rootPath, 'content/posts');
   const files = (await readdir(directory)).filter(name => name.endsWith('.md')).sort();
   if (!files.length) throw new Error('content/posts 中至少需要一篇 Markdown 随笔');
@@ -120,6 +121,8 @@ export async function build(rootPath = root) {
   const assetVersions = await hashAssetFiles(rootPath);
 
   const site = JSON.parse(await readFile(join(rootPath, 'content/site.json'), 'utf8'));
+  const siteUrl = resolveSiteUrl(options.siteUrl ?? process.env.SITE_URL ?? site.baseUrl);
+  const info = buildInfo(rootPath, siteUrl, options);
   const music = musicConfig(site.music);
   for (const field of SITE_STRINGS) {
     if (typeof site[field] !== 'string') throw new Error(`content/site.json: ${field} 必须是文字`);
@@ -166,8 +169,9 @@ export async function build(rootPath = root) {
     await rm(join(staging, 'dist/posts'), { recursive: true, force: true });
     await writeFile(join(staging, 'dist/profile.js'), '// 自动生成，请修改 content/ 后运行 pnpm build。\nwindow.siteProfile = ' + json + ';\n');
     await versionAssets(staging, assetVersions);
-    await generateStatic(staging, posts, localized, ui, assetVersions);
-    for (const file of ['style.css', 'index.html', 'profile.js', 'sitemap.xml', 'robots.txt']) {
+    await generateStatic(staging, posts, localized, ui, assetVersions, siteUrl);
+    await writeFile(join(staging, 'dist/build-info.json'), JSON.stringify(info, null, 2) + '\n');
+    for (const file of ['style.css', 'index.html', 'profile.js', 'sitemap.xml', 'robots.txt', 'build-info.json']) {
       try { await rename(join(staging, 'dist', file), join(rootPath, 'dist', file)); }
       catch (error) { if (error.code !== 'ENOENT') throw error; }
     }

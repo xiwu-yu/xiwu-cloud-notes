@@ -250,15 +250,17 @@ test('slow official document has translated host feedback without claiming playb
   await expect(page.locator('#music-toggle')).toBeFocused();
 });
 
-test('iframe Escape stays inside its document; Tab reaches the host collapse control', async ({ page }) => {
+test('iframe Escape stays inside its document; native keyboard navigation reaches the host collapse control', async ({ page, browserName }) => {
   await stubPlayer(page);
   await page.goto('./');await page.locator('#music-toggle').click();
   await page.frameLocator('#music-frame').getByRole('button').focus();
   await page.keyboard.press('Escape');
   await expect(page.locator('#music-panel')).toBeVisible();
-  await page.keyboard.press('Tab');
+  // macOS WebKit 默认仅 Tab 到输入框；Option-Tab 访问所有链接/按钮。
+  const next = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+  await page.keyboard.press(next);
   await expect(page.locator('.music-fallback a')).toBeFocused();
-  await page.keyboard.press('Tab');
+  await page.keyboard.press(next);
   await expect(page.locator('#music-collapse')).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('#music-toggle')).toBeFocused();

@@ -1,5 +1,7 @@
 # 晨雾云笺：本地修正与验收
 
+历史证据说明：批量截图、日志和补丁已移出 Git 跟踪；本机备份位于 `work/pr-evidence-before-cleanup/`。CI 重新生成的截图、报告和日志统一保存为 `review-evidence-<SHA>` Actions Artifact，保留 14 天；以下文件名相对于对应的 Artifact 目录。记录中的测试数字属于当时版本，最新结果见 `docs/domain-migration-review.md`。
+
 2026-10-25。本轮基线 `d85949d33a488c564b8ff880a19f94748c8598c7`，分支 `codex/evidence-based-improvements`。开始时工作区干净，仓库及祖先目录未发现适用的 AGENTS.md。本轮未提交、推送、部署或修改作者文章。已上线的语言 URL、静态分享、元数据校验、缺译、静态阅读、资源哈希和移动导航沿用原实现。
 
 ## 1. 功能修正
@@ -32,7 +34,7 @@
 
 实际背景采样另发现称呼卡固定渐变上的文字约 4.05:1，深色便笺小字最低约 2.98:1；均换成主题背景与文字色。320px 的 21px 正常字重配图标题按普通文字处理，提升夜间前景色；配图章节标记与小链接使用纸色底。
 
-`node scripts/contrast-evidence.mjs` 保存真实合成背景，保留布局、移去墨色，仅采样 Range 指定的文字区域，排除圆角外部和无文字内边距；并按前景色计算相对亮度。覆盖 320/375/1440px × 双主题 × 13 个区域共 **78 个样本，全部达标**：普通文字最低 **4.623:1**，24px 及以上正常字重大字最低 **3.755:1**。[最终数据](contrast/results.json) · [中间核查的旧固定背景问题](contrast/before-surface-fix.json)。E2E 另对纸面、组件底色及云色混合的保守上界做 token 校验。采样是选定区域的证据，不等于全站 WCAG 认证。
+`node scripts/contrast-evidence.mjs` 保存真实合成背景，保留布局、移去墨色，仅采样 Range 指定的文字区域，排除圆角外部和无文字内边距；并按前景色计算相对亮度。覆盖 320/375/1440px × 双主题 × 13 个区域共 **78 个样本，全部达标**：普通文字最低 **4.623:1**，24px 及以上正常字重大字最低 **3.755:1**。最终数据（Artifacts: `contrast/results.json`） · 中间核查的旧固定背景问题（Artifacts: `contrast/before-surface-fix.json`）。E2E 另对纸面、组件底色及云色混合的保守上界做 token 校验。采样是选定区域的证据，不等于全站 WCAG 认证。
 
 `reading.js`、`scripts/static.mjs` 和文章 Markdown 没有修改；真实静态正文、canonical / OG / hreflang、项目子路径、无 JS 与原有分享 URL 的回归继续通过。
 
@@ -56,11 +58,11 @@ PR 仅验证；main 仍需 validate 成功后才能部署。顶层仅 contents:r
 
 | 验证 | 结果与证据 |
 | --- | --- |
-| `pnpm test` | **19/19**，[日志](unit-tests.log)：日期、重复 id、缺译、共享字段、Markdown 安全、最后一次成功构建保护 |
-| `pnpm build` | **通过**，[日志](build.log)：3 篇原文、4 语言；12 份实际静态文章页 |
-| `pnpm test:e2e` | **39/39**，[日志](e2e.log)，Chromium 156.0.8078.4 |
-| 隔离副本新增合法文章 | **2/2 内容冒烟**，[日志](new-article.log) / [机器报告](new-article-results.json)。复制真实内容后仅临时加入第四篇无译文文章，重建 4 篇/13 静态页，复用原内容冒烟，无需改交互测试数量、标题或顺序；没有写进作者目录 |
-| 实际背景对比度 | **78/78**，[样本](contrast/results.json)；普通文字 ≥4.5，大字 ≥3 |
+| `pnpm test` | **19/19**，日志（Artifacts: `unit-tests.log`）：日期、重复 id、缺译、共享字段、Markdown 安全、最后一次成功构建保护 |
+| `pnpm build` | **通过**，日志（Artifacts: `build.log`）：3 篇原文、4 语言；12 份实际静态文章页 |
+| `pnpm test:e2e` | **39/39**，日志（Artifacts: `e2e.log`），Chromium 156.0.8078.4 |
+| 隔离副本新增合法文章 | **2/2 内容冒烟**，日志（Artifacts: `new-article.log`） / 机器报告（Artifacts: `new-article-results.json`）。复制真实内容后仅临时加入第四篇无译文文章，重建 4 篇/13 静态页，复用原内容冒烟，无需改交互测试数量、标题或顺序；没有写进作者目录 |
+| 实际背景对比度 | **78/78**，样本（Artifacts: `contrast/results.json`）；普通文字 ≥4.5，大字 ≥3 |
 | 差异检查 | `git diff --check` 通过；package.json、锁文件、作者文章和 site.json 未改；沿用已安装依赖，不需要重装 |
 
 浏览器覆盖 320/375/768/1440px、1440×360 / 1280×480 / 768×400 矮桌面、四语言、双主题、键盘、减少动态、无 JS、脚本/数据/播放器失败、语言偏好冲突、焦点归还、iframe 生命周期和慢网。正常路径检查控制台错误、失败请求、HTTP≥400 和横向溢出；故障注入用例独立上下文处理预期失败。宿主 mock 不代表真实网易云文档或音频可用。
@@ -89,19 +91,19 @@ PR 仅验证；main 仍需 validate 成功后才能部署。顶层仅 contents:r
 
 | 页面 | 修改前 | 修改后 |
 | --- | --- | --- |
-| 首页 1440 / 中文 / 浅色 | [完整图](before/home-1440-zh-CN-light.png) | [完整图](after/home-1440-zh-CN-light.png) |
-| 首页 375 / 日文 / 深色 | [完整图](before/home-375-ja-dark.png) | [完整图](after/home-375-ja-dark.png) · [首屏](after/viewport-375-ja-dark.png) |
-| 首页 320 / 英文 / 浅色 | [完整图](before/home-320-en-light.png) | [完整图](after/home-320-en-light.png) |
-| 首页 768 / 繁中 / 浅色 | [完整图](before/home-768-zh-TW-light.png) | [完整图](after/home-768-zh-TW-light.png) |
-| 文章卡片 | [图](before/cards-desktop.png) | [图](after/cards-desktop.png) |
-| 静态文章 | [图](before/static-reading.png) | [浅色](after/static-reading.png) · [深色](after/static-reading-dark.png) |
-| 1440×360 播放器顶部 | [裁切图](before/music-short-top.png) | [顶部可达](after/music-short-top.png) |
-| 1440×360 播放器底部 | [无法滚动到底](before/music-short-bottom.png) | [底部可达，外框入口仍在](after/music-short-bottom.png) |
-| 常规桌面音乐外框 | — | [1440×900 深色](after/music-desktop.png) |
+| 首页 1440 / 中文 / 浅色 | 完整图（Artifacts: `before/home-1440-zh-CN-light.png`） | 完整图（Artifacts: `after/home-1440-zh-CN-light.png`） |
+| 首页 375 / 日文 / 深色 | 完整图（Artifacts: `before/home-375-ja-dark.png`） | 完整图（Artifacts: `after/home-375-ja-dark.png`） · 首屏（Artifacts: `after/viewport-375-ja-dark.png`） |
+| 首页 320 / 英文 / 浅色 | 完整图（Artifacts: `before/home-320-en-light.png`） | 完整图（Artifacts: `after/home-320-en-light.png`） |
+| 首页 768 / 繁中 / 浅色 | 完整图（Artifacts: `before/home-768-zh-TW-light.png`） | 完整图（Artifacts: `after/home-768-zh-TW-light.png`） |
+| 文章卡片 | 图（Artifacts: `before/cards-desktop.png`） | 图（Artifacts: `after/cards-desktop.png`） |
+| 静态文章 | 图（Artifacts: `before/static-reading.png`） | 浅色（Artifacts: `after/static-reading.png`） · 深色（Artifacts: `after/static-reading-dark.png`） |
+| 1440×360 播放器顶部 | 裁切图（Artifacts: `before/music-short-top.png`） | 顶部可达（Artifacts: `after/music-short-top.png`） |
+| 1440×360 播放器底部 | 无法滚动到底（Artifacts: `before/music-short-bottom.png`） | 底部可达，外框入口仍在（Artifacts: `after/music-short-bottom.png`） |
+| 常规桌面音乐外框 | — | 1440×900 深色（Artifacts: `after/music-desktop.png`） |
 
 ## 8. 文件与 diff
 
-[可审查代码补丁](changes.patch) 包含运行时代码、测试、工作流、README 和取证脚本；本目录证据另阅，不包含二进制截图；补丁采用零上下文避免把补丁的空白上下文误报为源码空白问题，应用到基线时使用 `git apply --unidiff-zero`。源码改动也可在 GitHub PR 中查看。
+可审查代码补丁（Artifacts: `changes.patch`） 包含运行时代码、测试、工作流、README 和取证脚本；本目录证据另阅，不包含二进制截图；补丁采用零上下文避免把补丁的空白上下文误报为源码空白问题，应用到基线时使用 `git apply --unidiff-zero`。源码改动也可在 GitHub PR 中查看。
 
 - `scripts/music.mjs`、`dist/script.js`：宿主等待状态、无侵入的 iframe 生命周期和键盘收起入口。
 - `dist/style.css`：抽屉/矮屏/传统滚动条、主题对比度、字号、导航和卡片；整理因字号提升而相同的覆盖规则。

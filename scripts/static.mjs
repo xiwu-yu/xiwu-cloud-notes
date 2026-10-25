@@ -2,15 +2,25 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 
-// 明确包含项目子路径；静态页与 sitemap 共用，避免部署到用户站点根目录。
-export const SITE_URL = 'https://xiwu-yu.github.io/xiwu-cloud-notes/';
+// 一个入口配置所有可抓取 URL；相对文章/资源链接继续兼容项目子路径。
+export const DEFAULT_SITE_URL = 'https://cloud.xiwu.space/';
+export function resolveSiteUrl(value = DEFAULT_SITE_URL) {
+  let url;
+  try { url = new URL(value); } catch {}
+  if (typeof value !== 'string' || !url || url.protocol !== 'https:' || url.username || url.password || url.search || url.hash) {
+    throw new Error('SITE_URL / content/site.json: baseUrl 必须是无账号、查询参数和片段的 HTTPS 目录地址');
+  }
+  if (!url.pathname.endsWith('/')) url.pathname += '/';
+  return url.href;
+}
 export const postPath = post => `posts/${post.id}/${post.lang}.html`;
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const labels = { 'zh-CN': '简体中文', 'zh-TW': '繁體中文', en: 'English', ja: '日本語' };
 const ogLocale = lang => ({ 'zh-CN': 'zh_CN', 'zh-TW': 'zh_TW', en: 'en_US', ja: 'ja_JP' }[lang]);
 const homeLabel = { 'zh-CN': '回到云间来信', 'zh-TW': '回到雲間來信', en: 'Back to Letters in the Clouds', ja: '雲間の手紙に戻る' };
 
-export async function generateStatic(rootPath, posts, localized, ui, assetVersions) {
+export async function generateStatic(rootPath, posts, localized, ui, assetVersions, siteUrl = DEFAULT_SITE_URL) {
+  const SITE_URL = resolveSiteUrl(siteUrl);
   const dist = join(rootPath, 'dist');
   const readingVersion = createHash('sha256').update(await readFile(join(dist, 'reading.js'))).digest('hex').slice(0, 10);
   const css = (await readFile(join(dist, 'index.html'), 'utf8')).match(/href="(style\.css[^\"]*)"/)?.[1] || 'style.css';
@@ -26,7 +36,10 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
   index = index.replace(/<!-- STATIC_ARCHIVE_START -->[\s\S]*?<!-- STATIC_ARCHIVE_END -->/, `<!-- STATIC_ARCHIVE_START -->\n${archive}\n<!-- STATIC_ARCHIVE_END -->`);
   // 首页也提供可抓取的 canonical；文章的元数据完全在构建时输出。
   index = index.replace(/\n<!-- SITE_META_START -->[\s\S]*?<!-- SITE_META_END -->/, '');
-  index = index.replace('</head>', `<!-- SITE_META_START -->\n<link rel="canonical" href="${SITE_URL}">\n<!-- SITE_META_END -->\n</head>`);
+  const homeTitle = index.match(/<title>(.*?)<\/title>/)?.[1] || escape(localized['zh-CN'].name);
+  const homeDescription = index.match(/<meta name="description"[^>]*content="([^"]*)"/)?.[1] || '';
+  const homeImage = new URL('assets/contact.jpg', SITE_URL).href;
+  index = index.replace('</head>', `<!-- SITE_META_START -->\n<link rel="canonical" href="${escape(SITE_URL)}">\n${Object.keys(labels).map(lang => `<link rel="alternate" hreflang="${lang}" href="${escape(new URL(`?lang=${lang}`, SITE_URL).href)}">`).join('\n')}\n<link rel="alternate" hreflang="x-default" href="${escape(SITE_URL)}">\n<meta property="og:type" content="website">\n<meta property="og:title" content="${homeTitle}">\n<meta property="og:description" content="${homeDescription}">\n<meta property="og:url" content="${escape(SITE_URL)}">\n<meta property="og:image" content="${escape(homeImage)}">\n<meta property="og:locale" content="zh_CN">\n<!-- SITE_META_END -->\n</head>`);
   await writeFile(indexPath, index);
   for (const post of posts) {
     const variants = byId.get(post.id);
@@ -34,7 +47,7 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
     const image = new URL(post.image, SITE_URL);
     if (assetVersions[post.image]) image.searchParams.set('v', assetVersions[post.image]);
     const title = ui[post.lang]['meta.articleTitle'].replace('{title}', post.title).replace('{site}', localized[post.lang].name);
-    const alternates = variants.map(variant => `<link rel="alternate" hreflang="${variant.lang}" href="${new URL(postPath(variant), SITE_URL).href}">`).join('\n');
+    const alternates = variants.map(variant => `<link rel="alternate" hreflang="${variant.lang}" href="${escape(new URL(postPath(variant), SITE_URL).href)}">`).join('\n');
     const languageNav = Object.keys(labels).map(lang => {
       const variant = variants.find(item => item.lang === lang);
       return variant ? `<a href="../../${postPath(variant)}" lang="${lang}" hreflang="${lang}"${lang === post.lang ? ' aria-current="page"' : ''}>${labels[lang]}</a>` : `<span lang="${lang}">${labels[lang]} (暂无译文 / unavailable)</span>`;
@@ -47,12 +60,12 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escape(title)}</title>
 <meta name="description" content="${escape(post.description)}">
-<link rel="canonical" href="${absolute}">
+<link rel="canonical" href="${escape(absolute)}">
 ${alternates}
 <meta property="og:type" content="article">
 <meta property="og:title" content="${escape(title)}">
 <meta property="og:description" content="${escape(post.description)}">
-<meta property="og:url" content="${absolute}">
+<meta property="og:url" content="${escape(absolute)}">
 <meta property="og:site_name" content="${escape(localized[post.lang].name)}">
 <meta property="og:locale" content="${ogLocale(post.lang)}">
 ${variants.filter(v => v.lang !== post.lang).map(v => `<meta property="og:locale:alternate" content="${ogLocale(v.lang)}">`).join('\n')}
@@ -84,7 +97,7 @@ ${post.source ? `<p><a class="dialog-source" href="${escape(post.source)}" rel="
     await mkdir(directory, { recursive: true });
     await writeFile(join(dist, postPath(post)), html);
   }
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>${SITE_URL}</loc></url>\n${posts.map(post => `<url><loc>${new URL(postPath(post), SITE_URL).href}</loc><lastmod>${post.updatedAt}</lastmod></url>`).join('\n')}\n</urlset>\n`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>${escape(SITE_URL)}</loc></url>\n${posts.map(post => `<url><loc>${escape(new URL(postPath(post), SITE_URL).href)}</loc><lastmod>${post.updatedAt}</lastmod></url>`).join('\n')}\n</urlset>\n`;
   await writeFile(join(dist, 'sitemap.xml'), xml);
   await writeFile(join(dist, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}sitemap.xml\n`);
 }

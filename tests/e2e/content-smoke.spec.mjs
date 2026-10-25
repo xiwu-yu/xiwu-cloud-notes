@@ -25,6 +25,36 @@ test('real content loads in all languages and themes; every article is readable'
   }
 });
 
+test('custom domain root and legacy project subpath keep article language, resources anchors and safe external links', async ({ page }) => {
+  const resources = ['https://mtf.wiki/zh-cn', 'https://hrt.transmtf.com/', 'https://www.one-among.us/', 'https://rle.wiki/'];
+  const post = profile.localized.en.interests[0];
+  for (const path of ['/', '/xiwu-cloud-notes/']) {
+    await page.goto(`http://127.0.0.1:4173${path}?post=${post.id}&lang=en`);
+    await expect(page.locator('#dialog-title')).toHaveText(post.title);
+    await expect(page.locator('#dialog-body')).toHaveAttribute('lang', post.lang);
+    await page.locator('.dialog-close').click();
+    await page.locator('.site-header a[href="#resources"]').click();
+    await expect.poll(() => new URL(page.url()).hash).toBe('#resources');
+    const header = await page.locator('.site-header').boundingBox();
+    const title = await page.locator('#resources-title').boundingBox();
+    expect(title.y).toBeGreaterThanOrEqual(header.y + header.height);
+    const links = page.locator('.resource-list > a');
+    await expect(links).toHaveCount(resources.length);
+    for (let i = 0; i < resources.length; i++) {
+      await expect(links.nth(i)).toHaveAttribute('href', resources[i]);
+      await expect(links.nth(i)).toHaveAttribute('target', '_blank');
+      await expect(links.nth(i)).toHaveAttribute('rel', 'noopener noreferrer');
+    }
+    await page.goto(`http://127.0.0.1:4173${path}${post.url}`);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://cloud.xiwu.space/${post.url}`);
+    await expect(page.locator('.article-body')).toContainText(post.text.slice(0, 25));
+    await page.locator('header .brand').click();
+    await page.waitForLoadState('load');
+    expect(new URL(page.url()).pathname).toBe(path);
+    expect(new URL(page.url()).searchParams.get('lang')).toBe(post.lang);
+  }
+});
+
 test('contact has a spacious desktop image, mobile top-left heading and bottom-left links', async ({ page }) => {
   await page.goto('./');
   await page.locator('.about-portraits').scrollIntoViewIfNeeded();

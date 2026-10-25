@@ -3,7 +3,7 @@ import { spawn, execFileSync } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
-const output='artifacts/smart-navigation';
+const output=`${process.env.EVIDENCE_DIR || 'artifacts'}/smart-navigation`;
 await mkdir(output,{recursive:true});
 const server=spawn(process.execPath,['scripts/serve.mjs'],{env:{...process.env,PORT:'4175'},stdio:['ignore','pipe','inherit']});
 await once(server.stdout,'data');
@@ -20,7 +20,9 @@ try {
   for(const file of ['index.html','style.css','motion.css','motion.js','navigation.js','script.js','profile.js']) {
     const current=await readFile(`dist/${file}`);
     let before;
-    if(file==='profile.js')before=JSON.parse(await readFile('artifacts/morning-mist/after/measurements.json','utf8')).files[file];
+    if(file==='profile.js') {
+      try {before=JSON.parse(await readFile('artifacts/morning-mist/after/measurements.json','utf8')).files[file];} catch {before=null;}
+    }
     else {
       try {const old=execFileSync('git',['show',`96eca72:dist/${file}`],{stdio:['ignore','pipe','ignore']});before={bytes:old.length,gzip:gzipSync(old).length};}catch{before=null;}
     }

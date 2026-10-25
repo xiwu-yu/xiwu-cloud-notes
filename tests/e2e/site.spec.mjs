@@ -197,7 +197,7 @@ test('static pages work without JavaScript, and with either app script or data m
     await link.click();
     await expect(page.locator('.article-body')).toContainText('English body');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/xiwu-cloud-notes\/posts\/cloud\/en\.html$/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /^https:\/\/cloud\.xiwu\.space\/posts\/cloud\/en\.html$/);
     expect(await page.locator('meta[property="og:locale"]').getAttribute('content')).toBe('en_US');
     await context.close();
   }

@@ -5,7 +5,7 @@ import { once } from 'node:events';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 const phase = process.argv[2] || 'after';
-const output = `artifacts/morning-mist/${phase}`;
+const output = `${process.env.EVIDENCE_DIR || 'artifacts'}/morning-mist/${phase}`;
 await mkdir(output, { recursive: true });
 const server = spawn(process.execPath, ['scripts/serve.mjs'], { env: {...process.env, PORT:'4175'}, stdio:['ignore','pipe','inherit'] });
 await once(server.stdout, 'data');

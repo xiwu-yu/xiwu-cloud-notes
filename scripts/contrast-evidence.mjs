@@ -3,7 +3,7 @@ import { chromium } from '@playwright/test';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdir, writeFile } from 'node:fs/promises';
-const output='artifacts/morning-mist/contrast';
+const output=`${process.env.EVIDENCE_DIR || 'artifacts'}/morning-mist/contrast`;
 await mkdir(output,{recursive:true});
 const server=spawn(process.execPath,['scripts/serve.mjs'],{env:{...process.env,PORT:'4175'},stdio:['ignore','pipe','inherit']});
 await once(server.stdout,'data');
