@@ -5,7 +5,7 @@ const ui=JSON.parse(await readFile(new URL('../../content/ui.json',import.meta.u
 const {music}=JSON.parse(await readFile(new URL('../../content/site.json',import.meta.url),'utf8'));
 const playerUrl=`https://music.163.com/outchain/player?type=0&id=${music.playlistId}&auto=0&height=430`;
 // CI 不依赖网易云网络、地区限制或真实音频；此响应只验证宿主面板生命周期。
-const stub='<!doctype html><html><body><p>External player test fixture</p></body></html>';
+const stub='<!doctype html><html><meta charset="utf-8"><style>body{margin:0}p{margin:0;height:400px}button{height:44px}</style><body><p>External player test fixture</p><button>Native bottom control fixture</button></body></html>';
 async function stubPlayer(page,onRequest=()=>{}) {
   await page.route('https://music.163.com/outchain/player?**',route=>{
     onRequest();
@@ -87,9 +87,10 @@ test('music disclosure supports keyboard close and restores focus without trappi
   await expect(page.locator('#music-panel')).toBeHidden();
 });
 
-for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]]) {
+for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320],[1440,360],[1280,480],[768,400]]) {
   test(`music fits ${width}×${height} in all languages and themes, with accessible footer links`, async ({ page }) => {
     await stubPlayer(page);
+    await page.emulateMedia({reducedMotion:'reduce'});
     await page.setViewportSize({width,height});
     await page.goto('./');
     for (const lang of Object.keys(ui)) {
@@ -112,10 +113,31 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
         expect(panel.x).toBeGreaterThanOrEqual(0);
         expect(panel.y).toBeGreaterThanOrEqual(0);
         expect(panel.x+panel.width).toBeLessThanOrEqual(width);
-        expect(panel.y+panel.height).toBeLessThanOrEqual(toggle.y-8);
+        if (toggle) expect(panel.y+panel.height).toBeLessThanOrEqual(toggle.y-8);
+        else expect(panel.y+panel.height).toBeLessThanOrEqual(height-16);
+        expect(panel.width).toBeLessThanOrEqual(420);
+        const header=await page.locator('.site-header').boundingBox();
+        expect(panel.y).toBeGreaterThanOrEqual(header.y+header.height);
         expect(fallback.y+fallback.height).toBeLessThanOrEqual(panel.y+panel.height);
         expect(close.y).toBeGreaterThanOrEqual(panel.y);
         expect(close.x+close.width).toBeLessThanOrEqual(panel.x+panel.width);
+        // 固定 330×450 的原生文档不缩放；视口顶部、底部都可滚动到达。
+        const viewport=page.locator('.music-frame-viewport');
+        await viewport.evaluate(el=>el.scrollTop=0);
+        const top=await viewport.evaluate(el=>({box:el.getBoundingClientRect().toJSON(),frame:el.querySelector('iframe').getBoundingClientRect().toJSON(),height:el.clientHeight,width:el.clientWidth}));
+        expect(top.height).toBeGreaterThan(20);
+        expect(top.frame.y).toBeGreaterThanOrEqual(top.box.y);
+        expect(top.frame.width).toBe(330);
+        expect(top.width).toBeGreaterThanOrEqual(top.frame.width);
+        expect(top.frame.height).toBe(450);
+        await viewport.evaluate(el=>el.scrollTop=el.scrollHeight);
+        const bottom=await viewport.evaluate(el=>({box:el.getBoundingClientRect().toJSON(),frame:el.querySelector('iframe').getBoundingClientRect().toJSON()}));
+        expect(bottom.frame.bottom).toBeLessThanOrEqual(bottom.box.bottom+1);
+        for (const selector of ['#music-close','#music-collapse','.music-fallback a']) {
+          expect(await page.locator(selector).evaluate(el=>{
+            const b=el.getBoundingClientRect();return el.contains(document.elementFromPoint(b.x+b.width/2,b.y+b.height/2));
+          })).toBe(true);
+        }
         await noOverflow(page,width);
         await page.locator('#music-close').click();
       }
@@ -192,4 +214,85 @@ test('switching a desktop window to mobile layout disables the player instead of
   await page.setViewportSize({width:1440,height:900});
   await expect(page.locator('#music-toggle')).toBeVisible();
   await expect(page.locator('#music-panel')).toBeHidden();
+});
+
+
+test('slow official document has translated host feedback without claiming playback; load and collapse preserve the frame', async ({ page }) => {
+  let release;
+  const gate=new Promise(resolve=>release=resolve);
+  let requests=0;
+  await page.route('https://music.163.com/outchain/player?**',async route=>{
+    requests++;await gate;await route.fulfill({contentType:'text/html',body:stub});
+  });
+  await page.clock.install();
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.setViewportSize({width:1440,height:360});
+  await page.goto('./');
+  await page.locator('#music-toggle').click();
+  await expect(page.locator('#music-status')).toHaveText(ui['zh-CN']['music.loading']);
+  await page.clock.fastForward(10001);
+  for (const lang of Object.keys(ui)) {
+    await page.selectOption('#language-select',lang);
+    await expect(page.locator('#music-status')).toHaveText(ui[lang]['music.slow']);
+    for (const theme of ['light','dark']) {
+      if (await page.locator('html').getAttribute('data-theme')!==theme) await page.locator('.theme-toggle').click();
+      await expect(page.locator('.music-fallback a')).toBeInViewport();
+      await expect(page.locator('#music-collapse')).toBeInViewport();
+      expect(await page.locator('.music-frame-viewport').evaluate(el=>el.clientHeight)).toBeGreaterThan(20);
+    }
+  }
+  await page.locator('#music-close').click();
+  await page.locator('#music-toggle').click();
+  expect(requests).toBe(1);
+  release();
+  await expect(page.locator('#music-status')).toHaveText(ui.ja['music.document']);
+  await page.locator('#music-collapse').click();
+  await expect(page.locator('#music-toggle')).toBeFocused();
+});
+
+test('iframe Escape stays inside its document; Tab reaches the host collapse control', async ({ page }) => {
+  await stubPlayer(page);
+  await page.goto('./');await page.locator('#music-toggle').click();
+  await page.frameLocator('#music-frame').getByRole('button').focus();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#music-panel')).toBeVisible();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('.music-fallback a')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#music-collapse')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#music-toggle')).toBeFocused();
+});
+
+test('200% zoom equivalent layout keeps controls reachable and disables music at the narrow breakpoint', async ({ browser }) => {
+  // 物理 2560×960 / 200% => 1280×480 CSS px。非原生浏览器工具栏缩放。
+  const context=await browser.newContext({viewport:{width:1280,height:480},deviceScaleFactor:2});
+  const page=await context.newPage();
+  await stubPlayer(page);
+  await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
+  await page.locator('#music-toggle').click();
+  await page.locator('.music-frame-viewport').evaluate(el=>el.scrollTop=el.scrollHeight);
+  await expect(page.locator('#music-collapse')).toBeInViewport();
+  await page.locator('#music-collapse').click();
+  await noOverflow(page,1280);
+  // 物理 1440×900 / 200% => 720×450，遵循现有禁用音乐的小屏策略。
+  await page.setViewportSize({width:720,height:450});
+  await expect(page.locator('#music-widget')).toBeHidden();
+  await expect.poll(()=>page.locator('#music-frame').getAttribute('src')).toBeNull();
+  await noOverflow(page,720);
+  await context.close();
+});
+
+
+test('desktop touch layout also has no controls, fallback link, requests or music footer gap', async ({ browser }) => {
+  const context=await browser.newContext({viewport:{width:1440,height:900},hasTouch:true});
+  const page=await context.newPage();let requests=0;
+  await page.route('**/*music.163.com/**',route=>{requests++;return route.abort();});
+  await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
+  await expect(page.locator('#music-widget')).toBeHidden();
+  await expect(page.locator('#music-static-link')).toBeHidden();
+  expect(await page.locator('#music-frame').getAttribute('src')).toBeNull();
+  expect(await page.locator('body').evaluate(el=>el.classList.contains('has-music'))).toBe(false);
+  expect(requests).toBe(0);
+  await context.close();
 });

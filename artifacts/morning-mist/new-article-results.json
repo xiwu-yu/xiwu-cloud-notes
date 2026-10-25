@@ -1,0 +1,189 @@
+{
+  "config": {
+    "argv": [
+      "/Users/xiwu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config",
+      "work/writing-smoke.config.mjs"
+    ],
+    "configFile": "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes/work/writing-smoke.config.mjs",
+    "rootDir": "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes/work/writing-smoke/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes/work/writing-smoke/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "content-smoke.spec.mjs"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes/work/writing-smoke/tests/e2e",
+        "snapshotDir": "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes/work/writing-smoke/tests/e2e",
+        "testIgnore": [],
+        "testMatch": "content-smoke.spec.mjs",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://127.0.0.1:4176/xiwu-cloud-notes/",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "colorScheme": "light"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes/artifacts/morning-mist/new-article-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "cwd": "/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes",
+      "command": "node work/writing-server.mjs",
+      "url": "http://127.0.0.1:4176",
+      "reuseExistingServer": false
+    }
+  },
+  "suites": [
+    {
+      "title": "content-smoke.spec.mjs",
+      "file": "content-smoke.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "real content loads in all languages and themes; every article is readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11087,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-25T04:38:29.341Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7bf34b9adad415018065-a3b9d94180c71d317448",
+          "file": "content-smoke.spec.mjs",
+          "line": 9,
+          "column": 1
+        },
+        {
+          "title": "contact has a spacious desktop image, mobile top-left heading and bottom-left links",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4023,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-25T04:38:40.500Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7bf34b9adad415018065-a5a46dbdaf1a3c252296",
+          "file": "content-smoke.spec.mjs",
+          "line": 28,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-25T04:38:29.059Z",
+    "duration": 15490.738,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

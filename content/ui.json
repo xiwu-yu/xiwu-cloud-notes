@@ -115,9 +115,13 @@
     "music.close": "收起音乐面板",
     "music.iframeTitle": "网易云音乐歌单播放器",
     "music.hint": "点击播放器内的按钮播放或切歌。",
-    "music.fallback": "无法加载或播放？",
     "music.openPlaylist": "在网易云打开歌单 ↗",
-    "music.region": "音乐歌单"
+    "music.region": "音乐歌单",
+    "music.loading": "正在等待网易云官方页面…",
+    "music.document": "请使用网易云原生控件；若播放器空白或无法播放，可尝试官方歌单入口。",
+    "music.slow": "等待较久；网络、地区或歌曲权限可能影响加载和播放，可尝试官方歌单入口。",
+    "music.keyboard": "播放器内的 Esc 不会收起面板；可用 Tab 移到下方收起按钮。",
+    "hero.artAlt": "淡蓝与浅粉的层层云朵环绕一轮柔和的月亮，云间有微小星光"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -235,9 +239,13 @@
     "music.close": "收起音樂面板",
     "music.iframeTitle": "網易雲音樂歌單播放器",
     "music.hint": "點擊播放器內的按鈕播放或切歌。",
-    "music.fallback": "無法載入或播放？",
     "music.openPlaylist": "在網易雲開啟歌單 ↗",
-    "music.region": "音樂歌單"
+    "music.region": "音樂歌單",
+    "music.loading": "正在等待網易雲官方頁面…",
+    "music.document": "請使用網易雲原生控制項；若播放器空白或無法播放，可嘗試官方歌單入口。",
+    "music.slow": "等待較久；網路、地區或歌曲權限可能影響載入和播放，可嘗試官方歌單入口。",
+    "music.keyboard": "播放器內的 Esc 不會收起面板；可用 Tab 移到下方收起按鈕。",
+    "hero.artAlt": "淡藍與淺粉的層層雲朵環繞一輪柔和的月亮，雲間有微小星光"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -355,9 +363,13 @@
     "music.close": "Close music panel",
     "music.iframeTitle": "NetEase Cloud Music playlist player",
     "music.hint": "Use the player’s controls to play or change tracks.",
-    "music.fallback": "Unable to load or play?",
     "music.openPlaylist": "Open playlist on NetEase ↗",
-    "music.region": "Music playlist"
+    "music.region": "Music playlist",
+    "music.loading": "Waiting for the official NetEase page…",
+    "music.document": "Use NetEase’s own controls. If the player is blank or cannot play, try the official playlist link.",
+    "music.slow": "Still waiting. Network, region or track permissions may affect loading and playback. Try the official playlist link.",
+    "music.keyboard": "Esc inside the player cannot close this panel. Tab to the collapse button below.",
+    "hero.artAlt": "Soft blue and pink clouds surround a gentle moon, with tiny stars between the clouds."
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -475,8 +487,12 @@
     "music.close": "音楽パネルを閉じる",
     "music.iframeTitle": "NetEase Cloud Music プレイリストプレーヤー",
     "music.hint": "再生や曲の切り替えはプレーヤー内のボタンで。",
-    "music.fallback": "読み込み・再生ができない場合は",
     "music.openPlaylist": "NetEase でプレイリストを開く ↗",
-    "music.region": "音楽プレイリスト"
+    "music.region": "音楽プレイリスト",
+    "music.loading": "NetEase 公式ページを待っています…",
+    "music.document": "NetEase の操作ボタンをご利用ください。空白や再生不可の場合は公式プレイリストをお試しください。",
+    "music.slow": "時間がかかっています。通信環境・地域・楽曲の権限により読み込みや再生ができない場合は、公式プレイリストをお試しください。",
+    "music.keyboard": "プレーヤー内の Esc では閉じません。Tab で下の閉じるボタンへ移動できます。",
+    "hero.artAlt": "淡い青と桜色の雲が柔らかな月を囲み、雲の間に小さな星が輝いています。"
   }
 }

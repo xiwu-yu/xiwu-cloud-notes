@@ -1,0 +1,882 @@
+diff --git a/.github/workflows/pages.yml b/.github/workflows/pages.yml
+index 5ce2739..241a162 100644
+--- a/.github/workflows/pages.yml
++++ b/.github/workflows/pages.yml
+@@ -33 +33 @@ jobs:
+-        uses: actions/upload-artifact@v4
++        uses: actions/upload-artifact@v6
+@@ -40 +40 @@ jobs:
+-      - uses: actions/upload-pages-artifact@v4
++      - uses: actions/upload-pages-artifact@v5
+@@ -55 +55 @@ jobs:
+-      - uses: actions/deploy-pages@v4
++      - uses: actions/deploy-pages@v5.0.1
+diff --git a/README.md b/README.md
+index 03f0c2d..50b84d2 100644
+--- a/README.md
++++ b/README.md
+@@ -81 +81 @@ order: 3
+-桌面点击音乐按钮，在底部展开网易云官方播放器，使用 [夕雾yu_official 的《云间来信》](https://music.163.com/playlist?id=18522359099)。播放和切歌全部由网易云原生控件提供，不添加无法控制跨域音频的自定义五键或播放模式按钮。
++桌面点击音乐按钮，在右下角展开约 400px 宽的抽屉，内嵌 330×450px 的网易云官方播放器，使用 [夕雾yu_official 的《云间来信》](https://music.163.com/playlist?id=18522359099)。播放和切歌全部由网易云原生控件提供，不添加无法控制跨域音频的自定义五键或播放模式按钮。
+@@ -97 +97,7 @@ order: 3
+-外层兼容四语言和深浅主题。关闭后恢复按钮焦点，阅读弹窗保持原生顶层。桌面播放器不可用时保留官方歌单入口；跨域播放器音频、版权/地区限制及其内部界面由网易云管理，整页导航无法保证连续播放。
++外层兼容四语言和深浅主题，深色只调整宿主外框，不能改变跨域播放器的皮肤。矮桌面给页头留出空间，只缩短外层滚动视口，不缩放原生控件；可滚动到播放器顶部和底部，关闭与官方入口始终在滚动区外。高度不超过 600px 时，展开后暂时隐藏切换按钮，使用顶部关闭或下方收起按钮，收起后焦点返回切换按钮。阅读弹窗保持原生顶层。
++
++首次展开显示等待说明，超过 10 秒仍未收到文档加载事件时，提示网络、地区和歌曲权限可能影响使用。iframe 的 `load` 只用于更新宿主说明，不能证明文档正常呈现、音频可用或正在播放，浏览器错误页也可能触发它。官方歌单入口始终保留；不增加音频解析、代理、VIP 绕过或跨域播放控制。整页导航会离开当前播放器，同页保留节点不能实现跨页续播。
++
++Esc 仅在焦点位于宿主面板时可收起，iframe 内的 Esc 不会冒泡到父页。播放器后有说明、官方入口和可用 Tab 到达的收起按钮，外层滚动区也可用键盘操作；不使用透明遮罩拦截原生控件。
++
++本轮矮桌面、等待状态、键盘和触屏回归及截图见 [晨雾云笺验收记录](artifacts/morning-mist/README.md)。
+@@ -100,0 +107,8 @@ order: 3
++## 晨雾云笺样式与轻量动效
++
++主题区分文字/链接 `--accent` 与装饰 `--accent-decor`，使用暖白、浅蓝、樱花粉，深色使用蓝灰背景。辅助文字至少 12px，正文主要为 15–16px、行高 1.95，卡片使用整块链接与明确的悬停/键盘焦点；移动端保留单列和第二行导航。插画 alt 通过 `content/ui.json` 的 `hero.artAlt` 提供四语言。便笺和称呼卡也使用主题配色，配图上小字有实色底，避免仅检查纸面背景而漏掉实际合成背景。
++
++`dist/motion.js` / `motion.css` 是可失败的首页增强：云层以 30/36 秒缓慢移动，离屏或文档隐藏时暂停；卡片首次进入视口时短暂浮现，同页重复筛选不会重复播放。悬停抬升 2px，dialog 和音乐面板进入使用短过渡。默认内容可见，不依赖动效脚本读文章；CSS 和 JS 均响应 `prefers-reduced-motion`，不添加星点框架、持续动画滤镜或假播放状态。静态文章不加载这两项增强，不改变其正文、元数据与无 JS 阅读。
++
++构建后可运行 `node scripts/morning-mist-evidence.mjs after` 保存页面和本地冷加载数据，或 `node scripts/contrast-evidence.mjs` 对 320/375/1440px、双主题的实际文字区域背景采样。这些脚本使用已安装的 Playwright Chromium，不增加产品依赖。对比图、资源前后体积、验证命令和人工待验事项均在 [验收记录](artifacts/morning-mist/README.md)。
++
+@@ -130 +144 @@ pnpm build       # 从 Markdown 生成数据、静态文章页和 sitemap
+-GitHub Actions 在 PR、main push 和手动触发时验证；安装 Chromium 及 Linux 系统依赖。只有 main 的全部验证通过才上传并部署 Pages，部署作业通过 `needs: validate` 依赖验证。验证作业仅有 `contents: read`，`pages: write` 和 `id-token: write` 仅授予部署作业。失败时保留报告/trace 14 天。
++GitHub Actions 在 PR、main push 和手动触发时验证；安装 Chromium 及 Linux 系统依赖。只有 main 的全部验证通过才上传并部署 Pages，部署作业通过 `needs: validate` 依赖验证。验证作业仅有 `contents: read`，`pages: write` 和 `id-token: write` 仅授予部署作业。失败时保留报告/trace 14 天。Node 20 的 action 已按官方发布迁移：诊断上传使用 `upload-artifact@v6`，Pages 上传使用 `upload-pages-artifact@v5`（内部为 Node 24 的上传器），部署使用 `deploy-pages@v5.0.1`；本轮没有触发远端 workflow。
+diff --git a/content/ui.json b/content/ui.json
+index 1e9ca8b..c72a1d6 100644
+--- a/content/ui.json
++++ b/content/ui.json
+@@ -118 +117,0 @@
+-    "music.fallback": "无法加载或播放？",
+@@ -120 +119,6 @@
+-    "music.region": "音乐歌单"
++    "music.region": "音乐歌单",
++    "music.loading": "正在等待网易云官方页面…",
++    "music.document": "请使用网易云原生控件；若播放器空白或无法播放，可尝试官方歌单入口。",
++    "music.slow": "等待较久；网络、地区或歌曲权限可能影响加载和播放，可尝试官方歌单入口。",
++    "music.keyboard": "播放器内的 Esc 不会收起面板；可用 Tab 移到下方收起按钮。",
++    "hero.artAlt": "淡蓝与浅粉的层层云朵环绕一轮柔和的月亮，云间有微小星光"
+@@ -238 +241,0 @@
+-    "music.fallback": "無法載入或播放？",
+@@ -240 +243,6 @@
+-    "music.region": "音樂歌單"
++    "music.region": "音樂歌單",
++    "music.loading": "正在等待網易雲官方頁面…",
++    "music.document": "請使用網易雲原生控制項；若播放器空白或無法播放，可嘗試官方歌單入口。",
++    "music.slow": "等待較久；網路、地區或歌曲權限可能影響載入和播放，可嘗試官方歌單入口。",
++    "music.keyboard": "播放器內的 Esc 不會收起面板；可用 Tab 移到下方收起按鈕。",
++    "hero.artAlt": "淡藍與淺粉的層層雲朵環繞一輪柔和的月亮，雲間有微小星光"
+@@ -358 +365,0 @@
+-    "music.fallback": "Unable to load or play?",
+@@ -360 +367,6 @@
+-    "music.region": "Music playlist"
++    "music.region": "Music playlist",
++    "music.loading": "Waiting for the official NetEase page…",
++    "music.document": "Use NetEase’s own controls. If the player is blank or cannot play, try the official playlist link.",
++    "music.slow": "Still waiting. Network, region or track permissions may affect loading and playback. Try the official playlist link.",
++    "music.keyboard": "Esc inside the player cannot close this panel. Tab to the collapse button below.",
++    "hero.artAlt": "Soft blue and pink clouds surround a gentle moon, with tiny stars between the clouds."
+@@ -478 +489,0 @@
+-    "music.fallback": "読み込み・再生ができない場合は",
+@@ -480 +491,6 @@
+-    "music.region": "音楽プレイリスト"
++    "music.region": "音楽プレイリスト",
++    "music.loading": "NetEase 公式ページを待っています…",
++    "music.document": "NetEase の操作ボタンをご利用ください。空白や再生不可の場合は公式プレイリストをお試しください。",
++    "music.slow": "時間がかかっています。通信環境・地域・楽曲の権限により読み込みや再生ができない場合は、公式プレイリストをお試しください。",
++    "music.keyboard": "プレーヤー内の Esc では閉じません。Tab で下の閉じるボタンへ移動できます。",
++    "hero.artAlt": "淡い青と桜色の雲が柔らかな月を囲み、雲の間に小さな星が輝いています。"
+diff --git a/dist/index.html b/dist/index.html
+index f2d9b56..32f6ebb 100644
+--- a/dist/index.html
++++ b/dist/index.html
+@@ -7 +7 @@
+-<meta name="theme-color" content="#f8f8fc">
++<meta name="theme-color" content="#fbfaf8">
+@@ -10,2 +10,4 @@
+-<link rel="stylesheet" href="style.css?v=526d84efde">
+-<script defer src="profile.js?v=7f74e14e56"></script>
++<link rel="stylesheet" href="style.css?v=bb6d79c141">
++<link rel="stylesheet" href="motion.css?v=67dee04791">
++<script defer src="motion.js?v=9117d674e7"></script>
++<script defer src="profile.js?v=d9f63f3c2a"></script>
+@@ -13 +15 @@
+-<script defer src="script.js?v=04c8242030"></script>
++<script defer src="script.js?v=89543acbb6"></script>
+@@ -45 +47 @@
+-    <img src="assets/cloudscape.svg?v=4b6443d084" alt="淡蓝与浅粉的层层云朵环绕一轮柔和的月亮，云间有微小星光" width="680" height="650">
++    <img src="assets/cloudscape.svg?v=4b6443d084" alt="淡蓝与浅粉的层层云朵环绕一轮柔和的月亮，云间有微小星光" data-i18n-alt="hero.artAlt" width="680" height="650">
+@@ -166,3 +168,4 @@
+-    <div class="music-frame-viewport"><iframe id="music-frame" title="网易云音乐歌单播放器" data-i18n-title="music.iframeTitle" data-src="https://music.163.com/outchain/player?type=0&amp;id=18522359099&amp;auto=0&amp;height=430" width="330" height="450" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+-    <p class="music-help" data-i18n="music.fallback">无法加载或播放？</p>
+-    <div class="music-fallback"><a href="https://music.163.com/playlist?id=18522359099" target="_blank" rel="noopener noreferrer" data-i18n="music.openPlaylist">在网易云打开歌单 ↗</a></div>
++    <p id="music-status" class="music-status" role="status" aria-live="polite" aria-atomic="true"></p>
++    <div class="music-frame-viewport" role="region" tabindex="0" aria-describedby="music-keyboard-hint" aria-label="网易云音乐歌单播放器" data-i18n-aria-label="music.iframeTitle"><iframe id="music-frame" title="网易云音乐歌单播放器" data-i18n-title="music.iframeTitle" data-src="https://music.163.com/outchain/player?type=0&amp;id=18522359099&amp;auto=0&amp;height=430" width="330" height="450" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
++    <p id="music-keyboard-hint" class="music-keyboard-hint" data-i18n="music.keyboard">播放器内的 Esc 不会收起面板；可用 Tab 移到下方收起按钮。</p>
++    <div class="music-footer"><div class="music-fallback"><a href="https://music.163.com/playlist?id=18522359099" target="_blank" rel="noopener noreferrer" data-i18n="music.openPlaylist">在网易云打开歌单 ↗</a></div><button id="music-collapse" type="button" data-i18n="music.collapse">收起音乐歌单</button></div>
+diff --git a/dist/motion.css b/dist/motion.css
+new file mode 100644
+index 0000000..71d24ee
+--- /dev/null
++++ b/dist/motion.css
+@@ -0,0 +1,19 @@
++/* 轻量动效仅使用 transform / opacity；不会把默认内容设为隐藏。 */
++.cloud-one, .cloud-two { animation:cloud-drift 30s ease-in-out infinite alternate; animation-play-state:paused; }
++.cloud-two { animation-duration:36s; animation-direction:alternate-reverse; }
++.clouds-running .cloud-one, .clouds-running .cloud-two { animation-play-state:running; }
++@keyframes cloud-drift { from { transform:translate3d(0,0,0); } to { transform:translate3d(12px,-8px,0); } }
++.card-button { transition:transform 160ms,box-shadow 160ms,border-color 160ms; }
++.card-button:is(:hover,:focus-visible) { transform:translateY(-2px); border-color:var(--primary); box-shadow:var(--shadow); }
++.card-button:focus-visible .card-more { text-decoration:underline; text-underline-offset:4px; }
++.card-enter { animation:card-enter 280ms ease-out both; }
++@keyframes card-enter { from { opacity:.35; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
++dialog[open] { animation:dialog-enter 180ms ease-out; }
++@keyframes dialog-enter { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
++.music-panel:not([hidden]) { animation:music-enter 180ms ease-out; }
++@keyframes music-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
++@media(prefers-reduced-motion:reduce) {
++  .cloud, .card-enter, dialog[open], .music-panel:not([hidden]) { animation:none!important; }
++  .card-button { transition:none; }
++  .card-button:is(:hover,:focus-visible), .card-button:is(:hover,:focus-visible) img, .hero-button:hover { transform:none; }
++}
+diff --git a/dist/motion.js b/dist/motion.js
+new file mode 100644
+index 0000000..d7a424f
+--- /dev/null
++++ b/dist/motion.js
+@@ -0,0 +1,38 @@
++// 渐进增强：正文默认可见，观察器失败或没有脚本也不阻断阅读。
++(() => {
++  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
++  const hero = document.querySelector('.hero');
++  const grid = document.querySelector('.interest-grid');
++  if (!('IntersectionObserver' in window)) return;
++  let heroVisible = false;
++  const seen = new Set();
++  const syncClouds = () => document.documentElement.classList.toggle('clouds-running', heroVisible && !document.hidden && !reduced.matches);
++  if (hero) {
++    new IntersectionObserver(entries => {
++      heroVisible = entries[0].isIntersecting;
++      syncClouds();
++    }).observe(hero);
++    document.addEventListener('visibilitychange', syncClouds);
++  }
++  const cards = new IntersectionObserver(entries => {
++    for (const {target, isIntersecting} of entries) {
++      if (!isIntersecting) continue;
++      const id = target.dataset.essayId;
++      if (!reduced.matches && !seen.has(id)) target.classList.add('card-enter');
++      seen.add(id);
++      cards.unobserve(target);
++    }
++  }, {threshold:0.08});
++  const observeCards = () => grid?.querySelectorAll('.interest-card').forEach(card => cards.observe(card));
++  observeCards();
++  if (grid) new MutationObserver(records => {
++    for (const record of records) for (const node of record.removedNodes) {
++      if (node.nodeType === 1) cards.unobserve(node);
++    }
++    observeCards();
++  }).observe(grid, {childList:true});
++  reduced.addEventListener('change', () => {
++    syncClouds();
++    if (reduced.matches) document.querySelectorAll('.card-enter').forEach(card => card.classList.remove('card-enter'));
++  });
++})();
+diff --git a/dist/script.js b/dist/script.js
+index d9186c8..54bd086 100644
+--- a/dist/script.js
++++ b/dist/script.js
+@@ -455,0 +456,2 @@
++  let musicWaitTimer;
++  let musicStatus = '';
+@@ -456,0 +459,2 @@
++    const status = $('#music-status');
++    if (status) status.textContent = musicStatus ? t(`music.${musicStatus}`) : '';
+@@ -465 +469,9 @@
+-    if (expanded && !frame.hasAttribute('src')) frame.src = frame.dataset.src;
++    if (expanded && !frame.hasAttribute('src')) {
++      musicStatus = 'loading';
++      updateMusicLabel();
++      frame.src = frame.dataset.src;
++      musicWaitTimer = setTimeout(() => {
++        musicStatus = 'slow';
++        updateMusicLabel();
++      }, 10000);
++    }
+@@ -468,0 +481,7 @@
++    $('#music-frame').addEventListener('load', () => {
++      // load 仅说明嵌入文档返回，跨域宿主无法判断歌曲是否可播。
++      if (!$('#music-frame').hasAttribute('src')) return;
++      clearTimeout(musicWaitTimer);
++      musicStatus = 'document';
++      updateMusicLabel();
++    });
+@@ -477,0 +497,2 @@
++        clearTimeout(musicWaitTimer);
++        musicStatus = '';
+@@ -485 +506,3 @@
+-    $('#music-close').addEventListener('click', () => setMusicExpanded(false));
++    for (const button of [$('#music-close'), $('#music-collapse')]) {
++      button.addEventListener('click', () => setMusicExpanded(false));
++    }
+diff --git a/dist/style.css b/dist/style.css
+index 5baf2dd..7cfcdd6 100644
+--- a/dist/style.css
++++ b/dist/style.css
+@@ -1,3 +1,3 @@
+-/* 基础、主题与通用布局 */
+-:root { --paper:#f8f8fc; --ink:#404658; --muted:#72798a; --line:#dfe2ec; --primary:#626d91; --accent:#a76f8c; --wash:#eff0f8; --blue:#cbe7f1; --pink:#f0d4e1; --panel:#ffffff80; --serif:"Songti SC","STSong","Noto Serif CJK SC","Noto Serif CJK JP",Georgia,serif; color-scheme:light; }
+-:root[data-theme="dark"] { --paper:#202531; --ink:#e8e7ef; --muted:#b5b9cb; --line:#42495e; --primary:#c5cce5; --accent:#ddb4ca; --wash:#2d3344; --blue:#53667e; --pink:#74566d; --panel:#252c398a; color-scheme:dark; }
++/* 基础、主题与通用布局：accent 用于文字/链接，accent-decor 仅用于装饰。 */
++:root { --paper:#fbfaf8; --ink:#354052; --muted:#566174; --line:#d9dfe8; --primary:#53627f; --accent:#884562; --accent-decor:#c49ab2; --wash:#eef1f6; --blue:#d4e9f3; --pink:#f2dce6; --panel:#ffffffb8; --shadow:0 12px 36px #354a711a; --serif:"Songti SC","STSong","Noto Serif CJK SC","Noto Serif CJK JP",Georgia,serif; color-scheme:light; }
++:root[data-theme="dark"] { --paper:#1e2837; --ink:#f5f6fb; --muted:#bcc6d8; --line:#45546a; --primary:#c6d6ef; --accent:#efbfd7; --accent-decor:#9f799a; --wash:#2a374b; --blue:#425d78; --pink:#69516d; --panel:#263449d9; --shadow:0 12px 36px #080e1b40; color-scheme:dark; }
+@@ -6 +6 @@ html { scroll-behavior:smooth; scroll-padding-top:30px; }
+-body { margin:0; background:var(--paper); color:var(--ink); font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif; font-size:15px; line-height:1.8; }
++body { margin:0; background:var(--paper); color:var(--ink); font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif; font-size:15px; line-height:1.9; }
+@@ -18 +18 @@ img { display:block; width:100%; height:auto; }
+-.eyebrow { font-size:9px; font-weight:600; letter-spacing:2px; margin:0 0 29px; display:flex; align-items:center; gap:9px; }
++.eyebrow { font-size:12px; font-weight:600; letter-spacing:2px; margin:0 0 29px; display:flex; align-items:center; gap:9px; }
+@@ -20 +20 @@ h1 { font-family:var(--serif); font-size:clamp(34px,3.9vw,54px); font-weight:500
+-.text-link { font-size:11px; color:var(--muted); }
++.text-link { font-size:12px; color:var(--muted); }
+@@ -45 +45 @@ a:focus-visible { outline:3px solid var(--accent); outline-offset:5px; }
+-  .eyebrow { font-size:8px; letter-spacing:1.5px; margin-bottom:24px; }
++  .eyebrow { font-size:12px; letter-spacing:1.5px; margin-bottom:24px; }
+@@ -64 +64 @@ a:focus-visible { outline:3px solid var(--accent); outline-offset:5px; }
+-  :root:not([data-theme]) { --paper:#202531; --ink:#e8e7ef; --muted:#b5b9cb; --line:#42495e; --primary:#c5cce5; --accent:#ddb4ca; --wash:#2d3344; --blue:#53667e; --pink:#74566d; --panel:#252c398a; color-scheme:dark; }
++  :root:not([data-theme]) { --paper:#1e2837; --ink:#f5f6fb; --muted:#bcc6d8; --line:#45546a; --primary:#c6d6ef; --accent:#efbfd7; --accent-decor:#9f799a; --wash:#2a374b; --blue:#425d78; --pink:#69516d; --panel:#263449d9; --shadow:0 12px 36px #080e1b40; color-scheme:dark; }
+@@ -72 +72 @@ details { border-bottom:1px solid var(--line); padding:18px 0; }
+-summary { cursor:pointer; font-size:13px; list-style:none; display:flex; align-items:center; justify-content:space-between; gap:20px; }
++summary { cursor:pointer; font-size:15px; list-style:none; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+@@ -76 +76 @@ details[open] summary::after { content:'−'; }
+-details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px; padding-right:22px; }
++details p { font-size:15px; line-height:1.95; color:var(--muted); margin-bottom:2px; padding-right:22px; }
+@@ -85 +85 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.site-header { height:110px; display:flex; align-items:center; border-bottom:1px solid var(--line); gap:28px; }
++.site-header { height:110px; display:flex; align-items:center; border-bottom:1px solid var(--line); gap:28px; background:var(--paper); }
+@@ -88 +88 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.brand-sub { font-size:8px; letter-spacing:1.5px; font-weight:500; margin-left:10px; }
++.brand-sub { font-size:12px; letter-spacing:1.5px; font-weight:500; margin-left:10px; }
+@@ -90 +90,5 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.site-header nav a:hover { color:var(--accent); }
++@supports (backdrop-filter:blur(12px)) {
++  .site-header { background:color-mix(in srgb,var(--paper) 92%,transparent); backdrop-filter:blur(12px); }
++}
++.site-header nav a { padding-block:8px; text-underline-offset:6px; transition:color 160ms,background-color 160ms; }
++.site-header nav a:is(:hover,:focus-visible) { color:var(--accent); text-decoration:underline; }
+@@ -93 +97 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.language-picker select { appearance:none; font:inherit; font-size:11px; color:var(--ink); background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2372798a' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center; border:1px solid var(--line); border-radius:20px; height:38px; min-width:88px; padding:0 27px 0 13px; cursor:pointer; }
++.language-picker select { appearance:none; font:inherit; font-size:12px; color:var(--ink); background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2372798a' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center; border:1px solid var(--line); border-radius:20px; height:38px; min-width:88px; padding:0 27px 0 13px; cursor:pointer; }
+@@ -103 +107 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .site-header nav { gap:15px; font-size:10px; }
++  .site-header nav { gap:15px; font-size:12px; }
+@@ -108 +112 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .language-picker select { height:34px; min-width:82px; font-size:10px; padding-right:24px; background-position:right 9px center; }
++  .language-picker select { height:34px; min-width:82px; font-size:12px; padding-right:24px; background-position:right 9px center; }
+@@ -115 +118,0 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .site-header nav { font-size:9px; }
+@@ -123 +126 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.status-dot { height:6px; width:6px; border-radius:50%; background:#b899b1; }
++.status-dot { height:6px; width:6px; border-radius:50%; background:var(--accent-decor); }
+@@ -125 +128 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.pronoun { display:inline-block; font-size:10px; border:1px solid #d5cede; border-radius:20px; line-height:1.7; padding:2px 12px; margin-left:13px; color:var(--accent); }
++.pronoun { display:inline-block; font-size:12px; border:1px solid #d5cede; border-radius:20px; line-height:1.7; padding:2px 12px; margin-left:13px; color:var(--accent); }
+@@ -127,2 +130,2 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.accent-word svg { position:absolute; bottom:-8px; left:0; width:100%; height:12px; stroke:#c5a8c2; stroke-width:1.5; fill:none; }
+-.hero-description { max-width:390px; color:var(--muted); font-size:14px; line-height:2.15; margin-bottom:30px; }
++.accent-word svg { position:absolute; bottom:-8px; left:0; width:100%; height:12px; stroke:var(--accent-decor); stroke-width:1.5; fill:none; }
++.hero-description { max-width:390px; color:var(--muted); font-size:16px; line-height:1.95; margin-bottom:30px; }
+@@ -136,2 +139,2 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.hero-button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-width:158px; height:44px; padding:0 18px; border:1px solid transparent; border-radius:5px; font-size:12px; line-height:1; white-space:nowrap; transition:transform .2s,background .2s,border-color .2s; }
+-.hero-button:hover { transform:translateY(-3px); }
++.hero-button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-width:158px; height:44px; padding:0 18px; border:1px solid transparent; border-radius:5px; font-size:12px; line-height:1; white-space:nowrap; transition:transform 160ms,background 160ms,border-color 160ms; }
++.hero-button:hover { transform:translateY(-2px); }
+@@ -149 +152 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .hero-description { font-size:13px; max-width:95%; }
++  .hero-description { font-size:15px; max-width:95%; }
+@@ -152 +155 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .hero-art figcaption { margin-inline:15px; font-size:11px; }
++  .hero-art figcaption { margin-inline:15px; font-size:12px; }
+@@ -156 +159 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .hero-button { flex:1; min-width:0; height:42px; padding:0 10px; font-size:11px; gap:7px; }
++  .hero-button { flex:1; min-width:0; height:42px; padding:0 10px; font-size:12px; gap:7px; }
+@@ -162 +165 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .hero-button { height:40px; padding:0 7px; font-size:10px; gap:5px; }
++  .hero-button { height:40px; padding:0 7px; font-size:12px; gap:5px; }
+@@ -167,2 +170,2 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.ticker .wrap { display:flex; justify-content:space-between; gap:20px; align-items:center; font-size:9px; letter-spacing:1.4px; white-space:nowrap; overflow:hidden; color:var(--muted); }
+-.gentle-note { text-align:center; padding:40px 20px 55px; border-block:1px solid var(--line); background:radial-gradient(ellipse at 30% 40%,#ddecf35e,transparent 70%),radial-gradient(ellipse at 80% 60%,#f1dbe860,transparent 70%); }
++.ticker .wrap { display:flex; justify-content:space-between; gap:20px; align-items:center; font-size:12px; letter-spacing:1.4px; white-space:nowrap; overflow:hidden; color:var(--muted); }
++.gentle-note { text-align:center; padding:40px 20px 55px; border-block:1px solid var(--line); background:radial-gradient(ellipse at 30% 40%,color-mix(in srgb,var(--blue) 38%,transparent),transparent 70%),radial-gradient(ellipse at 80% 60%,color-mix(in srgb,var(--pink) 30%,transparent),transparent 70%); }
+@@ -171 +174 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.gentle-note>small { color:var(--muted); display:block; font-size:8px; letter-spacing:2.4px; line-height:2.2; }
++.gentle-note>small { color:var(--muted); display:block; font-size:12px; letter-spacing:2.4px; line-height:2.2; }
+@@ -173,3 +175,0 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-@media(max-width:1050px) {
+-  .ticker .wrap { font-size:8px; }
+-}
+@@ -186 +186 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.about-copy>p:first-child { font-size:14px; line-height:2.2; margin:0 0 25px; color:var(--muted); white-space:pre-line; }
++.about-copy>p:first-child { font-size:16px; line-height:1.95; margin:0 0 25px; color:var(--muted); white-space:pre-line; }
+@@ -188,2 +188,2 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.tags span { border:1px solid var(--line); background:var(--panel); border-radius:30px; padding:4px 12px; font-size:10px; }
+-.editorial-note { font-size:10px; color:var(--muted); margin:19px 0 0; }
++.tags span { border:1px solid var(--line); background:var(--panel); border-radius:30px; padding:4px 12px; font-size:12px; }
++.editorial-note { font-size:12px; color:var(--muted); margin:19px 0 0; }
+@@ -191 +191 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.identity-avatar { width:45px; height:45px; display:grid; place-items:center; border-radius:50%; background:linear-gradient(135deg,#d7e9f2,#f0dde8); color:#626c89; font-family:var(--serif); font-size:23px; }
++.identity-avatar { width:45px; height:45px; display:grid; place-items:center; border-radius:50%; background:linear-gradient(135deg,color-mix(in srgb,var(--blue) 50%,var(--paper)),color-mix(in srgb,var(--pink) 50%,var(--paper))); color:var(--ink); font-family:var(--serif); font-size:23px; }
+@@ -193,3 +193,3 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.identity-card div>span { display:block; font-size:10px; color:var(--muted); }
+-.identity-card button { font-size:10px; background:none; border:1px solid var(--line); border-radius:5px; padding:8px 11px; margin-left:auto; min-height:38px; }
+-.copy-status { font-size:10px; color:var(--muted); min-height:18px; margin:8px 0 0; }
++.identity-card div>span { display:block; font-size:12px; color:var(--muted); }
++.identity-card button { font-size:12px; background:none; border:1px solid var(--line); border-radius:5px; padding:8px 11px; margin-left:auto; min-height:38px; }
++.copy-status { font-size:12px; color:var(--muted); min-height:18px; margin:8px 0 0; }
+@@ -207 +207 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .about-copy>p:first-child { font-size:13px; }
++  .about-copy>p:first-child { font-size:15px; }
+@@ -216 +216 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.filter { border:1px solid transparent; background:transparent; font-size:11px; padding:7px 19px; border-radius:30px; min-height:40px; }
++.filter { border:1px solid transparent; background:transparent; font-size:12px; padding:7px 19px; border-radius:30px; min-height:40px; }
+@@ -219,3 +219,3 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.item-count { font-size:10px; letter-spacing:1px; color:var(--muted); white-space:nowrap; }
+-.interest-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:42px 28px; align-items:start; }
+-.card-button { padding:0; text-align:left; border:0; background:none; width:100%; display:block; font:inherit; color:inherit; cursor:pointer; }
++.item-count { font-size:12px; letter-spacing:1px; color:var(--muted); white-space:nowrap; }
++.interest-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:42px 28px; align-items:start; }
++.card-button { padding:16px; text-align:left; border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 8px 24px #354a710a; width:100%; display:block; font:inherit; color:inherit; cursor:pointer; }
+@@ -223,6 +223,6 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.card-image img { aspect-ratio:1.7; object-fit:cover; transition:transform .4s; }
+-.card-button:hover img { transform:scale(1.05); }
+-.card-number { position:absolute; top:13px; left:15px; color:#7b8197; font-size:10px; letter-spacing:1px; }
+-.card-meta { font-size:8px; letter-spacing:1px; color:var(--muted); margin:21px 0 8px; }
+-.card-description { font-size:12px; color:var(--muted); line-height:2; margin:0 0 19px; margin-top:0; }
+-.card-more { display:block; border-top:1px solid var(--line); padding-top:12px; font-size:10px; }
++.card-image img { aspect-ratio:1.7; object-fit:cover; transition:transform 160ms; }
++.card-button:is(:hover,:focus-visible) img { transform:scale(1.015); }
++.card-number { position:absolute; top:13px; left:15px; color:var(--muted); background:var(--paper); border-radius:20px; padding:1px 8px; font-size:12px; letter-spacing:1px; }
++.card-meta { font-size:12px; line-height:1.7; letter-spacing:.5px; color:var(--muted); margin:21px 0 8px; }
++.card-description { font-size:15px; color:var(--muted); line-height:2; margin:0 0 19px; }
++.card-more { display:block; min-height:40px; border-top:1px solid var(--line); padding-top:12px; font-size:12px; }
+@@ -231 +231 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.archive-selects label { display:flex; align-items:center; gap:10px; font-size:11px; color:var(--muted); }
++.archive-selects label { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); }
+@@ -234 +234 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.view-switch button { border:0; background:none; padding:8px 15px; border-radius:5px; font-size:11px; min-height:38px; white-space:nowrap; }
++.view-switch button { border:0; background:none; padding:8px 15px; border-radius:5px; font-size:12px; min-height:38px; white-space:nowrap; }
+@@ -236,2 +236,2 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.archive-note { font-size:10px; color:var(--muted); margin:14px 0 27px; }
+-.entry-date { display:block; font-size:10px; color:var(--muted); line-height:1.8; margin:0 0 13px; }
++.archive-note { font-size:12px; color:var(--muted); margin:14px 0 27px; }
++.entry-date { display:block; font-size:12px; color:var(--muted); line-height:1.8; margin:0 0 13px; }
+@@ -240 +240 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.timeline-heading>span { font-size:11px; color:var(--muted); letter-spacing:0; }
++.timeline-heading>span { font-size:12px; color:var(--muted); letter-spacing:0; }
+@@ -246 +246 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.timeline-category { font-size:11px; color:var(--accent); padding-top:4px; }
++.timeline-category { font-size:12px; color:var(--accent); padding-top:4px; }
+@@ -248,2 +248,2 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.timeline-description { grid-column:2; font-size:12px; color:var(--muted); }
+-.timeline-reading { grid-column:3; grid-row:1; font-size:10px; color:var(--muted); align-self:center; white-space:nowrap; }
++.timeline-description { grid-column:2; font-size:15px; color:var(--muted); }
++.timeline-reading { grid-column:3; grid-row:1; font-size:12px; color:var(--muted); align-self:center; white-space:nowrap; }
+@@ -252 +252 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.entry-tags { display:flex; flex-wrap:wrap; gap:7px; margin:12px 0 16px; font-size:10px; line-height:1.7; }
++.entry-tags { display:flex; flex-wrap:wrap; gap:7px; margin:12px 0 16px; font-size:12px; line-height:1.7; }
+@@ -263 +263 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.archive-search input { width:100%; min-height:40px; font:inherit; font-size:11px; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:5px; padding:9px 12px; }
++.archive-search input { width:100%; min-height:40px; font:inherit; font-size:12px; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:5px; padding:9px 12px; }
+@@ -286 +285,0 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .card-description { font-size:13px; }
+@@ -296,3 +295,2 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .timeline-description { grid-column:1; grid-row:auto; font-size:12px; line-height:1.9; }
+-  .timeline-reading { grid-column:1; grid-row:auto; font-size:10px; }
+-  .entry-date { font-size:10px; }
++  .timeline-description { grid-column:1; grid-row:auto; font-size:15px; line-height:1.9; }
++  .timeline-reading { grid-column:1; grid-row:auto; font-size:12px; }
+@@ -311,3 +309,3 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.resource-list p { font-size:11px; color:var(--muted); margin:0; }
+-.resource-type { font-size:10px; white-space:nowrap; margin-left:auto; color:var(--muted); }
+-.resource-note { font-size:10px; color:var(--muted); margin:19px 0 0; }
++.resource-list p { font-size:15px; color:var(--muted); margin:0; }
++.resource-type { font-size:12px; white-space:nowrap; margin-left:auto; color:var(--muted); }
++.resource-note { font-size:12px; color:var(--muted); margin:19px 0 0; }
+@@ -321,2 +319 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .resource-type { margin-left:28px; max-width:none; white-space:nowrap; font-size:9px; }
+-  .resource-note { font-size:9px; }
++  .resource-type { margin-left:28px; max-width:none; white-space:nowrap; font-size:12px; }
+@@ -327 +324 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.contact .eyebrow { margin-bottom:16px; }
++.contact .eyebrow { margin-bottom:16px; width:max-content; max-width:100%; color:var(--ink); background:var(--paper); box-shadow:0 0 0 5px var(--paper); border-radius:3px; letter-spacing:1.5px; }
+@@ -332 +329 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.contact-action>.text-link { display:inline-block; margin-top:18px; }
++.contact-action>.text-link { display:inline-block; margin-top:18px; padding:2px 8px; border-radius:6px; background:var(--paper); color:var(--accent); text-decoration:underline; text-underline-offset:4px; }
+@@ -342 +339 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-.contact-email { display:flex; width:max-content; align-items:center; justify-content:center; gap:8px; max-width:100%; margin:0 auto; padding:9px 13px; border:1px solid var(--line); border-radius:6px; background:var(--panel); font-size:11px; line-height:1.7; color:var(--ink); text-align:left; overflow-wrap:anywhere; transition:background .2s,border-color .2s; }
++.contact-email { display:flex; width:max-content; align-items:center; justify-content:center; gap:8px; max-width:100%; margin:0 auto; padding:9px 13px; border:1px solid var(--line); border-radius:6px; background:var(--panel); font-size:12px; line-height:1.7; color:var(--ink); text-align:left; overflow-wrap:anywhere; transition:background .2s,border-color .2s; }
+@@ -357 +354 @@ details p { font-size:12px; line-height:2; color:var(--muted); margin-bottom:2px
+-  .contact-email { margin:0; font-size:11px; }
++  .contact-email { margin:0; font-size:12px; }
+@@ -372,2 +369,2 @@ footer .brand { font-size:20px; }
+-footer p { font-size:10px; color:var(--muted); }
+-footer>a:last-child { font-size:10px; color:var(--muted); }
++footer p { font-size:12px; color:var(--muted); }
++footer>a:last-child { font-size:12px; color:var(--muted); }
+@@ -384 +381 @@ dialog h2 { font-size:29px; }
+-#dialog-body { font-size:14px; line-height:2.15; margin-top:25px; white-space:normal; overflow-wrap:anywhere; color:var(--ink); }
++#dialog-body { font-size:16px; line-height:1.95; margin-top:25px; white-space:normal; overflow-wrap:anywhere; color:var(--ink); }
+@@ -386 +383 @@ dialog h2 { font-size:29px; }
+-.dialog-meta { border-bottom:1px solid var(--line); padding-bottom:18px; font-size:10px; color:var(--muted); }
++.dialog-meta { border-bottom:1px solid var(--line); padding-bottom:18px; font-size:12px; color:var(--muted); }
+@@ -388,2 +385,2 @@ dialog h2 { font-size:29px; }
+-.dialog-pagination { display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:22px; margin-top:32px; gap:12px; }
+-.dialog-pagination button { border:1px solid var(--line); background:var(--wash); padding:9px 14px; border-radius:5px; font-size:11px; min-height:40px; }
++.dialog-pagination { flex-wrap:wrap; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:22px; margin-top:32px; gap:12px; }
++.dialog-pagination button { border:1px solid var(--line); background:var(--wash); padding:9px 14px; border-radius:5px; font-size:12px; min-height:40px; }
+@@ -391 +388 @@ dialog h2 { font-size:29px; }
+-.dialog-pagination>span { font-size:10px; color:var(--muted); }
++.dialog-pagination>span { font-size:12px; color:var(--muted); }
+@@ -414 +411 @@ dialog h2 { font-size:29px; }
+-.dialog-share { border:0; background:none; color:var(--accent); border-bottom:1px solid transparent; padding:0; font-size:10px; min-height:0; }
++.dialog-share { border:0; background:none; color:var(--accent); border-bottom:1px solid transparent; padding:0; font-size:12px; min-height:0; }
+@@ -416,2 +413,2 @@ dialog h2 { font-size:29px; }
+-.dialog-share-status { font-size:10px; color:var(--muted); text-align:center; margin:10px 0 0; overflow-wrap:anywhere; }
+-.dialog-toolbar { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding-right:38px; }
++.dialog-share-status { font-size:12px; color:var(--muted); text-align:center; margin:10px 0 0; overflow-wrap:anywhere; }
++.dialog-toolbar { flex-wrap:wrap; display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding-right:38px; }
+@@ -419 +416 @@ dialog h2 { font-size:29px; }
+-.dialog-language-select { appearance:none; font:inherit; font-size:10px; color:var(--muted); background:var(--wash) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2372798a' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 9px center; border:1px solid var(--line); border-radius:20px; height:30px; min-width:78px; padding:0 23px 0 10px; cursor:pointer; flex-shrink:0; }
++.dialog-language-select { appearance:none; font:inherit; font-size:12px; color:var(--muted); background:var(--wash) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2372798a' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 9px center; border:1px solid var(--line); border-radius:20px; height:30px; min-width:78px; padding:0 23px 0 10px; cursor:pointer; flex-shrink:0; }
+@@ -422 +419 @@ dialog h2 { font-size:29px; }
+-.static-article #dialog-body { font-size:16px; line-height:2; }
++.static-article #dialog-body { font-size:16px; line-height:1.95; }
+@@ -431 +428 @@ dialog h2 { font-size:29px; }
+-  #dialog-body { font-size:15px; line-height:2.1; }
++  #dialog-body { font-size:15px; line-height:1.95; }
+@@ -450 +447,2 @@ dialog h2 { font-size:29px; }
+-.music-widget { position:fixed; left:max(16px,env(safe-area-inset-left,0px)); right:max(16px,env(safe-area-inset-right,0px)); bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:5; width:auto; display:flex; flex-direction:column; align-items:flex-end; gap:10px; pointer-events:none; }
++/* 仅 iframe 视口可滚动；标题、关闭和官方入口不参与滚动。 */
++.music-widget { position:fixed; right:max(16px,env(safe-area-inset-right,0px)); bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:5; width:min(400px,calc(100% - 32px)); display:flex; flex-direction:column; align-items:flex-end; gap:18px; pointer-events:none; }
+@@ -452 +450 @@ dialog h2 { font-size:29px; }
+-.music-toggle { order:2; display:flex; align-items:center; justify-content:center; gap:7px; min-width:88px; min-height:48px; padding:9px 14px; border:1px solid var(--line); border-radius:28px; color:var(--primary); background:linear-gradient(125deg,color-mix(in srgb,var(--blue) 60%,var(--paper)),color-mix(in srgb,var(--pink) 55%,var(--paper))); box-shadow:0 6px 24px #313d6426; font-size:12px; }
++.music-toggle { order:2; display:flex; align-items:center; justify-content:center; gap:7px; min-width:88px; min-height:48px; padding:9px 14px; border:1px solid var(--line); border-radius:28px; color:var(--primary); background:linear-gradient(125deg,color-mix(in srgb,var(--blue) 60%,var(--paper)),color-mix(in srgb,var(--pink) 55%,var(--paper))); box-shadow:var(--shadow); font-size:12px; }
+@@ -454 +452,4 @@ dialog h2 { font-size:29px; }
+-.music-panel { order:1; align-self:center; max-width:1200px; display:flex; flex-direction:column; width:100%; max-height:calc(100dvh - 96px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px)); padding:16px; border:1px solid var(--line); border-radius:20px; color:var(--ink); background:linear-gradient(135deg,color-mix(in srgb,var(--blue) 30%,transparent),color-mix(in srgb,var(--pink) 24%,transparent)),color-mix(in srgb,var(--paper) 90%,transparent); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); box-shadow:0 14px 48px #202d5533; overflow:hidden; }
++.music-panel { order:1; display:flex; flex-direction:column; align-items:stretch; gap:8px; width:100%; min-height:0; max-height:calc(100dvh - 202px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px)); padding:16px; border:1px solid var(--line); border-radius:20px; color:var(--ink); background:var(--paper); box-shadow:var(--shadow); overflow:hidden; }
++@supports (backdrop-filter:blur(18px)) {
++  .music-panel { background:linear-gradient(135deg,color-mix(in srgb,var(--blue) 22%,transparent),color-mix(in srgb,var(--pink) 18%,transparent)),color-mix(in srgb,var(--paper) 96%,transparent); backdrop-filter:blur(18px); }
++}
+@@ -458 +459 @@ dialog h2 { font-size:29px; }
+-.music-byline { margin:5px 0 0; font-size:10px; color:var(--muted); overflow-wrap:anywhere; }
++.music-byline { margin:3px 0 0; font-size:12px; color:var(--muted); overflow-wrap:anywhere; }
+@@ -460,6 +461,8 @@ dialog h2 { font-size:29px; }
+-.music-hint { margin:12px 0; color:var(--muted); font-size:11px; line-height:1.7; flex-shrink:0; }
+-.music-frame-viewport { flex:0 1 450px; width:100%; max-width:330px; align-self:center; min-height:0; overflow:auto; overscroll-behavior:contain; border:1px solid var(--line); border-radius:10px; background:#fff; }
+-.music-frame-viewport iframe { display:block; width:100%; min-width:280px; height:450px; border:0; background:#fff; }
+-.music-help { margin:12px 0 0; font-size:11px; color:var(--muted); line-height:1.6; flex-shrink:0; }
+-.music-fallback { flex-shrink:0; font-size:12px; color:var(--accent); }
+-.music-fallback a { display:inline-flex; align-items:center; min-height:40px; text-decoration:underline; text-underline-offset:3px; }
++.music-hint, .music-status, .music-keyboard-hint { margin:0; color:var(--muted); font-size:12px; line-height:1.65; flex-shrink:0; }
++.music-frame-viewport { flex:1 1 450px; width:350px; scrollbar-gutter:stable; max-width:100%; align-self:center; min-height:0; overflow:auto; overscroll-behavior:contain; border:1px solid var(--line); border-radius:10px; background:#fff; }
++.music-frame-viewport:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
++.music-frame-viewport iframe { display:block; width:330px; height:450px; border:0; background:#fff; }
++.music-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-shrink:0; font-size:12px; }
++.music-fallback { min-width:0; color:var(--accent); }
++.music-fallback a { display:inline-flex; align-items:center; min-height:44px; text-decoration:underline; text-underline-offset:3px; }
++.music-footer button { flex-shrink:0; max-width:130px; min-height:44px; padding:6px 10px; border:1px solid var(--line); border-radius:12px; background:var(--wash); font-size:12px; }
+@@ -468,13 +471,7 @@ dialog h2 { font-size:29px; }
+-@media(max-height:480px) {
+-  .music-panel { padding:12px; }
+-  .music-hint { display:none; }
+-  .music-help { margin-top:6px; }
+-}
+-
+-@media(min-width:1051px) {
+-  .music-widget[data-mode="embedded"] .music-panel { display:grid; grid-template-columns:minmax(180px,1fr) 330px minmax(180px,1fr); grid-template-rows:auto auto 1fr; gap:0 22px; }
+-  .music-heading { grid-column:1/-1; margin-bottom:12px; }
+-  .music-hint { grid-column:1; grid-row:2; }
+-  .music-frame-viewport { grid-column:2; grid-row:2/4; }
+-  .music-help { grid-column:3; grid-row:2; }
+-  .music-fallback { grid-column:3; grid-row:3; }
++@media(max-height:600px) {
++  /* 矮桌面给页头留出 120px；展开时使用外层两处收起按钮，省下切换按钮的高度。 */
++  .music-panel { padding:10px; gap:4px; max-height:calc(100dvh - 136px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px)); }
++  .music-widget:has(.music-panel:not([hidden])) .music-toggle { display:none; }
++  .music-byline { display:none; }
++  .music-hint, .music-keyboard-hint { display:none; }
++  .music-heading h2 { font-size:18px; }
+@@ -484 +481 @@ dialog h2 { font-size:29px; }
+-@media(max-width:720px), (hover:none) and (pointer:coarse) {
++@media(max-width:720px), (hover:none), (pointer:coarse), (pointer:none) {
+diff --git a/scripts/contrast-evidence.mjs b/scripts/contrast-evidence.mjs
+new file mode 100644
+index 0000000..2fa43ab
+--- /dev/null
++++ b/scripts/contrast-evidence.mjs
+@@ -0,0 +1,66 @@
++// 实际合成背景采样，不替代完整 WCAG 人工审查。只隐藏文字墨色，保留布局与底图。
++import { chromium } from '@playwright/test';
++import { spawn } from 'node:child_process';
++import { once } from 'node:events';
++import { mkdir, writeFile } from 'node:fs/promises';
++const output='artifacts/morning-mist/contrast';
++await mkdir(output,{recursive:true});
++const server=spawn(process.execPath,['scripts/serve.mjs'],{env:{...process.env,PORT:'4175'},stdio:['ignore','pipe','inherit']});
++await once(server.stdout,'data');
++const browser=await chromium.launch();
++try {
++  const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});
++  const samples=[];
++  for(const width of [1440,375,320])for(const theme of ['light','dark']) {
++    await page.setViewportSize({width,height:900});
++    await page.goto('http://127.0.0.1:4175/xiwu-cloud-notes/?lang=zh-CN');
++    if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('.theme-toggle').click();
++    for(const [name,selector,minimum] of [
++      ['intro','.hero-description',4.5],['about','.about-copy>p:first-child',4.5],['note','.gentle-note>small',4.5],['identity','.identity-avatar',4.5],['link','.pronoun',4.5],['date','.entry-date',4.5],
++      ['summary','.card-description',4.5],['tag','.entry-tag',4.5],['card-number','.card-number',4.5],
++      ['contact-label','.contact .eyebrow',4.5],['contact-title','.contact h2',3],
++      ['contact-email','.contact-email',4.5],['contact-more','.contact-action>.text-link',4.5]
++    ]) {
++      const el=page.locator(selector).first();
++      await el.scrollIntoViewIfNeeded();
++      const data=await el.evaluate(el=>{
++        const style=getComputedStyle(el), color=style.color, size=parseFloat(style.fontSize);
++        const range=document.createRange();range.selectNodeContents(el);
++        const text=range.getBoundingClientRect(),box=el.getBoundingClientRect();
++        el.style.setProperty('color','transparent','important');
++        el.style.setProperty('text-shadow','none','important');
++        const rule=document.createElement('style');rule.id='contrast-probe-rule';
++        rule.textContent='.contrast-probe * {color:transparent!important;text-shadow:none!important}';
++        document.head.append(rule);el.classList.add('contrast-probe');
++        return {color,size,textBox:{x:text.x-box.x,y:text.y-box.y,width:text.width,height:text.height}};
++      });
++      const path=`${output}/${width}-${theme}-${name}.png`;
++      const png=await el.screenshot({path});
++      const result=await page.evaluate(async ({url,color,textBox:b})=>{
++        const image=new Image();image.src=url;await image.decode();
++        const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;
++        const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
++        const pixels=ctx.getImageData(0,0,image.width,image.height).data;
++        const lum=rgb=>rgb.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);
++        const fg=lum(color.match(/\d+/g).slice(0,3).map(Number));
++        let ratio=Infinity,background;
++        // Range 只覆盖文字区域，排除圆角边缘与没有文字的内边距。
++        for(let y=Math.max(0,Math.ceil(b.y));y<Math.min(image.height,Math.floor(b.y+b.height));y+=2) {
++          for(let x=Math.max(0,Math.ceil(b.x));x<Math.min(image.width,Math.floor(b.x+b.width));x+=2) {
++            const i=(y*image.width+x)*4,bg=[pixels[i],pixels[i+1],pixels[i+2]],l=lum(bg);
++            const contrast=(Math.max(fg,l)+.05)/(Math.min(fg,l)+.05);
++            if(contrast<ratio){ratio=contrast;background=bg;}
++          }
++        }
++        return {minimumContrast:Number(ratio.toFixed(3)),worstBackground:background};
++      },{url:`data:image/png;base64,${png.toString('base64')}`,...data});
++      const threshold=name==='contact-title' && data.size<24 ? 4.5 : minimum;
++      samples.push({name,width,theme,path,minimum:threshold,...data,...result});
++      await el.evaluate(el=>{el.style.removeProperty('color');el.style.removeProperty('text-shadow');el.classList.remove('contrast-probe');document.querySelector('#contrast-probe-rule').remove();});
++    }
++  }
++  await writeFile(`${output}/results.json`,JSON.stringify(samples,null,2)+'\n');
++  const failures=samples.filter(s=>s.minimumContrast<s.minimum);
++  console.log(`${samples.length} actual background samples; ${failures.length} below threshold`);
++  if(failures.length){console.log(failures);process.exitCode=1;}
++} finally {await browser.close();server.kill();}
+diff --git a/scripts/morning-mist-evidence.mjs b/scripts/morning-mist-evidence.mjs
+new file mode 100644
+index 0000000..d2fcd6f
+--- /dev/null
++++ b/scripts/morning-mist-evidence.mjs
+@@ -0,0 +1,75 @@
++// 本地证据；播放器使用标明的宿主 fixture，不代表网易云真实播放验证。
++import { chromium } from '@playwright/test';
++import { spawn } from 'node:child_process';
++import { once } from 'node:events';
++import { mkdir, readFile, writeFile } from 'node:fs/promises';
++import { gzipSync } from 'node:zlib';
++const phase = process.argv[2] || 'after';
++const output = `artifacts/morning-mist/${phase}`;
++await mkdir(output, { recursive: true });
++const server = spawn(process.execPath, ['scripts/serve.mjs'], { env: {...process.env, PORT:'4175'}, stdio:['ignore','pipe','inherit'] });
++await once(server.stdout, 'data');
++const browser = await chromium.launch();
++try {
++  const page = await browser.newPage({viewport:{width:1440,height:900}, reducedMotion:'reduce'});
++  const errors=[];
++  page.on('pageerror',error=>errors.push(error.message));
++  page.on('requestfailed',request=>errors.push(request.url()));
++  page.on('response',response=>{if(response.status()>=400)errors.push(`${response.status()} ${response.url()}`);});
++  const base='http://127.0.0.1:4175/xiwu-cloud-notes/';
++  await page.goto(base);
++  await page.waitForLoadState('networkidle');
++  const resources=await page.evaluate(()=>performance.getEntriesByType('resource').map(({name,transferSize,decodedBodySize})=>({url:new URL(name).pathname,transferSize,decodedBodySize})));
++  const files={};
++  for(const file of ['index.html','profile.js','style.css','script.js','archive.js','motion.js','motion.css']) {
++    try {const data=await readFile(`dist/${file}`);files[file]={bytes:data.length,gzip:gzipSync(data).length};} catch {}
++  }
++  const images=()=>page.locator('img').evaluateAll(async images=>{
++    images.forEach(image=>image.loading='eager');
++    await Promise.all(images.map(image=>image.decode().catch(()=>{})));
++  });
++  for(const [width,lang,theme] of [[1440,'zh-CN','light'],[375,'ja','dark'],[320,'en','light'],[768,'zh-TW','light']]) {
++    await page.setViewportSize({width,height:900});
++    await page.goto(`${base}?lang=${lang}`);
++    await page.evaluate(theme=>{localStorage.setItem('little-corner-theme',theme);},theme);
++    if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('.theme-toggle').click();
++    await images();
++    await page.screenshot({path:`${output}/home-${width}-${lang}-${theme}.png`,fullPage:true});
++    await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
++    await page.screenshot({path:`${output}/viewport-${width}-${lang}-${theme}.png`});
++    if(width===1440) {
++      await page.locator('#interests').scrollIntoViewIfNeeded();
++      await page.screenshot({path:`${output}/cards-desktop.png`});
++    }
++  }
++  await page.setViewportSize({width:1440,height:900});
++  await page.goto(`${base}posts/xiwu/en.html`);
++  await images();
++  await page.screenshot({path:`${output}/static-reading.png`,fullPage:true});
++  if (phase==='after') {
++    await page.locator('.theme-toggle').click();
++    await page.screenshot({path:`${output}/static-reading-dark.png`,fullPage:true});
++  }
++  await page.route('https://music.163.com/outchain/player?**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><style>body{margin:0;font:16px system-ui;background:#fff;color:#333}header,footer{padding:14px;background:#e5eff7}main{height:330px;padding:12px;box-sizing:border-box}</style><header>HOST FIXTURE · Top / 顶部</header><main>Official player document mocked.<br>仅用于宿主布局验证，不代表真实音频。</main><footer>Bottom / 底部 · Native controls area</footer>'}));
++  if (phase==='after') {
++    await page.setViewportSize({width:1440,height:900});
++    await page.goto(`${base}?lang=zh-CN`);
++    await page.locator('#music-toggle').click();
++    await page.frameLocator('#music-frame').getByText('HOST FIXTURE', {exact:false}).waitFor();
++    await page.screenshot({path:`${output}/music-desktop.png`});
++  }
++  await page.setViewportSize({width:1440,height:360});
++  await page.goto(`${base}?lang=zh-CN`);
++  if(await page.locator('html').getAttribute('data-theme')!=='light')await page.locator('.theme-toggle').click();
++  await page.locator('#music-toggle').click();
++  await page.frameLocator('#music-frame').getByText('HOST FIXTURE', {exact:false}).waitFor();
++  await page.screenshot({path:`${output}/music-short-top.png`});
++  const geometry=await page.locator('#music-panel').evaluate(panel=>{
++    const viewport=panel.querySelector('.music-frame-viewport');
++    const frame=panel.querySelector('iframe');
++    return {panel:panel.getBoundingClientRect().toJSON(),clientHeight:panel.clientHeight,scrollHeight:panel.scrollHeight,viewport:viewport.getBoundingClientRect().toJSON(),frame:frame.getBoundingClientRect().toJSON(),scrollExtent:viewport.scrollHeight-viewport.clientHeight};
++  });
++  await page.locator('.music-frame-viewport').evaluate(el=>el.scrollTop=el.scrollHeight);
++  await page.screenshot({path:`${output}/music-short-bottom.png`});
++  await writeFile(`${output}/measurements.json`,JSON.stringify({environment:{engine:'Chromium',version:browser.version(),viewport:'1440×900',network:'local uncompressed HTTP',reducedMotion:true},files,resources,totalTransferred:resources.reduce((sum,r)=>sum+r.transferSize,0),geometry,errors},null,2));
++} finally {await browser.close();server.kill();}
+diff --git a/scripts/music.mjs b/scripts/music.mjs
+index 64256a9..d37ee0d 100644
+--- a/scripts/music.mjs
++++ b/scripts/music.mjs
+@@ -32,3 +32,4 @@ export function musicMarkup(config, ui) {
+-    <div class="music-frame-viewport"><iframe id="music-frame" title="${t('music.iframeTitle')}" data-i18n-title="music.iframeTitle" data-src="${escape(config.iframeUrl)}" width="330" height="450" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+-    <p class="music-help" data-i18n="music.fallback">${t('music.fallback')}</p>
+-    <div class="music-fallback">${link}</div>
++    <p id="music-status" class="music-status" role="status" aria-live="polite" aria-atomic="true"></p>
++    <div class="music-frame-viewport" role="region" tabindex="0" aria-describedby="music-keyboard-hint" aria-label="${t('music.iframeTitle')}" data-i18n-aria-label="music.iframeTitle"><iframe id="music-frame" title="${t('music.iframeTitle')}" data-i18n-title="music.iframeTitle" data-src="${escape(config.iframeUrl)}" width="330" height="450" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
++    <p id="music-keyboard-hint" class="music-keyboard-hint" data-i18n="music.keyboard">${t('music.keyboard')}</p>
++    <div class="music-footer"><div class="music-fallback">${link}</div><button id="music-collapse" type="button" data-i18n="music.collapse">${t('music.collapse')}</button></div>
+diff --git a/tests/e2e/music.spec.mjs b/tests/e2e/music.spec.mjs
+index 696206b..fb1a5ea 100644
+--- a/tests/e2e/music.spec.mjs
++++ b/tests/e2e/music.spec.mjs
+@@ -8 +8 @@ const playerUrl=`https://music.163.com/outchain/player?type=0&id=${music.playlis
+-const stub='<!doctype html><html><body><p>External player test fixture</p></body></html>';
++const stub='<!doctype html><html><meta charset="utf-8"><style>body{margin:0}p{margin:0;height:400px}button{height:44px}</style><body><p>External player test fixture</p><button>Native bottom control fixture</button></body></html>';
+@@ -90 +90 @@ test('music disclosure supports keyboard close and restores focus without trappi
+-for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]]) {
++for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320],[1440,360],[1280,480],[768,400]]) {
+@@ -92,0 +93 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
++    await page.emulateMedia({reducedMotion:'reduce'});
+@@ -115 +116,5 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
+-        expect(panel.y+panel.height).toBeLessThanOrEqual(toggle.y-8);
++        if (toggle) expect(panel.y+panel.height).toBeLessThanOrEqual(toggle.y-8);
++        else expect(panel.y+panel.height).toBeLessThanOrEqual(height-16);
++        expect(panel.width).toBeLessThanOrEqual(420);
++        const header=await page.locator('.site-header').boundingBox();
++        expect(panel.y).toBeGreaterThanOrEqual(header.y+header.height);
+@@ -118,0 +124,17 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
++        // 固定 330×450 的原生文档不缩放；视口顶部、底部都可滚动到达。
++        const viewport=page.locator('.music-frame-viewport');
++        await viewport.evaluate(el=>el.scrollTop=0);
++        const top=await viewport.evaluate(el=>({box:el.getBoundingClientRect().toJSON(),frame:el.querySelector('iframe').getBoundingClientRect().toJSON(),height:el.clientHeight,width:el.clientWidth}));
++        expect(top.height).toBeGreaterThan(20);
++        expect(top.frame.y).toBeGreaterThanOrEqual(top.box.y);
++        expect(top.frame.width).toBe(330);
++        expect(top.width).toBeGreaterThanOrEqual(top.frame.width);
++        expect(top.frame.height).toBe(450);
++        await viewport.evaluate(el=>el.scrollTop=el.scrollHeight);
++        const bottom=await viewport.evaluate(el=>({box:el.getBoundingClientRect().toJSON(),frame:el.querySelector('iframe').getBoundingClientRect().toJSON()}));
++        expect(bottom.frame.bottom).toBeLessThanOrEqual(bottom.box.bottom+1);
++        for (const selector of ['#music-close','#music-collapse','.music-fallback a']) {
++          expect(await page.locator(selector).evaluate(el=>{
++            const b=el.getBoundingClientRect();return el.contains(document.elementFromPoint(b.x+b.width/2,b.y+b.height/2));
++          })).toBe(true);
++        }
+@@ -195,0 +218,81 @@ test('switching a desktop window to mobile layout disables the player instead of
++
++
++test('slow official document has translated host feedback without claiming playback; load and collapse preserve the frame', async ({ page }) => {
++  let release;
++  const gate=new Promise(resolve=>release=resolve);
++  let requests=0;
++  await page.route('https://music.163.com/outchain/player?**',async route=>{
++    requests++;await gate;await route.fulfill({contentType:'text/html',body:stub});
++  });
++  await page.clock.install();
++  await page.emulateMedia({reducedMotion:'reduce'});
++  await page.setViewportSize({width:1440,height:360});
++  await page.goto('./');
++  await page.locator('#music-toggle').click();
++  await expect(page.locator('#music-status')).toHaveText(ui['zh-CN']['music.loading']);
++  await page.clock.fastForward(10001);
++  for (const lang of Object.keys(ui)) {
++    await page.selectOption('#language-select',lang);
++    await expect(page.locator('#music-status')).toHaveText(ui[lang]['music.slow']);
++    for (const theme of ['light','dark']) {
++      if (await page.locator('html').getAttribute('data-theme')!==theme) await page.locator('.theme-toggle').click();
++      await expect(page.locator('.music-fallback a')).toBeInViewport();
++      await expect(page.locator('#music-collapse')).toBeInViewport();
++      expect(await page.locator('.music-frame-viewport').evaluate(el=>el.clientHeight)).toBeGreaterThan(20);
++    }
++  }
++  await page.locator('#music-close').click();
++  await page.locator('#music-toggle').click();
++  expect(requests).toBe(1);
++  release();
++  await expect(page.locator('#music-status')).toHaveText(ui.ja['music.document']);
++  await page.locator('#music-collapse').click();
++  await expect(page.locator('#music-toggle')).toBeFocused();
++});
++
++test('iframe Escape stays inside its document; Tab reaches the host collapse control', async ({ page }) => {
++  await stubPlayer(page);
++  await page.goto('./');await page.locator('#music-toggle').click();
++  await page.frameLocator('#music-frame').getByRole('button').focus();
++  await page.keyboard.press('Escape');
++  await expect(page.locator('#music-panel')).toBeVisible();
++  await page.keyboard.press('Tab');
++  await expect(page.locator('.music-fallback a')).toBeFocused();
++  await page.keyboard.press('Tab');
++  await expect(page.locator('#music-collapse')).toBeFocused();
++  await page.keyboard.press('Enter');
++  await expect(page.locator('#music-toggle')).toBeFocused();
++});
++
++test('200% zoom equivalent layout keeps controls reachable and disables music at the narrow breakpoint', async ({ browser }) => {
++  // 物理 2560×960 / 200% => 1280×480 CSS px。非原生浏览器工具栏缩放。
++  const context=await browser.newContext({viewport:{width:1280,height:480},deviceScaleFactor:2});
++  const page=await context.newPage();
++  await stubPlayer(page);
++  await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
++  await page.locator('#music-toggle').click();
++  await page.locator('.music-frame-viewport').evaluate(el=>el.scrollTop=el.scrollHeight);
++  await expect(page.locator('#music-collapse')).toBeInViewport();
++  await page.locator('#music-collapse').click();
++  await noOverflow(page,1280);
++  // 物理 1440×900 / 200% => 720×450，遵循现有禁用音乐的小屏策略。
++  await page.setViewportSize({width:720,height:450});
++  await expect(page.locator('#music-widget')).toBeHidden();
++  await expect.poll(()=>page.locator('#music-frame').getAttribute('src')).toBeNull();
++  await noOverflow(page,720);
++  await context.close();
++});
++
++
++test('desktop touch layout also has no controls, fallback link, requests or music footer gap', async ({ browser }) => {
++  const context=await browser.newContext({viewport:{width:1440,height:900},hasTouch:true});
++  const page=await context.newPage();let requests=0;
++  await page.route('**/*music.163.com/**',route=>{requests++;return route.abort();});
++  await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
++  await expect(page.locator('#music-widget')).toBeHidden();
++  await expect(page.locator('#music-static-link')).toBeHidden();
++  expect(await page.locator('#music-frame').getAttribute('src')).toBeNull();
++  expect(await page.locator('body').evaluate(el=>el.classList.contains('has-music'))).toBe(false);
++  expect(requests).toBe(0);
++  await context.close();
++});
+diff --git a/tests/e2e/site.spec.mjs b/tests/e2e/site.spec.mjs
+index 971c782..5efa6b8 100644
+--- a/tests/e2e/site.spec.mjs
++++ b/tests/e2e/site.spec.mjs
+@@ -290 +290,4 @@ test('static reading remains usable with blocked preferences, no JavaScript or m
+-    expect(await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(32, 37, 49)');
++    expect(await page.locator('body').evaluate(el => {
++      const style=getComputedStyle(el);
++      return style.colorScheme==='dark' && style.backgroundColor.match(/\d+/g).slice(0,3).every(value=>Number(value)<100);
++    })).toBe(true);
+@@ -337,0 +341,78 @@ test('copy shares the static page of each actual language, including fallback an
++
++
++test('informative hero illustration follows all four languages', async ({ page }) => {
++  await page.goto('./');
++  for (const lang of langs) {
++    await page.selectOption('#language-select',lang);
++    const expected=await page.evaluate(lang=>window.siteProfile.ui[lang]['hero.artAlt'],lang);
++    await expect(page.locator('.hero-art img')).toHaveAttribute('alt',expected);
++    expect(expected.length).toBeGreaterThan(15);
++  }
++});
++
++test('motion is progressive, pauses offscreen and when hidden, and responds to reduced motion live', async ({ page }) => {
++  await page.goto('./');
++  await expect.poll(()=>page.locator('html').evaluate(el=>el.classList.contains('clouds-running'))).toBe(true);
++  await page.evaluate(()=>{
++    Object.defineProperty(document,'hidden',{configurable:true,value:true});
++    document.dispatchEvent(new Event('visibilitychange'));
++  });
++  await expect(page.locator('html')).not.toHaveClass(/clouds-running/);
++  await page.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});
++  await expect(page.locator('html')).toHaveClass(/clouds-running/);
++  await page.locator('#interests').scrollIntoViewIfNeeded();
++  await expect(page.locator('html')).not.toHaveClass(/clouds-running/);
++  await expect(page.locator('.interest-card').first()).toHaveClass(/card-enter/);
++  await page.emulateMedia({reducedMotion:'reduce'});
++  await expect(page.locator('.interest-card').first()).not.toHaveClass(/card-enter/);
++  await page.locator('.hero').scrollIntoViewIfNeeded();
++  await expect(page.locator('html')).not.toHaveClass(/clouds-running/);
++  expect(await page.locator('.cloud-one').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
++  await openFirst(page);
++  expect(await page.locator('dialog').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
++  await page.locator('.dialog-close').click();
++  await page.emulateMedia({reducedMotion:'no-preference'});
++  await page.locator('.hero').scrollIntoViewIfNeeded();
++  await expect(page.locator('html')).toHaveClass(/clouds-running/);
++});
++
++test('missing optional motion script leaves cards visible and readable', async ({ browser }) => {
++  const context=await browser.newContext();const page=await context.newPage();
++  await page.route('**/motion.js*',route=>route.abort());
++  await page.goto('http://127.0.0.1:4174/xiwu-cloud-notes/');
++  expect(await page.locator('.interest-card').first().evaluate(el=>getComputedStyle(el).opacity)).toBe('1');
++  await openFirst(page);
++  await expect(page.locator('#dialog-body')).toContainText('中文正文');
++  await context.close();
++});
++
++test('text and link tokens meet normal-text contrast on composed cloud and component surfaces', async ({ page }) => {
++  await page.goto('./');
++  for (const theme of ['light','dark']) {
++    if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('.theme-toggle').click();
++    const failures=await page.evaluate(()=>{
++      const style=getComputedStyle(document.documentElement);
++      const canvas=document.createElement('canvas');canvas.width=canvas.height=1;
++      const ctx=canvas.getContext('2d',{willReadFrequently:true});
++      const rgb=token=>{
++        ctx.clearRect(0,0,1,1);ctx.fillStyle=style.getPropertyValue(token).trim();ctx.fillRect(0,0,1,1);
++        return [...ctx.getImageData(0,0,1,1).data].slice(0,3);
++      };
++      const blend=(a,b,alpha)=>a.map((v,i)=>v*alpha+b[i]*(1-alpha));
++      const luminance=rgb=>rgb.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
++      const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
++      const paper=rgb('--paper'),blue=rgb('--blue'),pink=rgb('--pink');
++      // 实际组件底色和装饰叠加的保守上界，含称呼卡、便笺、音乐框与云层。
++      const surfaces=[paper,rgb('--wash'),blend(blue,paper,.5),blend(pink,paper,.5),blend(pink,blend(blue,paper,.38),.3)];
++      const failures=[];
++      for (const token of ['--ink','--muted','--accent'])for(const surface of surfaces) {
++        const ratio=contrast(rgb(token),surface);if(ratio<4.5)failures.push({token,surface,ratio});
++      }
++      const active=contrast(rgb('--primary'),paper);if(active<4.5)failures.push({token:'active',ratio:active});
++      return failures;
++    });
++    expect(failures,theme).toEqual([]);
++    expect(await page.locator('.card-description').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(15);
++    expect(await page.locator('.entry-date').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(12);
++  }
++});

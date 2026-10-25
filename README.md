@@ -78,7 +78,7 @@ order: 3
 
 音乐功能仅保留在桌面端。手机、平板及移动布局不显示音乐按钮、面板或歌单跳转链接；不请求网易云，也不保留音乐面板的页脚空白。禁用 JavaScript 时，移动端也不显示歌单入口。
 
-桌面点击音乐按钮，在底部展开网易云官方播放器，使用 [夕雾yu_official 的《云间来信》](https://music.163.com/playlist?id=18522359099)。播放和切歌全部由网易云原生控件提供，不添加无法控制跨域音频的自定义五键或播放模式按钮。
+桌面点击音乐按钮，在右下角展开约 400px 宽的抽屉，内嵌 330×450px 的网易云官方播放器，使用 [夕雾yu_official 的《云间来信》](https://music.163.com/playlist?id=18522359099)。播放和切歌全部由网易云原生控件提供，不添加无法控制跨域音频的自定义五键或播放模式按钮。
 
 在 `content/site.json` 修改配置后运行 `pnpm build`：
 
@@ -94,9 +94,23 @@ order: 3
 
 桌面首次展开才加载 HTTPS 外链，`auto=0`，不强制播放。折叠、语言、主题、筛选和阅读弹窗不会重建 iframe。若将桌面窗口缩为移动布局，会卸载 iframe 内容，避免出现隐藏播放；恢复桌面尺寸后仍默认收起。手机和平板直接移除音乐 DOM，触屏/小屏样式也屏蔽无脚本时的备用入口。
 
-外层兼容四语言和深浅主题。关闭后恢复按钮焦点，阅读弹窗保持原生顶层。桌面播放器不可用时保留官方歌单入口；跨域播放器音频、版权/地区限制及其内部界面由网易云管理，整页导航无法保证连续播放。
+外层兼容四语言和深浅主题，深色只调整宿主外框，不能改变跨域播放器的皮肤。矮桌面给页头留出空间，只缩短外层滚动视口，不缩放原生控件；可滚动到播放器顶部和底部，关闭与官方入口始终在滚动区外。高度不超过 600px 时，展开后暂时隐藏切换按钮，使用顶部关闭或下方收起按钮，收起后焦点返回切换按钮。阅读弹窗保持原生顶层。
+
+首次展开显示等待说明，超过 10 秒仍未收到文档加载事件时，提示网络、地区和歌曲权限可能影响使用。iframe 的 `load` 只用于更新宿主说明，不能证明文档正常呈现、音频可用或正在播放，浏览器错误页也可能触发它。官方歌单入口始终保留；不增加音频解析、代理、VIP 绕过或跨域播放控制。整页导航会离开当前播放器，同页保留节点不能实现跨页续播。
+
+Esc 仅在焦点位于宿主面板时可收起，iframe 内的 Esc 不会冒泡到父页。播放器后有说明、官方入口和可用 Tab 到达的收起按钮，外层滚动区也可用键盘操作；不使用透明遮罩拦截原生控件。
+
+本轮矮桌面、等待状态、键盘和触屏回归及截图见 [晨雾云笺验收记录](artifacts/morning-mist/README.md)。
 
 音乐相关历史截图在 `artifacts/music/`、`artifacts/music-mobile/`，其中的移动目录属于已移除的历史版本。
+
+## 晨雾云笺样式与轻量动效
+
+主题区分文字/链接 `--accent` 与装饰 `--accent-decor`，使用暖白、浅蓝、樱花粉，深色使用蓝灰背景。辅助文字至少 12px，正文主要为 15–16px、行高 1.95，卡片使用整块链接与明确的悬停/键盘焦点；移动端保留单列和第二行导航。插画 alt 通过 `content/ui.json` 的 `hero.artAlt` 提供四语言。便笺和称呼卡也使用主题配色，配图上小字有实色底，避免仅检查纸面背景而漏掉实际合成背景。
+
+`dist/motion.js` / `motion.css` 是可失败的首页增强：云层以 30/36 秒缓慢移动，离屏或文档隐藏时暂停；卡片首次进入视口时短暂浮现，同页重复筛选不会重复播放。悬停抬升 2px，dialog 和音乐面板进入使用短过渡。默认内容可见，不依赖动效脚本读文章；CSS 和 JS 均响应 `prefers-reduced-motion`，不添加星点框架、持续动画滤镜或假播放状态。静态文章不加载这两项增强，不改变其正文、元数据与无 JS 阅读。
+
+构建后可运行 `node scripts/morning-mist-evidence.mjs after` 保存页面和本地冷加载数据，或 `node scripts/contrast-evidence.mjs` 对 320/375/1440px、双主题的实际文字区域背景采样。这些脚本使用已安装的 Playwright Chromium，不增加产品依赖。对比图、资源前后体积、验证命令和人工待验事项均在 [验收记录](artifacts/morning-mist/README.md)。
 
 ## 在 GitHub 上直接改
 
@@ -127,7 +141,7 @@ pnpm build       # 从 Markdown 生成数据、静态文章页和 sitemap
 
 默认使用锁定版本的 Chromium；如需用本机 Chrome 调试可运行 `PW_CHANNEL=chrome pnpm test:e2e`。失败截图和 trace 在 `test-results/`，HTML 报告在 `playwright-report/`，运行 `pnpm exec playwright show-report` 查看。
 
-GitHub Actions 在 PR、main push 和手动触发时验证；安装 Chromium 及 Linux 系统依赖。只有 main 的全部验证通过才上传并部署 Pages，部署作业通过 `needs: validate` 依赖验证。验证作业仅有 `contents: read`，`pages: write` 和 `id-token: write` 仅授予部署作业。失败时保留报告/trace 14 天。
+GitHub Actions 在 PR、main push 和手动触发时验证；安装 Chromium 及 Linux 系统依赖。只有 main 的全部验证通过才上传并部署 Pages，部署作业通过 `needs: validate` 依赖验证。验证作业仅有 `contents: read`，`pages: write` 和 `id-token: write` 仅授予部署作业。失败时保留报告/trace 14 天。Node 20 的 action 已按官方发布迁移：诊断上传使用 `upload-artifact@v6`，Pages 上传使用 `upload-pages-artifact@v5`（内部为 Node 24 的上传器），部署使用 `deploy-pages@v5.0.1`；本轮没有触发远端 workflow。
 
 `dist/profile.js`、`dist/posts/`、sitemap 和 robots 是自动生成产物，不提交 Git；首页结构和 CSS/JS 源文件仍在 `dist/`。不要直接修改生成文件。构建只将个人资料和文章保留在 `localized`；删除了顶层默认语言副本及每篇的旧 `body` 别名，仓库运行脚本已使用 `localized`、`text`、`bodyHtml`，旧阅读脚本也优先使用这些字段。`text` 支持全文搜索/字数，`bodyHtml` 用于阅读，二者用途不同。没有拆分语言请求，切换仍是同步本地操作，没有新增缓存或网络失败状态；内容哈希继续控制缓存更新。
 

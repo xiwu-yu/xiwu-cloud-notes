@@ -453,7 +453,11 @@
   const musicToggle = $('#music-toggle');
   const musicPanel = $('#music-panel');
   const musicLayout = window.matchMedia('(min-width:721px) and (hover:hover) and (pointer:fine)');
+  let musicWaitTimer;
+  let musicStatus = '';
   function updateMusicLabel() {
+    const status = $('#music-status');
+    if (status) status.textContent = musicStatus ? t(`music.${musicStatus}`) : '';
     if (musicToggle) musicToggle.setAttribute('aria-label', t(musicPanel.hidden ? 'music.open' : 'music.collapse'));
   }
   function setMusicExpanded(expanded) {
@@ -462,10 +466,25 @@
     musicToggle.setAttribute('aria-expanded', String(expanded));
     updateMusicLabel();
     const frame = $('#music-frame');
-    if (expanded && !frame.hasAttribute('src')) frame.src = frame.dataset.src;
+    if (expanded && !frame.hasAttribute('src')) {
+      musicStatus = 'loading';
+      updateMusicLabel();
+      frame.src = frame.dataset.src;
+      musicWaitTimer = setTimeout(() => {
+        musicStatus = 'slow';
+        updateMusicLabel();
+      }, 10000);
+    }
     (expanded ? $('#music-close') : musicToggle).focus({ preventScroll: true });
   }
   if (musicWidget) {
+    $('#music-frame').addEventListener('load', () => {
+      // load 仅说明嵌入文档返回，跨域宿主无法判断歌曲是否可播。
+      if (!$('#music-frame').hasAttribute('src')) return;
+      clearTimeout(musicWaitTimer);
+      musicStatus = 'document';
+      updateMusicLabel();
+    });
     musicWidget.hidden = false;
     musicWidget.dataset.mode = 'embedded';
     $('#music-static-link').hidden = true;
@@ -475,6 +494,8 @@
         musicPanel.hidden = true;
         musicToggle.setAttribute('aria-expanded', 'false');
         // 进入禁用音乐的小屏布局时停止加载，避免出现隐藏的音乐播放。
+        clearTimeout(musicWaitTimer);
+        musicStatus = '';
         $('#music-frame').removeAttribute('src');
         updateMusicLabel();
       }
@@ -482,7 +503,9 @@
     syncMusicLayout();
     musicLayout.addEventListener('change', syncMusicLayout);
     musicToggle.addEventListener('click', () => setMusicExpanded(musicPanel.hidden));
-    $('#music-close').addEventListener('click', () => setMusicExpanded(false));
+    for (const button of [$('#music-close'), $('#music-collapse')]) {
+      button.addEventListener('click', () => setMusicExpanded(false));
+    }
     musicWidget.addEventListener('keydown', event => {
       if (event.key === 'Escape' && !musicPanel.hidden) {
         event.preventDefault();
