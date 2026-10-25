@@ -50,7 +50,7 @@ try {
     await page.locator('.theme-toggle').click();
     await page.screenshot({path:`${output}/static-reading-dark.png`,fullPage:true});
   }
-  await page.route('https://music.163.com/outchain/player?**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><style>body{margin:0;font:16px system-ui;background:#fff;color:#333}header,footer{padding:14px;background:#e5eff7}main{height:330px;padding:12px;box-sizing:border-box}</style><header>HOST FIXTURE · Top / 顶部</header><main>Official player document mocked.<br>仅用于宿主布局验证，不代表真实音频。</main><footer>Bottom / 底部 · Native controls area</footer>'}));
+  await page.route(/^https:\/\/music\.163\.com\/(?:m\/)?outchain\/player\?/,route=>route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><style>body{margin:0;font:16px system-ui;background:#fff;color:#333}header,footer{padding:14px;background:#e5eff7}main{height:330px;padding:12px;box-sizing:border-box}</style><header>HOST FIXTURE · Top / 顶部</header><main>Official player document mocked.<br>仅用于宿主布局验证，不代表真实音频。</main><footer>Bottom / 底部 · Native controls area</footer>'}));
   if (phase==='after') {
     await page.setViewportSize({width:1440,height:900});
     await page.goto(`${base}?lang=zh-CN`);

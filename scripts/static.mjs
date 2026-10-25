@@ -33,6 +33,8 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="${escape(ui[lang]['meta.shareImageAlt'])}">`;
   const readingVersion = createHash('sha256').update(await readFile(join(dist, 'reading.js'))).digest('hex').slice(0, 10);
+  const appearanceVersion = createHash('sha256').update(await readFile(join(dist, 'appearance.js'))).digest('hex').slice(0, 10);
+  const transparency = lang => `<button class="transparency-toggle glass-action" type="button" hidden aria-pressed="false" aria-label="${escape(ui[lang]['appearance.reduce'])}" title="${escape(ui[lang]['appearance.reduce'])}" data-system-label="${escape(ui[lang]['appearance.system'])}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="12" r="6" fill="currentColor" opacity=".65"/></svg></button>`;
   const css = (await readFile(join(dist, 'index.html'), 'utf8')).match(/href="(style\.css[^\"]*)"/)?.[1] || 'style.css';
   const byId = new Map();
   for (const post of posts) {
@@ -90,13 +92,14 @@ ${imageMeta(post.lang)}
 <meta property="article:published_time" content="${post.publishedAt}">
 <meta property="article:modified_time" content="${post.updatedAt}">
 <link rel="icon" href="../../assets/favicon.svg?v=${assetVersions['assets/favicon.svg'] || ''}" type="image/svg+xml">
+<script src="../../appearance.js?v=${appearanceVersion}"></script>
 <script src="../../reading.js?v=${readingVersion}"></script>
 <link rel="stylesheet" href="../../${escape(css)}">
 </head>
 <body class="static-reading">
 <div class="sky-background" aria-hidden="true"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span></div>
-<header class="wrap"><a class="brand" href="../../?lang=${post.lang}">☁ ${escape(homeLabel[post.lang])}</a><button class="theme-toggle" type="button" hidden aria-label="${escape(ui[post.lang]['theme.toDark'])}" aria-pressed="false" data-to-dark="${escape(ui[post.lang]['theme.toDark'])}" data-to-light="${escape(ui[post.lang]['theme.toLight'])}"><span aria-hidden="true">◐</span></button></header>
-<main class="static-article wrap">
+<header class="wrap static-reader-toolbar glass-surface"><a class="brand" href="../../?lang=${post.lang}">☁ ${escape(homeLabel[post.lang])}</a><button class="theme-toggle" type="button" hidden aria-label="${escape(ui[post.lang]['theme.toDark'])}" aria-pressed="false" data-to-dark="${escape(ui[post.lang]['theme.toDark'])}" data-to-light="${escape(ui[post.lang]['theme.toLight'])}"><span aria-hidden="true">◐</span></button>${transparency(post.lang)}</header>
+<main class="static-article wrap reader-surface">
 <nav aria-label="${escape(ui[post.lang]['language.label'])}">${languageNav}</nav>
 <article lang="${post.lang}">
 <p class="eyebrow">${escape(post.category)}</p>
@@ -123,6 +126,7 @@ ${post.source ? `<p><a class="dialog-source" href="${escape(post.source)}" rel="
 <meta name="robots" content="noindex">
 <title>404 · ${escape(ui['zh-CN']['error.title'])} · ${escape(localized['zh-CN'].name)}</title>
 <link rel="icon" href="${escape(recoveryPath('assets/favicon.svg'))}" type="image/svg+xml">
+<script src="${escape(recoveryPath(`appearance.js?v=${appearanceVersion}`))}"></script>
 <script src="${escape(recoveryPath(`reading.js?v=${readingVersion}`))}"></script>
 <link rel="stylesheet" href="${escape(recoveryPath(css))}">
 </head>

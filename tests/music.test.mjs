@@ -9,6 +9,7 @@ import { build } from '../scripts/build.mjs';
 test('music config accepts playlist IDs only and builds official HTTPS links with autoplay off', () => {
   const config = musicConfig({playlistId:'123456789',title:'测试歌单',creator:'作者'});
   assert.equal(config.iframeUrl,'https://music.163.com/outchain/player?type=0&id=123456789&auto=0&height=430');
+  assert.equal(config.mobileIframeUrl,'https://music.163.com/m/outchain/player?type=0&id=123456789&auto=0&height=430');
   assert.equal(config.playlistUrl,'https://music.163.com/playlist?id=123456789');
   assert.equal(musicConfig(null),null);
   assert.equal(musicConfig(undefined),null);
@@ -32,6 +33,7 @@ test('changing or removing the playlist config updates markup; invalid config pr
     await build(root);
     const good=await readFile(join(root,'dist/index.html'),'utf8');
     assert.match(good,/data-src="https:\/\/music.163.com\/outchain\/player\?type=0&amp;id=123456789&amp;auto=0&amp;height=430"/);
+    assert.match(good,/data-mobile-src="https:\/\/music.163.com\/m\/outchain\/player\?type=0&amp;id=123456789&amp;auto=0&amp;height=430"/);
     assert.match(good,/href="https:\/\/music.163.com\/playlist\?id=123456789"/);
     assert.match(good,/&lt;测试歌单&gt;/);
     assert.doesNotMatch(good,/<iframe[^>]+\ssrc=/);
