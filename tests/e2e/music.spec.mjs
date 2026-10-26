@@ -373,3 +373,74 @@ test('HTTPS mobile host avoids the official desktop redirect to blocked HTTP con
   expect(mobileRequests).toBe(1);expect(desktopRequests).toBe(0);expect(failures).toEqual([]);
   await context.close();
 });
+
+test('iPad desktop Safari uses the desktop HTTPS endpoint even with five touch points', async ({ browser }) => {
+  const context=await browser.newContext({
+    viewport:{width:1180,height:820},hasTouch:true,
+    userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15'
+  });
+  const page=await context.newPage();
+  await page.addInitScript(()=>Object.defineProperty(navigator,'maxTouchPoints',{get:()=>5}));
+  let desktopRequests=0,mobileRequests=0;
+  await page.route('https://cloud.xiwu.space/**',async route=>{
+    const url=new URL(route.request().url());
+    const response=await route.fetch({url:`http://127.0.0.1:4174/xiwu-cloud-notes${url.pathname}${url.search}`});
+    await route.fulfill({response});
+  });
+  await page.route('https://music.163.com/outchain/player?**',route=>{
+    desktopRequests++;
+    return route.fulfill({contentType:'text/html',body:stub});
+  });
+  await page.route('https://music.163.com/m/outchain/player?**',route=>{
+    mobileRequests++;
+    // 实测网易云对桌面 Mac UA 的移动入口会降级重定向到 HTTP。
+    return route.fulfill({status:302,headers:{location:playerUrl.replace('https://','http://')}});
+  });
+  await page.goto('https://cloud.xiwu.space/');
+  expect(desktopRequests+mobileRequests).toBe(0);
+  await page.locator('#music-toggle').tap();
+  await expect(page.locator('#music-frame')).toHaveAttribute('src',playerUrl);
+  await expect(page.frameLocator('#music-frame').getByText('External player test fixture')).toBeVisible();
+  expect(desktopRequests).toBe(1);expect(mobileRequests).toBe(0);
+  await page.locator('#music-close').tap();
+  await page.setViewportSize({width:820,height:1180});
+  await page.locator('#music-toggle').tap();
+  await page.selectOption('#language-select','en');
+  expect(desktopRequests).toBe(1);expect(mobileRequests).toBe(0);
+  await context.close();
+});
+
+test('explicit reload resets waiting feedback, keeps the iframe node and never retries on folding', async ({ page }) => {
+  await page.clock.install();
+  let requests=0,release;
+  const pending=new Promise(resolve=>{release=resolve;});
+  await page.route(playerRoute,async route=>{
+    requests++;
+    if(requests===2)await pending;
+    await route.fulfill({contentType:'text/html',body:stub});
+  });
+  await page.goto('./');
+  await page.locator('#music-toggle').click();
+  await expect(page.frameLocator('#music-frame').getByText('External player test fixture')).toBeVisible();
+  await page.evaluate(()=>{window.savedRetryFrame=document.querySelector('#music-frame');});
+  await page.locator('.music-help summary').click();
+  for(const lang of Object.keys(ui)) {
+    await page.selectOption('#language-select',lang);
+    await expect(page.locator('#music-retry')).toHaveText(ui[lang]['music.retry']);
+    await expect(page.locator('#music-retry-hint')).toHaveText(ui[lang]['music.retryHint']);
+  }
+  await page.locator('#music-retry').click();
+  await expect.poll(()=>requests).toBe(2);
+  await expect(page.locator('#music-close')).toBeFocused();
+  await expect(page.locator('#music-status')).toHaveText(ui.ja['music.loading']);
+  expect(await page.evaluate(()=>savedRetryFrame===document.querySelector('#music-frame'))).toBe(true);
+  await page.locator('.music-help summary').click();
+  await page.clock.fastForward(10001);
+  await expect(page.locator('#music-status')).toHaveText(ui.ja['music.slow']);
+  await page.locator('#music-close').click();
+  await page.locator('#music-toggle').click();
+  expect(requests).toBe(2);
+  release();
+  await expect(page.locator('#music-status')).toHaveText(ui.ja['music.document']);
+  await expect(page.locator('#music-status')).toBeHidden();
+});
