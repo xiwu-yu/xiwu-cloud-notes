@@ -495,26 +495,36 @@
     if (status) { status.textContent = musicStatus ? t(`music.${musicStatus}`) : ''; status.hidden = !musicStatus || musicStatus === 'document'; }
     if (musicToggle) musicToggle.setAttribute('aria-label', t(musicPanel.hidden ? 'music.open' : 'music.collapse'));
   }
+  function loadMusicPlayer() {
+    const frame = $('#music-frame');
+    clearTimeout(musicWaitTimer);
+    musicStatus = 'loading';
+    updateMusicLabel();
+    musicWaitTimer = setTimeout(() => {
+      musicStatus = 'slow';
+      updateMusicLabel();
+    }, 10000);
+    // 入口必须与网易云收到的 UA 对应，而不是按屏宽或触控能力分类。
+    // iPad 桌面 Safari 的 Macintosh UA 访问移动入口会被重定向到 HTTP。
+    const mobileUserAgent = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    frame.src = mobileUserAgent ? frame.dataset.mobileSrc : frame.dataset.src;
+  }
   function setMusicExpanded(expanded) {
     musicPanel.hidden = !expanded;
     musicToggle.setAttribute('aria-expanded', String(expanded));
     updateMusicLabel();
     const frame = $('#music-frame');
     if (expanded && !frame.hasAttribute('src')) {
-      musicStatus = 'loading';
-      updateMusicLabel();
-      // 官方桌面入口在移动 UA 下会 302 到 HTTP，HTTPS 父页会将其拦截。
-      // 首次加载直接使用官方 HTTPS 移动入口；之后不随视口或语言切换重写。
-      const mobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-      frame.src = mobileDevice ? frame.dataset.mobileSrc : frame.dataset.src;
-      musicWaitTimer = setTimeout(() => {
-        musicStatus = 'slow';
-        updateMusicLabel();
-      }, 10000);
+      loadMusicPlayer();
     }
     (expanded ? $('#music-close') : musicToggle).focus({ preventScroll: true });
   }
   if (musicWidget) {
+    $('#music-retry').addEventListener('click', () => {
+      // 只有明确的重试操作才重载；收起、换语言和旋转屏幕继续保留文档。
+      loadMusicPlayer();
+      $('#music-close').focus({preventScroll:true});
+    });
     $('#music-frame').addEventListener('load', () => {
       // load 仅说明嵌入文档返回，跨域宿主无法判断歌曲是否可播。
       if (!$('#music-frame').hasAttribute('src')) return;

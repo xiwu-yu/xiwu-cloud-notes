@@ -663,6 +663,7 @@ html[lang="ja"] .hero h1 [data-i18n="hero.titleD"] { display:inline-block; }
 .music-help[open] summary::after { content:"−"; }
 .music-help-content { position:absolute; inset:78px 14px 108px; z-index:3; overflow:auto; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--paper); color:var(--ink); box-shadow:0 4px 18px #10213415; }
 .music-help-content p { display:block; margin:0 0 12px; font-size:13px; line-height:1.85; }
+.music-retry { min-height:40px; padding:6px 12px; border:1px solid var(--line); border-radius:10px; background:var(--wash); color:var(--ink); font:inherit; }
 .music-panel[data-positioned="true"] { position:fixed; left:var(--music-x); top:var(--music-y); bottom:auto; margin:0; width:min(420px,calc(100vw - 24px)); }
 .music-panel.is-dragging { user-select:none; }
 .music-drag-handle { display:flex; align-items:center; gap:8px; min-height:44px; padding:0; color:inherit; border:0; background:transparent; font:inherit; font-weight:inherit; border-radius:6px; touch-action:none; cursor:grab; }

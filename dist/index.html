@@ -9,14 +9,14 @@
 <link rel="icon" href="assets/favicon.svg?v=79847ec957" type="image/svg+xml">
 <script src="appearance.js?v=06e7ccb929"></script>
 <script src="navigation.js?v=0c74389e22"></script>
-<link rel="stylesheet" href="style.css?v=000243f98a">
+<link rel="stylesheet" href="style.css?v=300f81ad7d">
 <link rel="stylesheet" href="motion.css?v=42134c50fe">
 <script defer src="music-drag.js?v=affba2808f"></script>
 <script defer src="motion.js?v=16670e6b6a"></script>
-<script defer src="profile.js?v=f64f82c77c"></script>
+<script defer src="profile.js?v=1bfecc4076"></script>
 <script defer src="archive.js?v=461e9c9f06"></script>
 <script defer src="reader.js?v=8716d912f6"></script>
-<script defer src="script.js?v=e4c012aefb"></script>
+<script defer src="script.js?v=a296cd86ff"></script>
 <!-- SITE_META_START -->
 <link rel="canonical" href="https://cloud.xiwu.space/">
 <meta property="og:type" content="website">
@@ -197,7 +197,7 @@
     <p id="music-drag-hint" class="sr-only" data-i18n="music.dragHint">桌面可拖动标题移动；键盘方向键移动，Home 键复位。</p>
     <p id="music-status" class="music-status" role="status" aria-live="polite" aria-atomic="true"></p>
     <div class="music-frame-viewport" role="region" tabindex="0" aria-describedby="music-keyboard-hint" aria-label="网易云音乐歌单播放器" data-i18n-aria-label="music.iframeTitle"><iframe id="music-frame" title="网易云音乐歌单播放器" data-i18n-title="music.iframeTitle" data-src="https://music.163.com/outchain/player?type=0&amp;id=18522359099&amp;auto=0&amp;height=430" data-mobile-src="https://music.163.com/m/outchain/player?type=0&amp;id=18522359099&amp;auto=0&amp;height=430" width="330" height="450" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-    <details class="music-help"><summary data-i18n="music.help">使用帮助</summary><div class="music-help-content"><p class="music-hint" data-i18n="music.hint">在下方网易云播放器内播放和切歌；收起不会重新加载播放器。</p><p data-i18n="music.document">请使用网易云原生控件；若播放器空白或无法播放，可尝试官方歌单入口。</p><p id="music-keyboard-hint" class="music-keyboard-hint" data-i18n="music.keyboard">播放器内的 Esc 不会收起面板；用 Tab 移到下方收起按钮，部分 Safari 设置需用 Option+Tab。</p><p data-i18n="music.dragHint">桌面可拖动标题移动；键盘方向键移动，Home 键复位。</p></div></details>
+    <details class="music-help"><summary data-i18n="music.help">使用帮助</summary><div class="music-help-content"><p class="music-hint" data-i18n="music.hint">在下方网易云播放器内播放和切歌；收起不会重新加载播放器。</p><p data-i18n="music.document">请使用网易云原生控件；若播放器空白或无法播放，可尝试官方歌单入口。</p><button id="music-retry" class="music-retry" type="button" aria-describedby="music-retry-hint" data-i18n="music.retry">重新加载播放器</button><p id="music-retry-hint" data-i18n="music.retryHint">仅在播放器空白或无法加载时使用；将中断当前播放。</p><p id="music-keyboard-hint" class="music-keyboard-hint" data-i18n="music.keyboard">播放器内的 Esc 不会收起面板；用 Tab 移到下方收起按钮，部分 Safari 设置需用 Option+Tab。</p><p data-i18n="music.dragHint">桌面可拖动标题移动；键盘方向键移动，Home 键复位。</p></div></details>
     <div class="music-footer"><div class="music-fallback"><a href="https://music.163.com/playlist?id=18522359099" target="_blank" rel="noopener noreferrer" data-i18n="music.openPlaylist">在网易云打开歌单 ↗</a></div><button id="music-collapse" type="button" data-i18n="music.collapse">收起音乐播放栏</button></div>
   </section>
 </aside>
