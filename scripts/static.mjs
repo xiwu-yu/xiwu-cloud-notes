@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
+import { appearancePanel } from './appearance.mjs';
 
 // 一个入口配置所有可抓取 URL；相对文章/资源链接继续兼容项目子路径。
 export const DEFAULT_SITE_URL = 'https://cloud.xiwu.space/';
@@ -34,7 +35,7 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
 <meta property="og:image:alt" content="${escape(ui[lang]['meta.shareImageAlt'])}">`;
   const readingVersion = createHash('sha256').update(await readFile(join(dist, 'reading.js'))).digest('hex').slice(0, 10);
   const appearanceVersion = createHash('sha256').update(await readFile(join(dist, 'appearance.js'))).digest('hex').slice(0, 10);
-  const transparency = lang => `<button class="transparency-toggle glass-action" type="button" hidden aria-pressed="false" aria-label="${escape(ui[lang]['appearance.reduce'])}" title="${escape(ui[lang]['appearance.reduce'])}" data-system-label="${escape(ui[lang]['appearance.system'])}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="12" r="6" fill="currentColor" opacity=".65"/></svg></button>`;
+  const transparency = lang => `<button class="transparency-toggle glass-action" type="button" hidden aria-haspopup="dialog" aria-expanded="false" aria-controls="glass-settings" aria-label="${escape(ui[lang]['appearance.open'])}" title="${escape(ui[lang]['appearance.open'])}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="12" r="6" fill="currentColor" opacity=".65"/></svg></button>`;
   const css = (await readFile(join(dist, 'index.html'), 'utf8')).match(/href="(style\.css[^\"]*)"/)?.[1] || 'style.css';
   const byId = new Map();
   for (const post of posts) {
@@ -110,6 +111,7 @@ ${post.source ? `<p><a class="dialog-source" href="${escape(post.source)}" rel="
 </article>
 <p><a class="text-link" href="../../?post=${post.id}&amp;lang=${post.lang}">${escape(ui[post.lang]['notes.readMore'])}</a></p>
 </main>
+${appearancePanel(ui[post.lang])}
 </body>
 </html>\n`;
     const directory = join(dist, 'posts', post.id);

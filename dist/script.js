@@ -169,6 +169,7 @@
     const article = node('article', 'interest-card');
     article.dataset.essayId = item.id;
     const button = node('a', 'card-button glass-surface glass-card');
+    button.dataset.material = 'content';
     button.href = item.url;
     button.setAttribute('aria-label', t('notes.readCard', { title: item.title }));
     const imageWrap = node('div', 'card-image');
@@ -347,7 +348,6 @@
     dialogLanguageSelect.value = locale;
     applyStaticText();
     applySite();
-    document.querySelectorAll('[data-i18n-data-system-label]').forEach(el => { el.dataset.systemLabel = t('appearance.system'); });
     document.dispatchEvent(new Event('site:language-changed'));
     $('#copy-status').textContent = '';
     renderFilters();

@@ -86,22 +86,22 @@ test('long mobile reading keeps toolbar reachable without changing history or fo
 test('manual transparency preference persists through language, theme, modal, static reading and reload',async({page})=>{
   await page.goto('./');
   const toggle=page.locator('.site-header .transparency-toggle');
-  await toggle.click();await expect(page.locator('html')).toHaveAttribute('data-transparency','reduced');
+  await toggle.click();await page.locator('#glass-enabled').uncheck();await page.locator('#glass-settings-close').click();await expect(page.locator('html')).toHaveAttribute('data-transparency','reduced');
   for(const lang of langs) {
     await page.selectOption('#language-select',lang);
-    await expect(toggle).toHaveAttribute('aria-label',ui[lang]['appearance.reduce']);
-    await expect(toggle).toHaveAttribute('aria-pressed','true');
+    await expect(toggle).toHaveAttribute('aria-label',ui[lang]['appearance.open']);
+    await expect(toggle).toHaveAttribute('aria-expanded','false');
     expect(await blur(page.locator('.site-header'))).toBe('none');
     await page.locator('.theme-toggle').click();
   }
   await page.locator('.card-button').first().click();
-  await expect(page.locator('#interest-dialog .transparency-toggle')).toHaveAttribute('aria-pressed','true');
+  await page.locator('#interest-dialog .transparency-toggle').click();await expect(page.locator('#glass-enabled')).not.toBeChecked();await page.locator('#glass-settings-close').click();
   await page.keyboard.press('Escape');await page.goto('posts/cloud/en.html');
   await expect(page.locator('html')).toHaveAttribute('data-transparency','reduced');
-  await expect(page.locator('.transparency-toggle')).toHaveAttribute('aria-label',ui.en['appearance.reduce']);
+  await expect(page.locator('.transparency-toggle')).toHaveAttribute('aria-label',ui.en['appearance.open']);
   expect(await page.locator('#dialog-body').evaluate(el=>el.textContent)).toContain('English body');
   await page.reload();await expect(page.locator('html')).toHaveAttribute('data-transparency','reduced');
-  await page.locator('.transparency-toggle').click();await expect(page.locator('html')).toHaveAttribute('data-transparency','auto');
+  await page.locator('.transparency-toggle').click();await page.locator('#glass-enabled').check();await page.locator('#glass-settings-close').click();await expect(page.locator('html')).toHaveAttribute('data-transparency','auto');
 });
 
 test('static mobile articles use 17px and 20px margins; no JS and failed appearance enhancement keep text readable',async({browser})=>{
@@ -128,7 +128,7 @@ test('system contrast, forced colors and reduced transparency disable blur witho
     await page.emulateMedia(media);
     await expect(page.locator('html')).toHaveAttribute('data-transparency','reduced');
     expect(await blur(page.locator('.site-header'))).toBe('none');
-    await expect(page.locator('.site-header .transparency-toggle')).toBeDisabled();
+    await expect(page.locator('.site-header .transparency-toggle')).toBeEnabled();
     await expect(page.locator('.card-button').first()).toBeVisible();
   }
   if(browserName==='chromium') {
@@ -168,7 +168,7 @@ test('opaque CSS fallback works when the backdrop-filter enhancement gate is una
   // 强制关闭增强 gate，验证基础样式；不是声称在旧版浏览器实测。
   await page.route('**/style.css*',async route=>{
     const response=await route.fetch();
-    const css=(await response.text()).replace('@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)))','@supports (unavailable-backdrop-filter: true)');
+    const css=(await response.text()).replace('@supports (background:color-mix(in srgb,white 50%,transparent)) and ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)))','@supports (unavailable-backdrop-filter: true)');
     await route.fulfill({response,body:css,contentType:'text/css'});
   });
   await page.goto('./');
