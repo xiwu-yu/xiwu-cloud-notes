@@ -10,6 +10,8 @@ test('real content loads in all languages and themes; every article is readable'
   for (const lang of profile.locales) {
     const posts = profile.localized[lang].interests;
     await page.goto(`./?lang=${lang}`);
+    await expect(page.locator('#resources-title')).toHaveText(profile.ui[lang]['resources.title']);
+    await expect(page.locator('#boundaries-title')).toHaveText(profile.ui[lang]['boundaries.title']);
     await expect(page.locator('.interest-card')).toHaveCount(posts.length);
     for (const theme of ['light', 'dark']) {
       if (await page.locator('html').getAttribute('data-theme') !== theme) await page.locator('.theme-toggle').evaluate(button => button.click());

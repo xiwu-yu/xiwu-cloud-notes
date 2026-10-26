@@ -484,6 +484,8 @@ dialog h2 { font-size:29px; }
   .music-byline, .music-hint, .music-keyboard-hint { display:none; }
   .music-status { flex-shrink:1; min-height:0; overflow:auto; }
   .music-heading h2 { font-size:16px; }
+  /* 给英文收起文案足够的固有宽度，避免矮窗口中换行挤出备用入口。 */
+  .music-footer button { max-width:none; white-space:nowrap; }
 }
 @media(prefers-reduced-motion:reduce) {
   .music-toggle { transition:none; }
