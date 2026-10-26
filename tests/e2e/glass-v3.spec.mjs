@@ -10,7 +10,7 @@ test('one glass indicator moves continuously while button text stays stable',asy
  await expect.poll(()=>indicator.evaluate(e=>e.getAnimations().length)).toBeGreaterThan(0);
  const frames=await indicator.evaluate(e=>{
   const a=e.getAnimations()[0];a.pause();const points=[];
-  for(const time of[0,170,340]){a.currentTime=time;points.push(e.getBoundingClientRect().x);}a.finish();return points;
+  for(const time of[0,140,280]){a.currentTime=time;points.push(e.getBoundingClientRect().x);}a.finish();return points;
  });
  expect(frames[1]).toBeGreaterThan(frames[0]+1);expect(frames[1]).toBeLessThan(frames[2]-1);
  for(const button of await buttons.all())expect(await button.evaluate(e=>getComputedStyle(e).transform)).toBe('none');
@@ -47,7 +47,7 @@ test('foreground stays unblurred and paper-backed while material has only edge r
  for(const selector of['.card-image img','.card-content','.hero-button>span'])expect(await page.locator(selector).first().evaluate(e=>getComputedStyle(e).filter)).toBe('none');
  expect(await page.locator('.card-content').first().evaluate(e=>getComputedStyle(e).backgroundColor)).not.toContain('rgba');
  expect(await page.locator('.contact-split').evaluate(e=>getComputedStyle(e).opacity)).toBe('0.62');
- await page.locator('.site-header .transparency-toggle').click();
+ await page.locator('.site-header .transparency-toggle').click();await page.locator('#glass-enabled').uncheck();await page.locator('#glass-settings-close').click();
  for(const selector of['.hero-button','.glass-card','.contact-label','.contact-action'])expect(await page.locator(selector).first().evaluate(e=>getComputedStyle(e).backdropFilter)).toBe('none');
 });
 
@@ -67,16 +67,18 @@ test('player help is collapsed, stays usable in short layouts and preserves the 
  expect(requests).toBe(1);expect(await page.evaluate(()=>keptFrame===document.querySelector('#music-frame')&&keptWindow===keptFrame.contentWindow)).toBe(true);
 });
 
-for(const width of [320,390,1440])test(`${width}px photo copy has no glass backing and view buttons keep glass states and keyboard switching`,async({page})=>{
+for(const width of [320,390,1440])test(`${width}px photo titles stay unbacked, email uses media glass and view controls keep keyboard switching`,async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width,height:900});await page.goto('./');
  for(const lang of['zh-CN','zh-TW','en','ja']){
   await page.selectOption('#language-select',lang);
   for(const theme of['light','dark']){
    if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('.site-header .theme-toggle').click();
-   for(const selector of['.contact-label','.contact-copy h2','.contact-action','.contact-email']){
+   for(const selector of['.contact-label','.contact-copy h2','.contact-action']){
     const style=await page.locator(selector).evaluate(e=>{const s=getComputedStyle(e);return {background:s.backgroundColor,image:s.backgroundImage,blur:s.backdropFilter};});
     expect(style.background).toBe('rgba(0, 0, 0, 0)');expect(style.image).toBe('none');expect(style.blur).toBe('none');
    }
+   await expect(page.locator('.contact-email')).toHaveAttribute('data-material','media');
+   expect(await page.locator('.contact-email').evaluate(e=>getComputedStyle(e).backdropFilter)).toContain('blur');
    await expect(page.locator('.contact-label')).not.toHaveClass(/glass-surface/);
    await expect(page.locator('.contact-action')).not.toHaveClass(/glass-surface/);
    if(width<720)expect((await page.locator('.contact-email').boundingBox()).x).toBeCloseTo(20,0);
@@ -96,7 +98,7 @@ test('view switch uses the same continuous indicator motion as categories with s
  await page.goto('./');const buttons=page.locator('[data-view]'),indicator=page.locator('.view-indicator');
  await expect(indicator).toBeVisible();await page.evaluate(()=>window.keptViewIndicator=document.querySelector('.view-indicator'));
  await buttons.last().click();await expect.poll(()=>indicator.evaluate(e=>e.getAnimations().length)).toBeGreaterThan(0);
- const positions=await indicator.evaluate(e=>{const a=e.getAnimations()[0];a.pause();const xs=[];for(const t of [0,170,340]){a.currentTime=t;xs.push(e.getBoundingClientRect().x);}a.finish();return xs;});
+ const positions=await indicator.evaluate(e=>{const a=e.getAnimations()[0];a.pause();const xs=[];for(const t of [0,140,280]){a.currentTime=t;xs.push(e.getBoundingClientRect().x);}a.finish();return xs;});
  expect(positions[1]).toBeGreaterThan(positions[0]+1);expect(positions[1]).toBeLessThan(positions[2]-1);
  for(const button of await buttons.all())expect(await button.evaluate(e=>getComputedStyle(e).transform)).toBe('none');
  await page.selectOption('#language-select','en');expect(await page.evaluate(()=>keptViewIndicator===document.querySelector('.view-indicator'))).toBe(true);

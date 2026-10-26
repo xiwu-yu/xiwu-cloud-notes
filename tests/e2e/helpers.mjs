@@ -1,5 +1,21 @@
 import { test as base, expect } from '@playwright/test';
 export { expect };
+// macOS WebKit 默认以 Option+Tab 遍历所有控件，保留浏览器原生键盘策略。
+export const tabKey = (browserName, reverse = false) => `${browserName === 'webkit' ? 'Alt+' : ''}${reverse ? 'Shift+' : ''}Tab`;
+export async function prepareClipboard(context, browserName) {
+  if (browserName === 'chromium') {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    return;
+  }
+  // WebKit 自动化不提供 clipboard-write 权限。这里只验证宿主写入的分享 URL，
+  // 不是系统剪贴板实测；Chromium 仍使用真正的浏览器剪贴板和权限。
+  await context.addInitScript(() => {
+    let copied = '';
+    Object.defineProperty(navigator, 'clipboard', {configurable:true, value:{
+      writeText:async text => { copied = text; }, readText:async () => copied
+    }});
+  });
+}
 export const test = base.extend({
   page: async ({ page }, use) => {
     const issues = [];

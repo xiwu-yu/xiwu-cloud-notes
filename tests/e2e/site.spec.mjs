@@ -1,4 +1,4 @@
-import { test, expect, ids, param, noOverflow } from './helpers.mjs';
+import { test, expect, ids, param, noOverflow, tabKey, prepareClipboard } from './helpers.mjs';
 const langs = ['zh-CN', 'zh-TW', 'en', 'ja'];
 const cloudTitles = ['测试云朵', '測試雲朵', 'Test clouds', 'テストの雲'];
 const bodyMarkers = ['中文正文', '繁體中文正文', 'English body', '日本語の本文'];
@@ -60,8 +60,8 @@ test('timeline, undated groups, category keys and language changes share the sam
   }
 });
 
-test('explicit Chinese share overrides saved English, including reload and clipboard', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+test('explicit Chinese share overrides saved English, including reload and clipboard', async ({ page, context, browserName }) => {
+  await prepareClipboard(context, browserName);
   await page.goto('./');
   await page.selectOption('#language-select', 'en');
   expect(await page.evaluate(() => localStorage.getItem('xiwu-language'))).toBe('en');
@@ -155,7 +155,7 @@ test('missing translation announces fallback and uses actual body language for r
 });
 
 for (const width of [320, 375, 768, 1440]) {
-  test(`${width}px: four languages, both themes, navigation, dialogs and keyboard focus`, async ({ page }) => {
+  test(`${width}px: four languages, both themes, navigation, dialogs and keyboard focus`, async ({ page, browserName }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('./');
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -179,11 +179,11 @@ for (const width of [320, 375, 768, 1440]) {
         expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
         expect(await dialog.evaluate(n => n.scrollWidth - n.clientWidth)).toBeLessThanOrEqual(1);
         await expect(page.locator('.dialog-close')).toBeFocused();
-        await page.keyboard.press('Shift+Tab');
+        await page.keyboard.press(tabKey(browserName, true));
         await expect(page.locator('#interest-dialog .transparency-toggle')).toBeFocused();
-        await page.keyboard.press('Shift+Tab');
+        await page.keyboard.press(tabKey(browserName, true));
         await expect(page.locator('.dialog-theme-toggle')).toBeFocused();
-        await page.keyboard.press('Shift+Tab');
+        await page.keyboard.press(tabKey(browserName, true));
         await expect(page.locator('#dialog-language-select')).toBeFocused();
         expect(await page.locator('#dialog-language-select').evaluate(n => getComputedStyle(n).outlineStyle)).not.toBe('none');
         await page.keyboard.press('Escape');
@@ -320,8 +320,8 @@ test('closing after a language change restores focus to the corresponding articl
   await expect(page.locator('[data-essay-id="rain"] .card-button')).toBeFocused();
 });
 
-test('copy shares the static page of each actual language, including fallback and clipboard failure', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+test('copy shares the static page of each actual language, including fallback and clipboard failure', async ({ page, context, browserName }) => {
+  await prepareClipboard(context, browserName);
   await page.goto('./?post=cloud&lang=zh-CN#interests');
   for (let i = 0; i < langs.length; i++) {
     await page.selectOption('#dialog-language-select', langs[i]);
@@ -380,7 +380,7 @@ test('motion is progressive, pauses offscreen and when hidden, and responds to r
   await expect(page.locator('html')).not.toHaveClass(/clouds-running/);
   expect(await page.locator('.cloud-one').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
   await openFirst(page);
-  expect(await page.locator('dialog').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
+  expect(await page.locator('#interest-dialog').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
   await page.locator('.dialog-close').click();
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.locator('.hero').scrollIntoViewIfNeeded();

@@ -32,7 +32,7 @@
     const sticky = getComputedStyle(header).position === 'sticky';
     let timer, frame = 0, lastActivity = Date.now(), hidden = false, refreshing = false;
     const clearTimer = () => clearTimeout(timer);
-    const engaged = () => header.contains(document.activeElement) || (hover.matches && header.matches(':hover'));
+    const engaged = () => root.dataset.appearanceOpen === 'true' || header.contains(document.activeElement) || (hover.matches && header.matches(':hover'));
     const display = visible => {
       if (hidden === !visible) return;
       hidden = !visible;
@@ -75,6 +75,7 @@
     });
     addEventListener('pagehide', () => { clearTimer(); cancelAnimationFrame(frame); frame = 0; });
     addEventListener('pageshow', activity);
+    document.addEventListener('site:appearance-panel', activity);
     const measure = () => {
       const value = `${Math.ceil(header.getBoundingClientRect().height)}px`;
       if (root.style.getPropertyValue('--header-height') !== value) root.style.setProperty('--header-height', value);
