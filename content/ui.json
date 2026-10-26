@@ -132,7 +132,10 @@
     "notes.adjusted": "{count} 项已调整",
     "appearance.reduce": "减少透明效果",
     "appearance.system": "系统已减少透明效果",
-    "notes.subtitle": "一些思考，一点情绪"
+    "notes.subtitle": "一些思考，一点情绪",
+    "music.drag": "拖动音乐栏",
+    "music.dragHint": "桌面可拖动标题移动；键盘方向键移动，Home 键复位。",
+    "music.help": "使用帮助"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -267,7 +270,10 @@
     "notes.adjusted": "已調整 {count} 項",
     "appearance.reduce": "減少透明效果",
     "appearance.system": "系統已減少透明效果",
-    "notes.subtitle": "一些思考，一點情緒"
+    "notes.subtitle": "一些思考，一點情緒",
+    "music.drag": "拖曳音樂列",
+    "music.dragHint": "桌面可拖曳標題移動；鍵盤方向鍵移動，Home 鍵復位。",
+    "music.help": "使用說明"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -402,7 +408,10 @@
     "notes.adjusted": "{count} adjusted",
     "appearance.reduce": "Reduce transparency",
     "appearance.system": "Transparency reduced by your system",
-    "notes.subtitle": "Some Thoughts, a Little Feeling"
+    "notes.subtitle": "Some Thoughts, a Little Feeling",
+    "music.drag": "Move music panel",
+    "music.dragHint": "On desktop, drag the title or use arrow keys to move; Home resets the position.",
+    "music.help": "Player help"
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -537,6 +546,9 @@
     "notes.adjusted": "{count} 項目を変更中",
     "appearance.reduce": "透明度を下げる",
     "appearance.system": "システムで透明度を下げています",
-    "notes.subtitle": "考えごとと、少しの気持ち"
+    "notes.subtitle": "考えごとと、少しの気持ち",
+    "music.drag": "音楽パネルを移動",
+    "music.dragHint": "デスクトップでは見出しをドラッグ、または矢印キーで移動。Home キーで元に戻します。",
+    "music.help": "使い方"
   }
 }

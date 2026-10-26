@@ -115,7 +115,7 @@
 
   function updateThemeLabel() {
     const dark = document.documentElement.dataset.theme === 'dark';
-    $('.theme-toggle').setAttribute('aria-label', t(dark ? 'theme.toLight' : 'theme.toDark'));
+    document.querySelectorAll('.theme-toggle,.dialog-theme-toggle').forEach(button => { button.setAttribute('aria-label', t(dark ? 'theme.toLight' : 'theme.toDark')); button.setAttribute('aria-pressed', String(dark)); });
   }
 
   function renderDialog(item, { focus = false, scroll = false } = {}) {
@@ -168,7 +168,7 @@
   function createCard(item, index) {
     const article = node('article', 'interest-card');
     article.dataset.essayId = item.id;
-    const button = node('a', 'card-button');
+    const button = node('a', 'card-button glass-surface glass-card');
     button.href = item.url;
     button.setAttribute('aria-label', t('notes.readCard', { title: item.title }));
     const imageWrap = node('div', 'card-image');
@@ -181,7 +181,9 @@
     // 编号跟随当前排序与筛选后的可见顺序，而不是固定的原始数组位置。
     const number = node('span', 'card-number', String(index + 1).padStart(2, '0'));
     imageWrap.append(img, number);
-    button.append(imageWrap, node('p', 'card-meta', item.subtitle), node('h3', '', item.title), dateLine(item), node('p', 'card-description', item.description), tagLine(item), node('span', 'card-more', t('notes.readMore')));
+    const content = node('div', 'card-content');
+    content.append(node('p', 'card-meta', item.subtitle), node('h3', '', item.title), dateLine(item), node('p', 'card-description', item.description), tagLine(item), node('span', 'card-more', t('notes.readMore')));
+    button.append(imageWrap, content);
     button.addEventListener('click', event => {
       if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
@@ -450,10 +452,14 @@
     if (event.key === THEME_STORAGE || event.key === null) setTheme(preferredDark());
   });
   systemTheme.addEventListener('change', () => setTheme(preferredDark()));
-  themeButton.addEventListener('click', () => {
+  document.querySelectorAll('.theme-toggle,.dialog-theme-toggle').forEach(button => {
+  button.hidden = false;
+  button.addEventListener('click', () => {
     const dark = document.documentElement.dataset.theme !== 'dark';
     setTheme(dark);
     try { localStorage.setItem(THEME_STORAGE, dark ? 'dark' : 'light'); } catch {}
+  });
+
   });
 
   // 桌面与触屏共用官方控件；收起、改变视口与同页交互都不重建 iframe。
@@ -464,7 +470,7 @@
   let musicStatus = '';
   function updateMusicLabel() {
     const status = $('#music-status');
-    if (status) status.textContent = musicStatus ? t(`music.${musicStatus}`) : '';
+    if (status) { status.textContent = musicStatus ? t(`music.${musicStatus}`) : ''; status.hidden = !musicStatus || musicStatus === 'document'; }
     if (musicToggle) musicToggle.setAttribute('aria-label', t(musicPanel.hidden ? 'music.open' : 'music.collapse'));
   }
   function setMusicExpanded(expanded) {

@@ -19,7 +19,7 @@ try {
       ['intro','.hero-description',4.5],['about','.about-copy>p:first-child',4.5],['note','.gentle-note>small',4.5],['identity','.identity-avatar',4.5],['link','.pronoun',4.5],['date','.entry-date',4.5],
       ['summary','.card-description',4.5],['tag','.entry-tag',4.5],['card-number','.card-number',4.5],
       ['contact-label','.contact .eyebrow',4.5],['contact-title','.contact h2',3],
-      ['contact-email','.contact-email',4.5],['contact-more','.contact-action>.text-link',4.5]
+      ['contact-email','.contact-email',4.5],['contact-more','.footer-more',4.5]
     ]) {
       const el=page.locator(selector).first();
       await el.scrollIntoViewIfNeeded();

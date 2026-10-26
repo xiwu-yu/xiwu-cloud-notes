@@ -53,8 +53,9 @@ for(const width of [320,390,768,1280,1440]) {
           expect(layout.box.right).toBeCloseTo(width-20,0);
         }
         expect(await blur(page.locator('#interest-dialog'))).toBe('none');
-        expect(await blur(page.locator('.card-button').first())).toBe('none');
-        expect(await page.locator('.glass-surface .glass-surface').count()).toBe(0);
+        expect(await blur(page.locator('.card-button').first())).toContain('blur');
+        // 内部按钮可复用细边材质，但不得在工具条的滤镜上再次叠加背景模糊。
+        for(const nested of await page.locator('.glass-surface .glass-surface').all())expect(await blur(nested)).toBe('none');
         for(const selector of ['.dialog-close','#dialog-language-select','#interest-dialog .transparency-toggle','.dialog-home-refresh']) {
           const box=await page.locator(selector).boundingBox();expect(box.height).toBeGreaterThanOrEqual(44);expect(box.width).toBeGreaterThanOrEqual(44);
           expect(await page.locator(selector).evaluate(el=>{const b=el.getBoundingClientRect();return el.contains(document.elementFromPoint(b.x+b.width/2,b.y+b.height/2));})).toBe(true);

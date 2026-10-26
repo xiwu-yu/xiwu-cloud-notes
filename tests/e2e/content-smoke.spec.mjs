@@ -83,7 +83,7 @@ test('contact has a spacious desktop image, mobile top-left heading and bottom-l
             const overlay = getComputedStyle(el, '::before');
             const actionBox = el.querySelector('.contact-action').getBoundingClientRect();
             const copyBox = el.querySelector('.contact-copy').getBoundingClientRect();
-            const texts = ['.eyebrow', 'h2', '#email-link', '.contact-action .text-link'].map(selector => {
+            const texts = ['.eyebrow', 'h2', '#email-link'].map(selector => {
               const box = el.querySelector(selector).getBoundingClientRect();
               return {left:box.left, right:box.right, top:box.top, bottom:box.bottom};
             });
@@ -96,7 +96,7 @@ test('contact has a spacious desktop image, mobile top-left heading and bottom-l
               opacity:Number(getComputedStyle(art).opacity),
               overlayDisplay:overlay.display,
               overlayOpacity:Number(overlay.opacity),
-              overlayPointerEvents:overlay.pointerEvents,
+              artPointerEvents:getComputedStyle(art).pointerEvents,
               artZ:Number(getComputedStyle(art).zIndex),
               overlayZ:Number(overlay.zIndex),
               textZ:Number(getComputedStyle(el.querySelector('.contact-copy')).zIndex)
@@ -114,13 +114,11 @@ test('contact has a spacious desktop image, mobile top-left heading and bottom-l
           expect(Math.abs(layout.copyTop-layout.art.top-36)).toBeLessThanOrEqual(1);
           expect(layout.actionTop).toBeGreaterThan(layout.copyBottom+12);
           expect(layout.opacity).toBeGreaterThan(0);
-          expect(layout.opacity).toBeLessThan(1);
-          expect(layout.overlayDisplay).not.toBe('none');
-          expect(layout.overlayOpacity).toBeGreaterThan(0);
-          expect(layout.overlayOpacity).toBeLessThan(1);
-          expect(layout.overlayPointerEvents).toBe('none');
-          expect(layout.artZ).toBeLessThan(layout.overlayZ);
-          expect(layout.overlayZ).toBeLessThan(layout.textZ);
+          expect(layout.opacity).toBe(.62);
+          expect(layout.overlayDisplay).toBe('block');
+          expect(layout.overlayOpacity).toBe(.45);
+          expect(layout.artPointerEvents).toBe('none');
+          expect(layout.artZ).toBeLessThan(layout.textZ);
           await expect(page.locator('#email-link')).toHaveAttribute('href', 'mailto:824396851az%40gmail.com');
         } else {
           await expect(page.locator('.contact-mobile-art')).toBeHidden();
@@ -143,7 +141,7 @@ test('contact has a spacious desktop image, mobile top-left heading and bottom-l
     if (width <= 720) {
       await page.locator('#contact').scrollIntoViewIfNeeded();
       await expect.poll(() => page.locator('.contact-mobile-art img').evaluate(img=>img.complete && img.naturalWidth>0)).toBe(true);
-      await page.locator('.contact-action .text-link').click();
+      await page.locator('.footer-more').click();
       await expect.poll(() => new URL(page.url()).hash).toBe('#interests');
     }
   }

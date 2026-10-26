@@ -151,12 +151,12 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
     }
     await page.locator('footer').scrollIntoViewIfNeeded();
     await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
-    const back=await page.locator('footer>a:last-child').boundingBox();
+    const back=await page.locator('.footer-more').boundingBox();
     if (width > 720) {
       const toggle=await page.locator('#music-toggle').boundingBox();
       expect(back.y+back.height).toBeLessThan(toggle.y);
     }
-    const hit=await page.locator('footer>a:last-child').evaluate(el=>{
+    const hit=await page.locator('.footer-more').evaluate(el=>{
       const box=el.getBoundingClientRect();
       return el.contains(document.elementFromPoint(box.left+box.width/2,box.top+box.height/2));
     });
@@ -272,6 +272,12 @@ test('iframe Escape stays inside its document; native keyboard navigation reache
   await expect(page.locator('#music-panel')).toBeVisible();
   // macOS WebKit 默认仅 Tab 到输入框；Option-Tab 访问所有链接/按钮。
   const next = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+  await page.keyboard.press(next);
+  await expect(page.locator('.music-help summary')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.music-help')).toHaveAttribute('open','');
+  await expect(page.locator('.music-hint')).toBeVisible();
+  await page.keyboard.press('Enter');
   await page.keyboard.press(next);
   await expect(page.locator('.music-fallback a')).toBeFocused();
   await page.keyboard.press(next);
