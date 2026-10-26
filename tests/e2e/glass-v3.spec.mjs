@@ -15,7 +15,8 @@ test('one glass indicator moves continuously while button text stays stable',asy
  expect(frames[1]).toBeGreaterThan(frames[0]+1);expect(frames[1]).toBeLessThan(frames[2]-1);
  for(const button of await buttons.all())expect(await button.evaluate(e=>getComputedStyle(e).transform)).toBe('none');
  await page.selectOption('#language-select','en');
- expect(await page.evaluate(()=>keptIndicator===document.querySelector('.filter-indicator'))).toBe(true);
+ // 语言重绘后由 rAF 把同一指示器放回容器；等待完成，不依赖 CI 帧调度速度。
+ await expect.poll(()=>page.evaluate(()=>keptIndicator===document.querySelector('.filter-indicator'))).toBe(true);
  await expect(indicator).toHaveCount(1);
  await page.emulateMedia({reducedMotion:'reduce'});await page.locator('.filter').first().click();
  await expect.poll(()=>indicator.evaluate(e=>e.getAnimations().length)).toBe(0);
@@ -101,7 +102,7 @@ test('view switch uses the same continuous indicator motion as categories with s
  const positions=await indicator.evaluate(e=>{const a=e.getAnimations()[0];a.pause();const xs=[];for(const t of [0,140,280]){a.currentTime=t;xs.push(e.getBoundingClientRect().x);}a.finish();return xs;});
  expect(positions[1]).toBeGreaterThan(positions[0]+1);expect(positions[1]).toBeLessThan(positions[2]-1);
  for(const button of await buttons.all())expect(await button.evaluate(e=>getComputedStyle(e).transform)).toBe('none');
- await page.selectOption('#language-select','en');expect(await page.evaluate(()=>keptViewIndicator===document.querySelector('.view-indicator'))).toBe(true);
+ await page.selectOption('#language-select','en');await expect.poll(()=>page.evaluate(()=>keptViewIndicator===document.querySelector('.view-indicator'))).toBe(true);
  await page.emulateMedia({reducedMotion:'reduce'});await buttons.first().click();await expect.poll(()=>indicator.evaluate(e=>e.getAnimations().length)).toBe(0);
 });
 
