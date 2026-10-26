@@ -148,3 +148,20 @@ test('contact has a spacious desktop image, mobile top-left heading and bottom-l
     }
   }
 });
+
+test('real body-only search results show their matching excerpt and open the corresponding passage',async({page})=>{
+ let checked=0;
+ for(const lang of profile.locales)for(const post of profile.localized[lang].interests){
+  const metadata=[post.id,post.title,post.description,post.subtitle,post.category,...(post.tags||[])].join(' ').toLowerCase();
+  const query=(post.text.match(/[\p{L}\p{N}]{4,}/gu)||[]).find(word=>word.length<40&&!metadata.includes(word.toLowerCase()));
+  if(!query)continue;
+  await page.goto('./?lang='+lang);await page.locator('#archive-search').fill(query);
+  const result=page.locator('[data-essay-id="'+post.id+'"] .card-button');
+  await expect(result.locator('.match-source')).toHaveText(profile.ui[lang]['notes.matchBody']);
+  await expect(result.locator('.match-excerpt')).toContainText(query);
+  await result.click();await expect(page.locator('#dialog-body mark').first()).toBeVisible();
+  expect(new URL(page.url()).searchParams.get('part')).toMatch(/^(?:passage|section)-\d+$/);
+  await page.locator('.dialog-close').click();checked++;
+ }
+ expect(checked).toBeGreaterThan(0);
+});

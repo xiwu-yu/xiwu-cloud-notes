@@ -2,6 +2,7 @@
 (() => {
   const profile = window.siteProfile;
   const archive = window.essayArchive;
+  const reader = window.essayReader;
   if (!profile || !archive) return;
 
   const DEFAULT_LOCALE = profile.defaultLocale || 'zh-CN';
@@ -89,6 +90,8 @@
   const state = { category: 'all', month: 'all', order: 'newest', view: 'cards', dateBy: 'writtenAt', query: '' };
   let visibleItems = [];
   let currentId = null;
+  let currentFind = '';
+  let currentPart = '';
   let openedFrom = null;
   let closingFromHistory = false;
   let returningHome = false;
@@ -105,6 +108,9 @@
     if (currentId) url.searchParams.set('post', currentId);
     else url.searchParams.delete('post');
     url.searchParams.set('lang', locale);
+    for(const [key,value] of [['find',currentFind],['part',currentPart]]) {
+      if(currentId && value)url.searchParams.set(key,value);else url.searchParams.delete(key);
+    }
     if (push) history.pushState({ post: currentId, lang: locale }, '', url);
     else if (replace) history.replaceState({ post: currentId, lang: locale }, '', url);
   }
@@ -138,6 +144,9 @@
     // bodyHtml 仅来自构建时关闭了原始 HTML 的 Markdown 解析器。
     if (typeof item.bodyHtml === 'string') bodyElement.innerHTML = item.bodyHtml;
     else bodyElement.textContent = item.text || '';
+    reader?.highlight(bodyElement,currentFind);
+    reader?.mountToc($('.reader-toc'),bodyElement,t('reader.toc'),item.url);
+    $('#dialog-static').href = resultUrl(item,currentFind);
     const sourceLink = $('#dialog-source');
     sourceLink.hidden = !item.source;
     if (item.source) sourceLink.href = item.source;
@@ -152,11 +161,14 @@
     if (scroll) dialog.scrollTop = 0;
     if (focus) $('.dialog-close').focus({ preventScroll: true });
   }
-  function openEssay(item, trigger, { push = true, focus = true, scroll = true } = {}) {
+  function openEssay(item, trigger, { push = true, focus = true, scroll = true, find = state.query, part = '' } = {}) {
     currentId = item.id;
+    currentFind = find;
+    currentPart = part || (reader?.preview(item,find).id ?? '');
     if (trigger) openedFrom = trigger;
     renderDialog(item, { focus, scroll });
     if (!dialog.open) dialog.showModal();
+    if(currentPart)reader?.jump($('#dialog-body'),currentPart);
     if (push) writeUrl({ push: true });
     if (focus) $('.dialog-close').focus({ preventScroll: true });
   }
@@ -165,12 +177,22 @@
     dialog.close();
   }
 
+  function resultUrl(item, query) {
+    const match = reader?.preview(item,query);
+    return match?.id ? `${item.url}?find=${encodeURIComponent(query)}#${match.id}` : item.url;
+  }
+  function description(item,className) {
+    const element=node('p',className), match=reader?.preview(item,state.query);
+    if(!match?.source){element.textContent=item.description;return element;}
+    const label=node('span','match-source',t(match.source==='body'?'notes.matchBody':'notes.matchMetadata'));
+    const excerpt=node('span','match-excerpt',match.text);reader.markText(excerpt,state.query);element.append(label,excerpt);return element;
+  }
   function createCard(item, index) {
     const article = node('article', 'interest-card');
     article.dataset.essayId = item.id;
     const button = node('a', 'card-button glass-surface glass-card');
     button.dataset.material = 'content';
-    button.href = item.url;
+    button.href = resultUrl(item,state.query);
     button.setAttribute('aria-label', t('notes.readCard', { title: item.title }));
     const imageWrap = node('div', 'card-image');
     const img = node('img');
@@ -183,7 +205,7 @@
     const number = node('span', 'card-number', String(index + 1).padStart(2, '0'));
     imageWrap.append(img, number);
     const content = node('div', 'card-content');
-    content.append(node('p', 'card-meta', item.subtitle), node('h3', '', item.title), dateLine(item), node('p', 'card-description', item.description), tagLine(item), node('span', 'card-more', t('notes.readMore')));
+    content.append(node('p', 'card-meta', item.subtitle), node('h3', '', item.title), dateLine(item), description(item,'card-description'), tagLine(item), node('span', 'card-more', t('notes.readMore')));
     button.append(imageWrap, content);
     button.addEventListener('click', event => {
       if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -205,9 +227,9 @@
       const li = node('li', 'timeline-entry');
       li.dataset.essayId = item.id;
       const button = node('a', 'timeline-button');
-      button.href = item.url;
+      button.href = resultUrl(item,state.query);
       button.setAttribute('aria-label', t('notes.readCard', { title: item.title }));
-      button.append(node('span', 'timeline-category', item.category), node('span', 'timeline-title', item.title), node('span', 'timeline-description', item.description), node('span', 'timeline-reading', readingInfo(item)));
+      button.append(node('span', 'timeline-category', item.category), node('span', 'timeline-title', item.title), description(item,'timeline-description'), node('span', 'timeline-reading', readingInfo(item)));
       button.append(tagLine(item));
       button.addEventListener('click', event => {
         if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -358,7 +380,7 @@
     renderStaticArchive();
     if (dialog.open && currentId) {
       const item = posts.find(entry => entry.id === currentId);
-      if (item) renderDialog(item);
+      if (item) {currentPart=reader?.preview(item,currentFind).id || '';renderDialog(item,{scroll:true});if(currentPart)reader?.jump($('#dialog-body'),currentPart);}
       else closeDialogFromHistory();
     }
     if (updateUrl) writeUrl({ replace: true });
@@ -421,7 +443,7 @@
     const id = url.searchParams.get('post');
     const item = id ? posts.find(entry => entry.id === id) : null;
     if (item) {
-      openEssay(item, null, { push: false, focus: false, scroll: false });
+      openEssay(item, null, { push: false, focus: false, scroll: false, find:url.searchParams.get('find') || '',part:url.searchParams.get('part') || '' });
       writeUrl({ replace: true });
     }
     else if (dialog.open) closeDialogFromHistory();
@@ -536,7 +558,8 @@
   if (initialPost) {
     const item = posts.find(entry => entry.id === initialPost);
     if (item) {
-      openEssay(item, null, { push: false });
+      const url = new URL(location.href);
+      openEssay(item, null, { push: false, find:url.searchParams.get('find') || '',part:url.searchParams.get('part') || '' });
       writeUrl({ replace: true });
     }
     else writeUrl({ replace: true });

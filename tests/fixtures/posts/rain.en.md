@@ -23,3 +23,11 @@ English body with searchable starlight.
 ```js
 const rain = true;
 ```
+
+## Search context
+
+A later paragraph with a searchable detail. The complete keyword is **nee**dle. Literal [a+b] and [a safe link](https://example.com) stay readable.
+
+### Closing note
+
+最后一段 / Final paragraph.

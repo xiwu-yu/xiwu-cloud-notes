@@ -23,3 +23,11 @@ order: 2
 ```js
 const rain = true;
 ```
+
+## Search context
+
+这是更靠后的一段可定位正文。完整关键字为 **nee**dle。Literal [a+b] and [a safe link](https://example.com) stay readable.
+
+### Closing note
+
+最后一段 / Final paragraph.

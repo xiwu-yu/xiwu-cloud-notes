@@ -4,6 +4,8 @@ import { basename } from 'node:path';
 
 // Markdown 在发布前转换；关闭原始 HTML，保留解析器默认的危险链接检查。
 const markdown = new MarkdownIt({ html: false, breaks: false, typographer: false });
+markdown.renderer.rules.code_block = (tokens,index,options,env,renderer) =>
+  '<pre'+renderer.renderAttrs(tokens[index])+'><code>'+markdown.utils.escapeHtml(tokens[index].content)+'</code></pre>\n';
 const fields = new Set(['id', 'lang', 'title', 'category', 'tags', 'writtenAt', 'publishedAt', 'updatedAt', 'description', 'subtitle', 'image', 'alt', 'order', 'source']);
 export const SUPPORTED_LANGS = ['zh-CN', 'zh-TW', 'en', 'ja'];
 
@@ -62,6 +64,20 @@ export function parsePost(source, filename) {
   const body = match[2].trim();
   if (!body) throw new Error(`${filename}: 正文不能为空`);
   const tokens = markdown.parse(body, {});
+  const headings = [];
+  let passage = 0;
+  // 数字锚点只来自解析后的块，不信任作者输入的 HTML/id；重复标题也不会冲突。
+  tokens.forEach((token, index) => {
+    if (token.type === 'heading_open') {
+      const id = `section-${headings.length + 1}`;
+      token.attrSet('id', id);
+      headings.push({id, level:Number(token.tag.slice(1)), text:plainText([tokens[index + 1]]).trim()});
+    } else if (['paragraph_open', 'th_open', 'td_open', 'fence', 'code_block'].includes(token.type)) {
+      token.attrSet('id', `passage-${++passage}`);
+    } else return;
+    token.attrSet('data-reader-block', '');
+    token.attrSet('tabindex', '-1');
+  });
   return {
     filename, id, lang, title: data.title, category: data.category, tags: [...new Set((data.tags || []).map(tag => tag.trim()))],
     description: data.description, subtitle: data.subtitle || (lang === 'zh-CN' ? `随笔 / ${data.category}` : data.category),
@@ -69,7 +85,7 @@ export function parsePost(source, filename) {
     writtenAt: data.writtenAt ?? null, publishedAt: data.publishedAt, updatedAt: data.updatedAt || data.publishedAt,
     order: data.order ?? Number.MAX_SAFE_INTEGER,
     ...(data.source ? { source: data.source } : {}),
-    body, text: plainText(tokens).trim(), bodyHtml: markdown.renderer.render(tokens, markdown.options, {})
+    body, headings, text: plainText(tokens).trim(), bodyHtml: markdown.renderer.render(tokens, markdown.options, {})
   };
 }
 
