@@ -64,3 +64,16 @@ test('Search matches localized titles, tags and body text, requiring every term'
   assert.equal(archive.select(searchable,{query:'诗 不存在'}).length,0);
   assert.equal(archive.select(searchable,{query:'  '}).length,3);
 });
+
+test('search previews explain literal body or metadata matches without duplicating the source', () => {
+  const item={id:'memo',title:'My note',description:'Original summary',tags:['tag-only']};
+  const blocks=[{id:'passage-1',text:'A small needle.'},{id:'passage-2',text:'A longer needle [a+b] in the article.'}];
+  assert.equal(archive.searchPreview(item,' ',blocks).text,item.description);
+  assert.deepEqual(archive.searchPreview(item,'NEEDLE [a+b]',blocks),{text:blocks[1].text,id:'passage-2',source:'body'});
+  assert.deepEqual(archive.searchPreview(item,'tag-only',blocks),{text:'tag-only',id:null,source:'metadata'});
+  const long={id:'passage-3',text:'云'.repeat(200)+'needle'+'🌸'.repeat(200)};
+  const excerpt=archive.searchPreview(item,'needle',[long]);
+  assert.ok(excerpt.text.includes('needle'));
+  assert.ok(excerpt.text.startsWith('…')&&excerpt.text.endsWith('…'));
+  assert.ok(Array.from(excerpt.text).length<=162);
+});

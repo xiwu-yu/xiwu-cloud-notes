@@ -9,13 +9,14 @@
 <link rel="icon" href="assets/favicon.svg?v=79847ec957" type="image/svg+xml">
 <script src="appearance.js?v=06e7ccb929"></script>
 <script src="navigation.js?v=0c74389e22"></script>
-<link rel="stylesheet" href="style.css?v=f4734f6fc1">
+<link rel="stylesheet" href="style.css?v=000243f98a">
 <link rel="stylesheet" href="motion.css?v=42134c50fe">
 <script defer src="music-drag.js?v=affba2808f"></script>
 <script defer src="motion.js?v=16670e6b6a"></script>
-<script defer src="profile.js?v=fd14b0f879"></script>
-<script defer src="archive.js?v=8a209936c6"></script>
-<script defer src="script.js?v=8244ca1ca9"></script>
+<script defer src="profile.js?v=f64f82c77c"></script>
+<script defer src="archive.js?v=461e9c9f06"></script>
+<script defer src="reader.js?v=8716d912f6"></script>
+<script defer src="script.js?v=e4c012aefb"></script>
 <!-- SITE_META_START -->
 <link rel="canonical" href="https://cloud.xiwu.space/">
 <meta property="og:type" content="website">
@@ -175,7 +176,7 @@
   <h2 id="dialog-title"></h2>
   <p id="dialog-meta" class="dialog-meta"></p>
   <p id="dialog-fallback" class="fallback-notice" role="status" hidden></p>
-  <div id="dialog-body"></div>
+  <div class="reader-layout"><details class="reader-toc" hidden></details><div id="dialog-body"></div></div>
   <a id="dialog-static" class="text-link" data-i18n="dialog.static">独立文章页 ↗</a>
   <div class="dialog-pagination">
     <button id="essay-prev" type="button" data-i18n="dialog.prev">← 上一篇</button>

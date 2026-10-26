@@ -12,7 +12,7 @@ const source = (body='正文。', metadata='') => `---\ntitle: 一篇随笔\ncat
 test('Markdown formats render; reading text excludes markup and link URLs', () => {
   const post = parsePost(source('## 小标题\n\n**加粗**与[链接](https://example.com)\n\n> 引用\n\n- 第一项\n- 第二项\n\n`code`\n\n```js\nconst a = 1;\n```'), 'example.md');
   assert.equal(post.id,'example');
-  for(const fragment of ['<h2>小标题</h2>','<strong>加粗</strong>','<blockquote>','<ul>','<pre><code class="language-js">']) assert.ok(post.bodyHtml.includes(fragment));
+  for(const fragment of ['<h2 id="section-1" data-reader-block="" tabindex="-1">小标题</h2>','<strong>加粗</strong>','<blockquote>','<ul>','class="language-js"']) assert.ok(post.bodyHtml.includes(fragment));
   assert.ok(post.text.includes('第一项'));
   assert.ok(!post.text.includes('https://example.com'));
   assert.ok(!post.text.includes('**'));
@@ -81,6 +81,7 @@ test('Adding and removing Markdown updates the build; a bad file preserves the l
     await writeFile(join(root,'dist/script.js'),'console.log(1);');
     await writeFile(join(root,'dist/appearance.js'),await readFile(new URL('../dist/appearance.js',import.meta.url)));
     await writeFile(join(root,'dist/reading.js'),await readFile(new URL('../dist/reading.js',import.meta.url)));
+    await writeFile(join(root,'dist/reader.js'),await readFile(new URL('../dist/reader.js',import.meta.url)));
     await writeFile(join(root,'content/posts/one.md'),source('第一篇'));
     await build(root);
     await writeFile(join(root,'content/posts/two.md'),source('第二篇'));
@@ -167,7 +168,7 @@ test('new article, missing translations, static metadata, deletion and failed re
     assert.equal(ctx.window.siteProfile.localized.en.interests.find(p=>p.id==='new-day').lang, 'zh-CN');
     assert.equal(ctx.window.siteProfile.localized.en.interests.find(p=>p.id==='new-day').body, undefined);
     const html = await readFile(join(root,'dist/posts/new-day/zh-CN.html'),'utf8');
-    assert.match(html, /<h2>新文章<\/h2>/);
+    assert.match(html, /<h2[^>]*id="section-1"[^>]*>新文章<\/h2>/);
     assert.match(html, /<html lang="zh-CN">/);
     assert.match(html, /<title>一篇随笔/);
     assert.match(html, /<link rel="canonical" href="https:\/\/cloud.xiwu.space\/posts\/new-day\/zh-CN.html">/);
@@ -195,7 +196,7 @@ test('new article, missing translations, static metadata, deletion and failed re
     }
     await writeFile(translationPath,translation);
     await build(root);
-    assert.match(await readFile(join(root,'dist/posts/new-day/en.html'),'utf8'), /<p>English<\/p>/);
+    assert.match(await readFile(join(root,'dist/posts/new-day/en.html'),'utf8'), /<p[^>]*id="passage-1"[^>]*>English<\/p>/);
     await rm(translationPath);
     await rm(join(root,'content/posts/new-day.md'));
     await build(root);
@@ -203,4 +204,16 @@ test('new article, missing translations, static metadata, deletion and failed re
     assert.doesNotMatch(await readFile(join(root,'dist/sitemap.xml'),'utf8'), /new-day/);
     assert.doesNotMatch(await readFile(join(root,'dist/index.html'),'utf8'), /posts\/new-day/);
   } finally { await rm(root, {recursive:true,force:true}); }
+});
+
+test('headings and passages have safe unique anchors without rewriting article text', () => {
+  const post = parsePost(source('## **重复**标题\n\n正文中的[链接](https://example.com)。\n\n## **重复**标题\n\n### <img src=x>\n\n~~~\n[a+b]\n~~~'), 'anchors.md');
+  assert.deepEqual(post.headings.map(h=>[h.id,h.level,h.text]),[['section-1',2,'重复标题'],['section-2',2,'重复标题'],['section-3',3,'<img src=x>']]);
+  const ids=[...post.bodyHtml.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
+  assert.equal(ids.length,new Set(ids).size);
+  assert.ok(post.bodyHtml.includes('id="passage-1"'));
+  assert.ok(post.bodyHtml.includes('&lt;img src=x&gt;'));
+  assert.ok(!post.bodyHtml.includes('<img '));
+  assert.ok(!post.text.includes('section-1'));
+  assert.ok(post.text.includes('正文中的链接'));
 });

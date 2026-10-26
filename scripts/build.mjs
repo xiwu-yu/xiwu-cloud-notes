@@ -153,7 +153,7 @@ export async function build(rootPath = root, options = {}) {
     const siteStrings = localizedSite(site, lang);
     const interests = basePosts.map(base => {
       const variant = posts.find(post => post.id === base.id && post.lang === lang) || base;
-      const { body, order, filename, ...post } = variant;
+      const { body, headings, order, filename, ...post } = variant;
       return {
         ...post,
         image: assetVersions[post.image] ? `${post.image}?v=${assetVersions[post.image]}` : post.image,

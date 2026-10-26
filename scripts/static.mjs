@@ -34,6 +34,7 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="${escape(ui[lang]['meta.shareImageAlt'])}">`;
   const readingVersion = createHash('sha256').update(await readFile(join(dist, 'reading.js'))).digest('hex').slice(0, 10);
+  const readerVersion = createHash('sha256').update(await readFile(join(dist, 'reader.js'))).digest('hex').slice(0, 10);
   const appearanceVersion = createHash('sha256').update(await readFile(join(dist, 'appearance.js'))).digest('hex').slice(0, 10);
   const transparency = lang => `<button class="transparency-toggle glass-action" type="button" hidden aria-haspopup="dialog" aria-expanded="false" aria-controls="glass-settings" aria-label="${escape(ui[lang]['appearance.open'])}" title="${escape(ui[lang]['appearance.open'])}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="12" r="6" fill="currentColor" opacity=".65"/></svg></button>`;
   const css = (await readFile(join(dist, 'index.html'), 'utf8')).match(/href="(style\.css[^\"]*)"/)?.[1] || 'style.css';
@@ -63,8 +64,16 @@ ${imageMeta('zh-CN')}
 <!-- SITE_META_END -->
 </head>`);
   await writeFile(indexPath, index);
+  const orderedIds = posts.filter(post => post.lang === 'zh-CN').sort((a,b) => a.writtenAt === b.writtenAt ? 0 : a.writtenAt === null ? 1 : b.writtenAt === null ? -1 : b.writtenAt.localeCompare(a.writtenAt)).map(post=>post.id);
   for (const post of posts) {
     const variants = byId.get(post.id);
+    const position = orderedIds.indexOf(post.id);
+    const neighbor = (offset,key) => {
+      const candidates = byId.get(orderedIds[position+offset]);
+      const item = candidates?.find(variant=>variant.lang===post.lang) || candidates?.find(variant=>variant.lang==='zh-CN');
+      return item ? `<a href="../../${postPath(item)}" lang="${item.lang}" hreflang="${item.lang}"><span>${escape(ui[post.lang][key])}</span><strong>${escape(item.title)}</strong>${item.lang!==post.lang ? `<small>${escape(ui[post.lang]['reader.original'])}</small>` : ''}</a>` : '';
+    };
+    const toc = post.headings.length < 2 ? '' : `<details class="reader-toc" open><summary>${escape(ui[post.lang]['reader.toc'])}</summary><nav aria-label="${escape(ui[post.lang]['reader.toc'])}">${post.headings.map(heading=>`<a data-reader-anchor="${heading.id}" href="#${heading.id}" style="--toc-indent:${Math.min(3,heading.level-Math.min(...post.headings.map(h=>h.level)))*12}px">${escape(heading.text)}</a>`).join('')}</nav></details>`;
     const absolute = new URL(postPath(post), SITE_URL).href;
     const title = ui[post.lang]['meta.articleTitle'].replace('{title}', post.title).replace('{site}', localized[post.lang].name);
     const alternates = variants.map(variant => `<link rel="alternate" hreflang="${variant.lang}" href="${escape(new URL(postPath(variant), SITE_URL).href)}">`).join('\n');
@@ -95,12 +104,15 @@ ${imageMeta(post.lang)}
 <link rel="icon" href="../../assets/favicon.svg?v=${assetVersions['assets/favicon.svg'] || ''}" type="image/svg+xml">
 <script src="../../appearance.js?v=${appearanceVersion}"></script>
 <script src="../../reading.js?v=${readingVersion}"></script>
+<script defer src="../../reader.js?v=${readerVersion}"></script>
 <link rel="stylesheet" href="../../${escape(css)}">
 </head>
 <body class="static-reading">
 <div class="sky-background" aria-hidden="true"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span></div>
 <header class="wrap static-reader-toolbar glass-surface"><a class="brand" href="../../?lang=${post.lang}">☁ ${escape(homeLabel[post.lang])}</a><button class="theme-toggle" type="button" hidden aria-label="${escape(ui[post.lang]['theme.toDark'])}" aria-pressed="false" data-to-dark="${escape(ui[post.lang]['theme.toDark'])}" data-to-light="${escape(ui[post.lang]['theme.toLight'])}"><span aria-hidden="true">◐</span></button>${transparency(post.lang)}</header>
-<main class="static-article wrap reader-surface">
+<main class="static-layout wrap">
+${toc}
+<div class="static-article reader-surface">
 <nav aria-label="${escape(ui[post.lang]['language.label'])}">${languageNav}</nav>
 <article lang="${post.lang}">
 <p class="eyebrow">${escape(post.category)}</p>
@@ -109,7 +121,9 @@ ${imageMeta(post.lang)}
 <div class="article-body" id="dialog-body">${post.bodyHtml.replace(/(href|src)="(assets\/[^"]*)"/g, '$1="../../$2"')}</div>
 ${post.source ? `<p><a class="dialog-source" href="${escape(post.source)}" rel="noopener noreferrer">${escape(ui[post.lang]['dialog.source'])}</a></p>` : ''}
 </article>
-<p><a class="text-link" href="../../?post=${post.id}&amp;lang=${post.lang}">${escape(ui[post.lang]['notes.readMore'])}</a></p>
+<nav class="static-pagination" aria-label="${escape(ui[post.lang]['reader.backToList'])}">${neighbor(-1,'reader.previous')}${neighbor(1,'reader.next')}</nav>
+<p class="static-back"><a class="text-link" href="../../?lang=${post.lang}#interests">${escape(ui[post.lang]['reader.backToList'])}</a></p>
+</div>
 </main>
 ${appearancePanel(ui[post.lang])}
 </body>
