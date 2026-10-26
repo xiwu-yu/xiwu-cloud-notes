@@ -182,6 +182,8 @@ for (const width of [320, 375, 768, 1440]) {
         await page.keyboard.press('Shift+Tab');
         await expect(page.locator('#interest-dialog .transparency-toggle')).toBeFocused();
         await page.keyboard.press('Shift+Tab');
+        await expect(page.locator('.dialog-theme-toggle')).toBeFocused();
+        await page.keyboard.press('Shift+Tab');
         await expect(page.locator('#dialog-language-select')).toBeFocused();
         expect(await page.locator('#dialog-language-select').evaluate(n => getComputedStyle(n).outlineStyle)).not.toBe('none');
         await page.keyboard.press('Escape');

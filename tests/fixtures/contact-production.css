@@ -1,0 +1,10 @@
+/* Captured from https://cloud.xiwu.space/style.css on 2026-10-26.
+   Build f3dd8cff7fa429ddad2416cbf3dbdb6b86bab145; lock image treatment only. */
+.contact-split { position:absolute; inset:0; display:flex; z-index:0; opacity:.62; }
+.contact-split span { flex:1; min-width:0; background-image:url("assets/contact.jpg?v=8d141f7dad"); background-size:100% 200%; background-repeat:no-repeat; filter:saturate(.9); }
+.contact::before { content:""; position:absolute; inset:0; z-index:1; background:var(--paper); opacity:.45; pointer-events:none; }
+@media(max-width:720px) {
+  .contact-split { display:none; }
+  .contact .contact-mobile-art { display:block; position:absolute; inset:0; z-index:0; opacity:.62; overflow:hidden; pointer-events:none; }
+  .contact-mobile-art img { width:100%; height:100%; object-fit:cover; filter:saturate(.9); }
+}

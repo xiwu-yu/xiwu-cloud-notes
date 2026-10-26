@@ -62,7 +62,7 @@
     "notes.archiveAria": "时间归档工具",
     "notes.viewAria": "随笔显示方式",
     "gentle.line": "飞萤扑火，<br>向死而生。",
-    "resources.title": "一些中文资料与工具。",
+    "resources.title": "阅读资源",
     "resources.side": "一些跨性别相关网站",
     "resources.note": "资料按需参考；HRT 记录工具不能代替医疗建议。",
     "resources.mtf.desc": "跨性别知识、医疗资源与生活办事指南。",
@@ -73,7 +73,7 @@
     "resources.oau.type": "中文 · 纪念与记录 ↗",
     "resources.rle.desc": "跨性别与性别多元群体的生活指南，包含校园、时尚护理和安全防护等内容。",
     "resources.rle.type": "中文 · 日常生活 ↗",
-    "boundaries.title": "有几件事，<br>提前说一下。",
+    "boundaries.title": "一些问题",
     "boundaries.q1": "怎么称呼？",
     "boundaries.a1": "夕雾或者nina，代词用「她」。",
     "boundaries.q2": "可以问哪些问题？",
@@ -132,7 +132,10 @@
     "notes.adjusted": "{count} 项已调整",
     "appearance.reduce": "减少透明效果",
     "appearance.system": "系统已减少透明效果",
-    "notes.subtitle": "一些思考，一点情绪"
+    "notes.subtitle": "一些思考，一点情绪",
+    "music.drag": "拖动音乐栏",
+    "music.dragHint": "桌面可拖动标题移动；键盘方向键移动，Home 键复位。",
+    "music.help": "使用帮助"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -197,7 +200,7 @@
     "notes.archiveAria": "時間歸檔工具",
     "notes.viewAria": "隨筆顯示方式",
     "gentle.line": "飛螢撲火，<br>向死而生。",
-    "resources.title": "一些中文資料與工具。",
+    "resources.title": "閱讀資源",
     "resources.side": "一些跨性別相關網站",
     "resources.note": "資料按需參考；HRT 記錄工具不能代替醫療建議。",
     "resources.mtf.desc": "跨性別知識、醫療資源與生活辦事指南。",
@@ -208,7 +211,7 @@
     "resources.oau.type": "中文 · 紀念與記錄 ↗",
     "resources.rle.desc": "跨性別與性別多元群體的生活指南，包含校園、時尚護理和安全防護等內容。",
     "resources.rle.type": "中文 · 日常生活 ↗",
-    "boundaries.title": "有幾件事，<br>提前說一下。",
+    "boundaries.title": "一些問題",
     "boundaries.q1": "怎麼稱呼？",
     "boundaries.a1": "夕霧或nina，代詞用「她」。",
     "boundaries.q2": "可以問哪些問題？",
@@ -267,7 +270,10 @@
     "notes.adjusted": "已調整 {count} 項",
     "appearance.reduce": "減少透明效果",
     "appearance.system": "系統已減少透明效果",
-    "notes.subtitle": "一些思考，一點情緒"
+    "notes.subtitle": "一些思考，一點情緒",
+    "music.drag": "拖曳音樂列",
+    "music.dragHint": "桌面可拖曳標題移動；鍵盤方向鍵移動，Home 鍵復位。",
+    "music.help": "使用說明"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -332,7 +338,7 @@
     "notes.archiveAria": "Archive tools",
     "notes.viewAria": "Essay view",
     "gentle.line": "Fireflies into the flame,<br>living toward death.",
-    "resources.title": "Some Chinese-Language Resources and Tools.",
+    "resources.title": "Reading Resources",
     "resources.side": "Some trans-related websites",
     "resources.note": "Use these as needed; an HRT tracker is not medical advice.",
     "resources.mtf.desc": "Trans knowledge, medical resources, and practical guides to daily life.",
@@ -343,7 +349,7 @@
     "resources.oau.type": "Chinese · memorial ↗",
     "resources.rle.desc": "A life guide for trans and gender-diverse people, covering campus life, style and care, and safety.",
     "resources.rle.type": "Chinese · everyday life ↗",
-    "boundaries.title": "A few things,<br>before you ask.",
+    "boundaries.title": "Some Questions",
     "boundaries.q1": "What should I call you?",
     "boundaries.a1": "Xiwu or Nina, with she/her pronouns.",
     "boundaries.q2": "What can I ask about?",
@@ -402,7 +408,10 @@
     "notes.adjusted": "{count} adjusted",
     "appearance.reduce": "Reduce transparency",
     "appearance.system": "Transparency reduced by your system",
-    "notes.subtitle": "Some Thoughts, a Little Feeling"
+    "notes.subtitle": "Some Thoughts, a Little Feeling",
+    "music.drag": "Move music panel",
+    "music.dragHint": "On desktop, drag the title or use arrow keys to move; Home resets the position.",
+    "music.help": "Player help"
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -467,7 +476,7 @@
     "notes.archiveAria": "アーカイブツール",
     "notes.viewAria": "エッセイの表示形式",
     "gentle.line": "飛蛍、炎へ。<br>死に向かって生きる。",
-    "resources.title": "中国語の資料とツール。",
+    "resources.title": "参考資料",
     "resources.side": "トランスジェンダー関連のサイト",
     "resources.note": "必要に応じて参考にしてください。HRT記録ツールは医療上の助言の代わりにはなりません。",
     "resources.mtf.desc": "トランスジェンダーに関する知識、医療資源、生活の手続きガイド。",
@@ -478,7 +487,7 @@
     "resources.oau.type": "中国語 · 追悼と記録 ↗",
     "resources.rle.desc": "トランスジェンダーと多様な性の人のための生活ガイド。学校生活、ファッションとケア、安全対策などを扱います。",
     "resources.rle.type": "中国語 · 日常生活 ↗",
-    "boundaries.title": "先にいくつか、<br>お伝えしておきたいこと。",
+    "boundaries.title": "いくつかの質問",
     "boundaries.q1": "どう呼べばいい？",
     "boundaries.a1": "夕霧またはニナ、代名詞は「彼女」。",
     "boundaries.q2": "どんなことを聞いてもいい？",
@@ -537,6 +546,9 @@
     "notes.adjusted": "{count} 項目を変更中",
     "appearance.reduce": "透明度を下げる",
     "appearance.system": "システムで透明度を下げています",
-    "notes.subtitle": "考えごとと、少しの気持ち"
+    "notes.subtitle": "考えごとと、少しの気持ち",
+    "music.drag": "音楽パネルを移動",
+    "music.dragHint": "デスクトップでは見出しをドラッグ、または矢印キーで移動。Home キーで元に戻します。",
+    "music.help": "使い方"
   }
 }

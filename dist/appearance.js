@@ -9,6 +9,49 @@
   let manual=false;
   try{manual=localStorage.getItem(key)==='true';}catch{}
   const frames=new Map();
+  function installChoiceIndicator(selector,buttonSelector,kind) {
+    const group=document.querySelector(selector);
+    if(!group)return;
+    const indicator=document.createElement('span');
+    indicator.className=`${kind}-indicator glass-surface`;indicator.setAttribute('aria-hidden','true');indicator.hidden=true;
+    let frame=0,animation=null,last=null,animateNext=false;
+    const queue=animate=>{animateNext=animateNext||animate;if(!frame)frame=requestAnimationFrame(()=>{frame=0;measure(animateNext);animateNext=false;});};
+    const measure=animate=>{
+      if(!group.contains(indicator))group.prepend(indicator);
+      const active=group.querySelector('[aria-pressed="true"]');if(!active)return;
+      // 只滚动分类容器，不把文档跳到尚未进入视口的分类区。
+      const x=active.offsetLeft,y=active.offsetTop,w=active.offsetWidth,h=active.offsetHeight;
+      const scrollMin=x-5,scrollMax=x+w-group.clientWidth+5;
+      if(x<group.scrollLeft)group.scrollLeft=Math.max(0,scrollMin);
+      else if(x+w>group.scrollLeft+group.clientWidth)group.scrollLeft=Math.max(0,scrollMax);
+      if(last&&last.x===x&&last.y===y&&last.w===w&&last.h===h)return;
+      const old=indicator.hidden?null:indicator.getBoundingClientRect(),bounds=group.getBoundingClientRect();
+      animation?.cancel();indicator.hidden=false;indicator.style.width=`${w}px`;indicator.style.height=`${h}px`;
+      const target=`translate3d(${x}px,${y}px,0)`;indicator.style.transform=target;
+      if(old&&animate&&!motion.matches&&!document.hidden) {
+        // FLIP 只动画材质层：宽度一次设定，帧间只改变 transform，标签没有缩放。
+        animation=indicator.animate([
+          {transform:`translate3d(${old.x-bounds.x+group.scrollLeft}px,${old.y-bounds.y}px,0) scale(${old.width/w},${old.height/h})`},
+          {transform:target}
+        ],{duration:340,easing:'cubic-bezier(.2,.8,.2,1)'});
+      }
+      last={x,y,w,h};group.classList.add(`has-${kind}-indicator`);
+    };
+    const resize='ResizeObserver' in window?new ResizeObserver(()=>queue(false)):null;
+    const watch=()=>{resize?.disconnect();resize?.observe(group);group.querySelectorAll(buttonSelector).forEach(button=>resize?.observe(button));};
+    new MutationObserver(records=>{
+      if(records.some(record=>record.type==='childList'))watch();
+      queue(records.some(record=>record.type==='attributes'));
+    }).observe(group,{childList:true,subtree:true,attributes:true,attributeFilter:['aria-pressed']});
+    group.addEventListener('click',()=>queue(true));
+    addEventListener('resize',()=>queue(false),{passive:true});
+    document.addEventListener('site:language-changed',()=>queue(false));
+    document.fonts?.ready.then(()=>queue(false));document.fonts?.addEventListener('loadingdone',()=>queue(false));
+    motion.addEventListener('change',()=>{animation?.cancel();animation=null;last=null;queue(false);});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){animation?.cancel();animation=null;}else queue(false);});
+    watch();queue(false);
+  }
+
   const required=()=>system.matches || contrast.matches || forced.matches;
   function resetLights() {
     for(const surface of document.querySelectorAll('[data-glass-light]')) {
@@ -29,6 +72,8 @@
   }
   apply(); // 样式渲染前恢复偏好，避免透明度闪变。
   document.addEventListener('DOMContentLoaded',()=>{
+    installChoiceIndicator('.filters','.filter','filter');
+    installChoiceIndicator('.view-switch','[data-view]','view');
     for(const button of document.querySelectorAll('.transparency-toggle')) {
       button.hidden=false;
       button.addEventListener('click',()=>{

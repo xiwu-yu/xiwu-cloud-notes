@@ -151,18 +151,42 @@ for (const [width,height] of [[320,568],[375,812],[768,900],[1440,900],[568,320]
     }
     await page.locator('footer').scrollIntoViewIfNeeded();
     await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
-    const back=await page.locator('footer>a:last-child').boundingBox();
+    const back=await page.locator('.footer-more').boundingBox();
     if (width > 720) {
       const toggle=await page.locator('#music-toggle').boundingBox();
       expect(back.y+back.height).toBeLessThan(toggle.y);
     }
-    const hit=await page.locator('footer>a:last-child').evaluate(el=>{
+    const hit=await page.locator('.footer-more').evaluate(el=>{
       const box=el.getBoundingClientRect();
       return el.contains(document.elementFromPoint(box.left+box.width/2,box.top+box.height/2));
     });
     expect(hit).toBe(true);
   });
 }
+
+test('short landscape music footer remains reachable with wider system font metrics', async ({ page }) => {
+  await stubPlayer(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 568, height: 320 });
+  await page.goto('./?lang=en');
+  // Deterministically reproduce the Linux two-line collapse label on macOS too.
+  await page.addStyleTag({ content: '.music-footer { font-family: monospace } .music-footer button { font-family: monospace; line-height: 1.9 }' });
+  await page.locator('#music-toggle').click();
+  const panel = await page.locator('#music-panel').boundingBox();
+  for (const selector of ['#music-close', '#music-collapse', '.music-fallback a']) {
+    const box = await page.locator(selector).boundingBox();
+    expect(box.y).toBeGreaterThanOrEqual(panel.y);
+    expect(box.y + box.height).toBeLessThanOrEqual(panel.y + panel.height);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(await page.locator(selector).evaluate(el => {
+      const b = el.getBoundingClientRect();
+      return el.contains(document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2));
+    })).toBe(true);
+  }
+  expect(await page.locator('.music-frame-viewport').evaluate(el => el.clientHeight)).toBeGreaterThan(20);
+  await page.locator('#music-collapse').click();
+  await expect(page.locator('#music-toggle')).toBeFocused();
+});
 
 test('playlist fallback remains available when the iframe fails or JavaScript is unavailable', async ({ browser }) => {
   for (const failure of ['player','javascript','script.js','profile.js']) {
@@ -272,6 +296,12 @@ test('iframe Escape stays inside its document; native keyboard navigation reache
   await expect(page.locator('#music-panel')).toBeVisible();
   // macOS WebKit 默认仅 Tab 到输入框；Option-Tab 访问所有链接/按钮。
   const next = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+  await page.keyboard.press(next);
+  await expect(page.locator('.music-help summary')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.music-help')).toHaveAttribute('open','');
+  await expect(page.locator('.music-hint')).toBeVisible();
+  await page.keyboard.press('Enter');
   await page.keyboard.press(next);
   await expect(page.locator('.music-fallback a')).toBeFocused();
   await page.keyboard.press(next);
