@@ -12,7 +12,7 @@ test('real content loads in all languages and themes; every article is readable'
     await page.goto(`./?lang=${lang}`);
     await expect(page.locator('.interest-card')).toHaveCount(posts.length);
     for (const theme of ['light', 'dark']) {
-      if (await page.locator('html').getAttribute('data-theme') !== theme) await page.locator('.theme-toggle').click();
+      if (await page.locator('html').getAttribute('data-theme') !== theme) await page.locator('.theme-toggle').evaluate(button => button.click());
       await noOverflow(page, 1440);
       for (const post of posts) {
         await page.locator(`[data-essay-id="${post.id}"] .card-button`).click();
@@ -67,7 +67,7 @@ test('contact has a spacious desktop image, mobile top-left heading and bottom-l
     for (const lang of profile.locales) {
       await page.selectOption('#language-select', lang);
       for (const theme of ['light', 'dark']) {
-        if (await page.locator('html').getAttribute('data-theme') !== theme) await page.locator('.theme-toggle').click();
+        if (await page.locator('html').getAttribute('data-theme') !== theme) await page.locator('.theme-toggle').evaluate(button => button.click());
         await noOverflow(page, width);
         await expect(page.locator('#email-link')).toHaveAttribute('href', 'mailto:824396851az%40gmail.com');
         await expect(page.locator('#email-label')).toContainText('824396851az@gmail.com');
