@@ -125,6 +125,7 @@
   }
 
   function renderDialog(item, { focus = false, scroll = false } = {}) {
+    window.articleLikes?.mount($('#dialog-like'), {id:item.id, endpoint:profile.likes, strings:ui});
     $('#dialog-title').textContent = item.title;
     $('#dialog-category').textContent = item.category;
     const meta = $('#dialog-meta');

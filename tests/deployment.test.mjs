@@ -30,6 +30,29 @@ function commit(root) {
 }
 const loader = root => (path,binary) => readFile(join(root,'dist',path),binary ? undefined : 'utf8');
 
+test('likes config reaches both readers with hashed assets, subpaths and four-language labels; invalid API preserves the last build', async()=>{
+  const root=await repository();
+  try {
+    await writeFile(join(root,'content/likes.json'),JSON.stringify({apiUrl:'https://likes.example.workers.dev'}));
+    await build(root,{...options,siteUrl:'https://example.org/notes/'});
+    const home=await readFile(join(root,'dist/index.html'),'utf8');
+    assert.match(home,/src="likes\.js\?v=[a-f0-9]{10}"/);
+    assert.match(await readFile(join(root,'dist/profile.js'),'utf8'),/"likes":"https:\/\/likes.example.workers.dev"/);
+    for(const lang of ['zh-CN','zh-TW','en','ja']) {
+      const html=await readFile(join(root,`dist/posts/xiwu/${lang}.html`),'utf8');
+      assert.match(html,/data-article-id="xiwu"/);
+      assert.match(html,/data-api-url="https:\/\/likes.example.workers.dev"/);
+      assert.match(html,/src="\.\.\/\.\.\/likes\.js\?v=[a-f0-9]{10}"/);
+      const ui=JSON.parse(await readFile(join(root,'content/ui.json'),'utf8'));
+      assert.ok(html.includes(`data-likes-like="${ui[lang]['likes.like']}"`));
+      assert.ok(html.includes(`https://example.org/notes/posts/xiwu/${lang}.html`));
+    }
+    await writeFile(join(root,'content/likes.json'),JSON.stringify({apiUrl:'http://bad.test'}));
+    await assert.rejects(build(root),/apiUrl.*HTTPS/);
+    assert.equal(await readFile(join(root,'dist/index.html'),'utf8'),home);
+  } finally {await rm(root,{recursive:true,force:true});}
+});
+
 test('site base URL accepts HTTPS roots/subpaths and rejects unsafe bases; invalid build time fails', () => {
   assert.equal(resolveSiteUrl(),'https://cloud.xiwu.space/');
   assert.equal(resolveSiteUrl('https://xiwu-yu.github.io/xiwu-cloud-notes'),'https://xiwu-yu.github.io/xiwu-cloud-notes/');

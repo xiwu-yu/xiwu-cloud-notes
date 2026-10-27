@@ -158,7 +158,15 @@
     "reader.next": "下一篇",
     "reader.original": "简体中文原文",
     "notes.matchBody": "正文匹配",
-    "notes.matchMetadata": "资料匹配"
+    "notes.matchMetadata": "资料匹配",
+    "likes.like": "喜欢这篇",
+    "likes.unlike": "已喜欢 · 取消",
+    "likes.count": "{count} 人喜欢",
+    "likes.loading": "正在读取点赞…",
+    "likes.error": "点赞服务暂不可用，请稍后重试。",
+    "likes.limited": "操作太频繁，请一分钟后重试。",
+    "likes.storage": "浏览器无法保存匿名身份，暂不能点赞。",
+    "likes.retry": "重试"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -319,7 +327,15 @@
     "reader.next": "下一篇",
     "reader.original": "簡體中文原文",
     "notes.matchBody": "正文符合",
-    "notes.matchMetadata": "資料符合"
+    "notes.matchMetadata": "資料符合",
+    "likes.like": "喜歡這篇",
+    "likes.unlike": "已喜歡 · 取消",
+    "likes.count": "{count} 人喜歡",
+    "likes.loading": "正在讀取按讚…",
+    "likes.error": "按讚服務暫時無法使用，請稍後重試。",
+    "likes.limited": "操作太頻繁，請一分鐘後重試。",
+    "likes.storage": "瀏覽器無法儲存匿名身分，暫時不能按讚。",
+    "likes.retry": "重試"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -480,7 +496,15 @@
     "reader.next": "Next article",
     "reader.original": "Simplified Chinese original",
     "notes.matchBody": "Found in the article",
-    "notes.matchMetadata": "Found in article details"
+    "notes.matchMetadata": "Found in article details",
+    "likes.like": "Like this article",
+    "likes.unlike": "Liked · Unlike",
+    "likes.count": "{count} likes",
+    "likes.loading": "Loading likes…",
+    "likes.error": "Likes are unavailable. Please try again later.",
+    "likes.limited": "Too many requests. Try again in a minute.",
+    "likes.storage": "Your browser cannot save an anonymous identity. Liking is unavailable.",
+    "likes.retry": "Retry"
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -641,6 +665,14 @@
     "reader.next": "次の記事",
     "reader.original": "簡体字中国語の原文",
     "notes.matchBody": "本文の一致箇所",
-    "notes.matchMetadata": "記事情報の一致箇所"
+    "notes.matchMetadata": "記事情報の一致箇所",
+    "likes.like": "この記事にいいね",
+    "likes.unlike": "いいね済み · 解除",
+    "likes.count": "{count} 件のいいね",
+    "likes.loading": "いいねを読み込み中…",
+    "likes.error": "いいねを利用できません。しばらくしてからお試しください。",
+    "likes.limited": "操作が多すぎます。1分後にお試しください。",
+    "likes.storage": "匿名の識別情報を保存できないため、いいねを利用できません。",
+    "likes.retry": "再試行"
   }
 }

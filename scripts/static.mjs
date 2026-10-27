@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { appearancePanel } from './appearance.mjs';
+import { likeMarkup } from './likes.mjs';
 
 // 一个入口配置所有可抓取 URL；相对文章/资源链接继续兼容项目子路径。
 export const DEFAULT_SITE_URL = 'https://cloud.xiwu.space/';
@@ -20,7 +21,7 @@ const labels = { 'zh-CN': '简体中文', 'zh-TW': '繁體中文', en: 'English'
 const ogLocale = lang => ({ 'zh-CN': 'zh_CN', 'zh-TW': 'zh_TW', en: 'en_US', ja: 'ja_JP' }[lang]);
 const homeLabel = { 'zh-CN': '回到云间来信', 'zh-TW': '回到雲間來信', en: 'Back to Letters in the Clouds', ja: '雲間の手紙に戻る' };
 
-export async function generateStatic(rootPath, posts, localized, ui, assetVersions, siteUrl = DEFAULT_SITE_URL) {
+export async function generateStatic(rootPath, posts, localized, ui, assetVersions, siteUrl = DEFAULT_SITE_URL, likes = null) {
   const SITE_URL = resolveSiteUrl(siteUrl);
   const dist = join(rootPath, 'dist');
   const coverPath = 'assets/share-cover.png';
@@ -35,6 +36,7 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
 <meta property="og:image:alt" content="${escape(ui[lang]['meta.shareImageAlt'])}">`;
   const readingVersion = createHash('sha256').update(await readFile(join(dist, 'reading.js'))).digest('hex').slice(0, 10);
   const readerVersion = createHash('sha256').update(await readFile(join(dist, 'reader.js'))).digest('hex').slice(0, 10);
+  const likesVersion = createHash('sha256').update(await readFile(join(dist, 'likes.js'))).digest('hex').slice(0, 10);
   const appearanceVersion = createHash('sha256').update(await readFile(join(dist, 'appearance.js'))).digest('hex').slice(0, 10);
   const transparency = lang => `<button class="transparency-toggle glass-action" type="button" hidden aria-haspopup="dialog" aria-expanded="false" aria-controls="glass-settings" aria-label="${escape(ui[lang]['appearance.open'])}" title="${escape(ui[lang]['appearance.open'])}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="12" r="6" fill="currentColor" opacity=".65"/></svg></button>`;
   const css = (await readFile(join(dist, 'index.html'), 'utf8')).match(/href="(style\.css[^\"]*)"/)?.[1] || 'style.css';
@@ -105,6 +107,7 @@ ${imageMeta(post.lang)}
 <script src="../../appearance.js?v=${appearanceVersion}"></script>
 <script src="../../reading.js?v=${readingVersion}"></script>
 <script defer src="../../reader.js?v=${readerVersion}"></script>
+<script defer src="../../likes.js?v=${likesVersion}"></script>
 <link rel="stylesheet" href="../../${escape(css)}">
 </head>
 <body class="static-reading">
@@ -121,6 +124,7 @@ ${toc}
 <div class="article-body" id="dialog-body">${post.bodyHtml.replace(/(href|src)="(assets\/[^"]*)"/g, '$1="../../$2"')}</div>
 ${post.source ? `<p><a class="dialog-source" href="${escape(post.source)}" rel="noopener noreferrer">${escape(ui[post.lang]['dialog.source'])}</a></p>` : ''}
 </article>
+${likeMarkup(post.id, likes, ui[post.lang])}
 <nav class="static-pagination" aria-label="${escape(ui[post.lang]['reader.backToList'])}">${neighbor(-1,'reader.previous')}${neighbor(1,'reader.next')}</nav>
 <p class="static-back"><a class="text-link" href="../../?lang=${post.lang}#interests">${escape(ui[post.lang]['reader.backToList'])}</a></p>
 </div>

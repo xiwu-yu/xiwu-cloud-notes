@@ -1,0 +1,4 @@
+# Wrangler 官方本地运行时所需，仅允许锁定版本的两个安装校验脚本。
+allowBuilds:
+  esbuild@0.28.2: true
+  workerd@1.20261023.1: true
