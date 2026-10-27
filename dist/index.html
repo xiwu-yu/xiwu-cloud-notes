@@ -9,14 +9,15 @@
 <link rel="icon" href="assets/favicon.svg?v=79847ec957" type="image/svg+xml">
 <script src="appearance.js?v=06e7ccb929"></script>
 <script src="navigation.js?v=0c74389e22"></script>
-<link rel="stylesheet" href="style.css?v=300f81ad7d">
+<link rel="stylesheet" href="style.css?v=1d9e2dc925">
 <link rel="stylesheet" href="motion.css?v=42134c50fe">
 <script defer src="music-drag.js?v=affba2808f"></script>
 <script defer src="motion.js?v=16670e6b6a"></script>
-<script defer src="profile.js?v=1bfecc4076"></script>
+<script defer src="profile.js?v=79253b901e"></script>
 <script defer src="archive.js?v=461e9c9f06"></script>
 <script defer src="reader.js?v=8716d912f6"></script>
-<script defer src="script.js?v=a296cd86ff"></script>
+<script defer src="likes.js?v=acadc88ed7"></script>
+<script defer src="script.js?v=1cabdd820a"></script>
 <!-- SITE_META_START -->
 <link rel="canonical" href="https://cloud.xiwu.space/">
 <meta property="og:type" content="website">
@@ -119,7 +120,9 @@
   <!-- STATIC_ARCHIVE_START -->
 <details class="static-archive" id="static-archive"><summary>静态文章目录 / Static archive / 記事一覧</summary><ul><li><a lang="en" hreflang="en" href="posts/hrt-preface/en.html">English · HRT: A Preface</a> · <a lang="ja" hreflang="ja" href="posts/hrt-preface/ja.html">日本語 · HRT のまえがき</a> · <a lang="zh-CN" hreflang="zh-CN" href="posts/hrt-preface/zh-CN.html">简体中文 · HRT 前言</a> · <a lang="zh-TW" hreflang="zh-TW" href="posts/hrt-preface/zh-TW.html">繁體中文 · HRT 前言</a></li>
 <li><a lang="en" hreflang="en" href="posts/claw-marks/en.html">English · Leave Claw Marks While I Still Can</a> · <a lang="ja" hreflang="ja" href="posts/claw-marks/ja.html">日本語 · 死が来る前に、爪痕を残したい</a> · <a lang="zh-CN" hreflang="zh-CN" href="posts/claw-marks/zh-CN.html">简体中文 · 在死亡来临之前，用力留下爪痕喵</a> · <a lang="zh-TW" hreflang="zh-TW" href="posts/claw-marks/zh-TW.html">繁體中文 · 在死亡來臨之前，用力留下爪痕喵</a></li>
-<li><a lang="en" hreflang="en" href="posts/xiwu/en.html">English · Evening Mist</a> · <a lang="ja" hreflang="ja" href="posts/xiwu/ja.html">日本語 · 夕霧</a> · <a lang="zh-CN" hreflang="zh-CN" href="posts/xiwu/zh-CN.html">简体中文 · 夕雾</a> · <a lang="zh-TW" hreflang="zh-TW" href="posts/xiwu/zh-TW.html">繁體中文 · 夕霧</a></li></ul><p>无需 JavaScript 即可阅读。 / Read without JavaScript.</p></details>
+<li><a lang="en" hreflang="en" href="posts/xiwu/en.html">English · Evening Mist</a> · <a lang="ja" hreflang="ja" href="posts/xiwu/ja.html">日本語 · 夕霧</a> · <a lang="zh-CN" hreflang="zh-CN" href="posts/xiwu/zh-CN.html">简体中文 · 夕雾</a> · <a lang="zh-TW" hreflang="zh-TW" href="posts/xiwu/zh-TW.html">繁體中文 · 夕霧</a></li>
+<li><a lang="en" hreflang="en" href="posts/hrt-month-3/en.html">English · HRT Month 3 | Planting Hope Again</a> · <a lang="ja" hreflang="ja" href="posts/hrt-month-3/ja.html">日本語 · HRT Month 3｜もう一度、希望を植えよう</a> · <a lang="zh-CN" hreflang="zh-CN" href="posts/hrt-month-3/zh-CN.html">简体中文 · HRT Month 3｜重新种下希望</a> · <a lang="zh-TW" hreflang="zh-TW" href="posts/hrt-month-3/zh-TW.html">繁體中文 · HRT Month 3｜重新種下希望</a></li>
+<li><a lang="en" hreflang="en" href="posts/through-time-and-space/en.html">English · Through Time and Space, I Hold You Close</a> · <a lang="ja" hreflang="ja" href="posts/through-time-and-space/ja.html">日本語 · 時空をかき分けて、君を抱きしめる</a> · <a lang="zh-CN" hreflang="zh-CN" href="posts/through-time-and-space/zh-CN.html">简体中文 · 拨开时空抱紧你</a> · <a lang="zh-TW" hreflang="zh-TW" href="posts/through-time-and-space/zh-TW.html">繁體中文 · 撥開時空抱緊你</a></li></ul><p>无需 JavaScript 即可阅读。 / Read without JavaScript.</p></details>
 <!-- STATIC_ARCHIVE_END -->
 </section>
 <section class="gentle-note wrap" aria-label="云间便笺" data-i18n-aria-label="gentle.aria">
@@ -178,6 +181,7 @@
   <p id="dialog-fallback" class="fallback-notice" role="status" hidden></p>
   <div class="reader-layout"><details class="reader-toc" hidden></details><div id="dialog-body"></div></div>
   <a id="dialog-static" class="text-link" data-i18n="dialog.static">独立文章页 ↗</a>
+  <div id="dialog-like" class="article-like" hidden></div>
   <div class="dialog-pagination">
     <button id="essay-prev" type="button" data-i18n="dialog.prev">← 上一篇</button>
     <div class="dialog-pagination-center"><span id="essay-position"></span><button id="essay-share" class="dialog-share" type="button" data-i18n="dialog.share">复制链接</button></div>

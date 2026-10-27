@@ -835,3 +835,15 @@ mark { background:var(--blue); color:var(--ink); border-radius:3px; padding-inli
   .music-toggle { min-width:48px; width:48px; height:48px; padding:10px; border-radius:50%; }
   .music-toggle>span { display:none; }
 }
+/* 点赞只在服务端确认后更新，独立正文和阅读弹窗共用。 */
+.article-like { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-block:28px; }
+.article-like[hidden] { display:none; }
+.like-button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:48px; padding:10px 18px; border:1px solid var(--line); border-radius:999px; background:var(--paper); color:var(--ink); font:inherit; cursor:pointer; }
+.like-button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
+.like-button:disabled { cursor:default; }
+.like-button[aria-busy="true"] { cursor:progress; }
+.like-heart { color:var(--accent); font-size:22px; }
+.like-count { padding-inline-start:10px; border-inline-start:1px solid var(--line); font-variant-numeric:tabular-nums; }
+.like-status { flex-basis:100%; font-size:14px; line-height:1.6; color:var(--ink); }
+.like-retry { min-height:44px; font:inherit; cursor:pointer; }
+.like-button:focus-visible,.like-retry:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
