@@ -2,13 +2,13 @@
 id: "hrt-preface"
 lang: "en"
 title: "HRT: A Preface"
-category: "Gender & Life"
+category: "Gender & Identity"
 tags: ["HRT","gender identity","growing up"]
 writtenAt: "2026-03-12"
 description: "Starting at twenty-two doesn't mean the feelings only began at twenty-two. Looking back at those memories, and leaving something for who I am now and who I will become."
 publishedAt: "2026-10-24T15:51:51+08:00"
-updatedAt: "2026-10-24T15:51:51+08:00"
-subtitle: "Essay / after the beginning"
+updatedAt: "2026-10-27T12:11:19+08:00"
+subtitle: "HRT / after the beginning"
 image: "assets/cloud-white.svg"
 alt: "A white cloud slowly opening in pale blue and pink light"
 order: 1

@@ -2,15 +2,15 @@
 id: "xiwu"
 lang: "ja"
 title: "夕霧"
-category: "詩と随想"
+category: "創作"
 tags: ["詩","夕霧","成長"]
 description: "自分に宛てた短い詩。長い夜、古い袍、断橋、そして霧が晴れる前の待つ時間。"
 writtenAt: "2026-09-16"
 publishedAt: "2026-10-24T18:27:42+08:00"
-updatedAt: "2026-10-24T18:27:42+08:00"
+updatedAt: "2026-10-27T12:40:40+08:00"
 subtitle: "詩 / 2026 年 9 月 16 日"
-image: "assets/cloud-blue.svg"
-alt: "長い夜のあとの空を覆う、淡い青い雲と星明かり"
+image: "assets/cloud-purple.svg"
+alt: "長い夜のあとの空を覆う、淡い紫の雲と星明かり"
 order: 3
 ---
 

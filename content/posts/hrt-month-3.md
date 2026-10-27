@@ -2,12 +2,15 @@
 id: "hrt-month-3"
 lang: "zh-CN"
 title: "HRT Month 3｜重新种下希望"
-category: "性别与生活"
+category: "性别与认同"
 tags: ["HRT", "性别认同", "失恋", "生活随笔"]
 writtenAt: "2026-06-10"
 description: "HRT 接近三个月，变化、怀疑与希望交织。寻着旧日的足迹，也试着以属于自己的性别，重新生活下去。"
 publishedAt: "2026-10-27T00:58:22+08:00"
-subtitle: "随笔 / HRT 第三个月"
+subtitle: "HRT / 第三个月"
+updatedAt: "2026-10-27T12:40:40+08:00"
+image: "assets/cloud-mint.svg"
+alt: "浅薄荷色云朵与星光，留下一片柔和的天空"
 ---
 
 HRT Month 3

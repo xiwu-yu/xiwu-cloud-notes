@@ -2,12 +2,15 @@
 id: "hrt-month-3"
 lang: "en"
 title: "HRT Month 3 | Planting Hope Again"
-category: "Gender & Life"
+category: "Gender & Identity"
 tags: ["HRT", "gender identity", "heartbreak", "personal essay"]
 writtenAt: "2026-06-10"
 description: "Almost three months into HRT, changes, doubts, and hope intertwine. Following old footsteps, and trying to live again in a gender that belongs to me."
 publishedAt: "2026-10-27T00:58:22+08:00"
-subtitle: "Essay / the third month of HRT"
+subtitle: "HRT / the third month"
+updatedAt: "2026-10-27T12:40:40+08:00"
+image: "assets/cloud-mint.svg"
+alt: "Pale mint clouds and starlight in a gentle sky"
 ---
 
 HRT Month 3

@@ -3,12 +3,12 @@ id: "claw-marks"
 lang: "zh-TW"
 title: "在死亡來臨之前，用力留下爪痕喵"
 category: "生活與情緒"
-tags: ["舊文","情緒記錄","朋友與陪伴"]
+tags: ["遺書","情緒記錄","朋友與陪伴"]
 writtenAt: "2026-10-14"
 publishedAt: "2026-10-24T16:15:16+08:00"
-updatedAt: "2026-10-27T01:27:41+08:00"
+updatedAt: "2026-10-27T12:11:19+08:00"
 description: "把經歷過的難處，和想對家人、朋友說的話寫下來。也希望那些努力能被看見。"
-subtitle: "舊文 / 寫於 2026 年 10 月 14 日"
+subtitle: "遺書 / 寫於 2026 年 10 月 14 日"
 image: "assets/cloud-blue.svg"
 alt: "淺藍色雲朵與星光，留下一片安靜的天空"
 order: 2

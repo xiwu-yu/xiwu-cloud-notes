@@ -146,6 +146,22 @@ details p { font-size:15px; line-height:1.95; color:var(--muted); margin-bottom:
 .hero-note { display:flex; align-items:center; gap:10px; color:var(--muted); margin-top:32px; font-size:16px; letter-spacing:.2px; line-height:1.5; }
 .hero-art { margin:0; position:relative; align-self:center; }
 .hero-art img { width:112%; max-width:none; margin-left:-6%; opacity:.96; }
+/* 首页夜景降低月面、云层与氛围光的亮度，保留原有插画和浮动。 */
+:root[data-theme="dark"] .hero-art img { content:url("assets/cloudscape-night.svg?v=89e0fdd369"); opacity:.88; }
+:root[data-theme="dark"] .sky-background { background:linear-gradient(180deg,#25364e33 0%,#3a2f4526 23%,#0000 65%); }
+:root[data-theme="dark"] .cloud-one { opacity:.14; }
+:root[data-theme="dark"] .cloud-two { opacity:.17; }
+:root[data-theme="dark"] .cloud-three { opacity:.1; }
+:root[data-theme="dark"] .sky-star { opacity:.18; }
+@media(prefers-color-scheme:dark) {
+  :root:not([data-theme]) .hero-art img { content:url("assets/cloudscape-night.svg?v=89e0fdd369"); opacity:.88; }
+  :root:not([data-theme]) .sky-background { background:linear-gradient(180deg,#25364e33 0%,#3a2f4526 23%,#0000 65%); }
+  :root:not([data-theme]) .cloud-one { opacity:.14; }
+  :root:not([data-theme]) .cloud-two { opacity:.17; }
+  :root:not([data-theme]) .cloud-three { opacity:.1; }
+  :root:not([data-theme]) .sky-star { opacity:.18; }
+}
+
 .hero-art figcaption { display:flex; justify-content:space-between; align-items:center; margin:0 25px; padding-top:5px; font-family:var(--serif); font-size:13px; letter-spacing:1px; line-height:1.9; color:var(--muted); }
 .art-caption { font-family:Georgia,serif; font-style:italic; font-size:14px; transform:rotate(-5deg); color:var(--accent); }
 .hero h1 { white-space:normal; text-wrap:balance; }
@@ -640,6 +656,17 @@ html[lang="ja"] .hero h1 [data-i18n="hero.titleD"] { display:inline-block; }
 .interest-grid::before { content:""; position:absolute; z-index:-1; inset:-24px 0; pointer-events:none; background:radial-gradient(ellipse at 10% 25%,color-mix(in srgb,var(--blue) 58%,transparent),transparent 60%),radial-gradient(ellipse at 92% 72%,color-mix(in srgb,var(--pink) 58%,transparent),transparent 65%); -webkit-mask-image:radial-gradient(ellipse closest-side,#000 65%,transparent); mask-image:radial-gradient(ellipse closest-side,#000 65%,transparent); }
 .glass-card { padding:12px; transition:transform 160ms ease,box-shadow 160ms ease; }
 .card-image { border:0; box-shadow:none; border-radius:18px; }
+/* 云朵封面的夜景版本沿用各自配色，仅在深色模式替换图片。 */
+.card-image img[src*="assets/cloud-blue.svg"] { --night-cloud-image:url("assets/cloud-blue-night.svg?v=73ebcb7c62"); }
+.card-image img[src*="assets/cloud-pink.svg"] { --night-cloud-image:url("assets/cloud-pink-night.svg?v=9ca0641ea9"); }
+.card-image img[src*="assets/cloud-purple.svg"] { --night-cloud-image:url("assets/cloud-purple-night.svg?v=22d0c02db5"); }
+.card-image img[src*="assets/cloud-mint.svg"] { --night-cloud-image:url("assets/cloud-mint-night.svg?v=7b0fa2d0e6"); }
+.card-image img[src*="assets/cloud-white.svg"] { --night-cloud-image:url("assets/cloud-white-night.svg?v=aebf6511b7"); }
+:root[data-theme="dark"] .card-image img[src*="assets/cloud-"] { content:var(--night-cloud-image,normal); }
+@media(prefers-color-scheme:dark) {
+  :root:not([data-theme]) .card-image img[src*="assets/cloud-"] { content:var(--night-cloud-image,normal); }
+}
+
 .card-content { background:var(--paper); border:0; border-radius:0 0 18px 18px; padding:20px 12px 12px; margin-top:0; }
 .card-content h3 { margin-block:8px 14px; }
 .card-content .card-meta { margin-top:0; }

@@ -54,6 +54,16 @@ jobs:
             work/evidence/
             dist/build-info.json
           retention-days: 14
+      - name: Rebuild deployment artifact from clean tracked sources
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          # Earlier builds rewrite tracked HTML/CSS asset hashes. Restore those
+          # inputs before the release build records the source-tree status.
+          git restore --source=HEAD --worktree -- dist/index.html dist/style.css
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+          pnpm build
+          node scripts/verify-site.mjs --local dist
       - uses: actions/upload-pages-artifact@v5
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         with:

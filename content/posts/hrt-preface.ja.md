@@ -2,13 +2,13 @@
 id: "hrt-preface"
 lang: "ja"
 title: "HRT のまえがき"
-category: "ジェンダーと暮らし"
+category: "ジェンダーとアイデンティティ"
 tags: ["HRT","性自認","子ども時代の記憶"]
 writtenAt: "2026-03-12"
 description: "二十二歳で動き出したことは、二十二歳になって初めてこの気持ちが生まれたという意味ではない。あの記憶を振り返り、今と未来の自分にひとつの区切りを残しておく。"
 publishedAt: "2026-10-24T15:51:51+08:00"
-updatedAt: "2026-10-24T15:51:51+08:00"
-subtitle: "エッセイ / 始まりのあとで"
+updatedAt: "2026-10-27T12:11:19+08:00"
+subtitle: "HRT / 始まりのあとで"
 image: "assets/cloud-white.svg"
 alt: "淡い青とピンクの光の中で、白い雲がゆっくり広がっている"
 order: 1

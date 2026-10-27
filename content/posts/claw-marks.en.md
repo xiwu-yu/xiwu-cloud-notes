@@ -3,12 +3,12 @@ id: "claw-marks"
 lang: "en"
 title: "Leave Claw Marks While I Still Can"
 category: "Life & Feelings"
-tags: ["old writing","emotional record","friends and company"]
+tags: ["suicide note","emotional record","friends and company"]
 writtenAt: "2026-10-14"
 publishedAt: "2026-10-24T16:15:16+08:00"
-updatedAt: "2026-10-27T01:27:41+08:00"
+updatedAt: "2026-10-27T12:11:19+08:00"
 description: "Writing down the hard things I've been through, and what I want to say to family and friends. I hope those efforts can be seen, too."
-subtitle: "Old writing / written on 14 October 2026"
+subtitle: "Suicide note / written on 14 October 2026"
 image: "assets/cloud-blue.svg"
 alt: "A pale blue cloud with starlight, leaving a quiet patch of sky"
 order: 2

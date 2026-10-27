@@ -2,13 +2,13 @@
 id: "hrt-preface"
 lang: "zh-CN"
 title: "HRT 前言"
-category: "性别与生活"
+category: "性别与认同"
 tags: ["HRT","性别认同","成长回忆"]
 writtenAt: "2026-03-12"
 description: "二十二岁开始行动，不意味着二十二岁才第一次有这些感受。回头看看那些记忆，也给现在和未来的自己留一份交代。"
 publishedAt: "2026-10-24T15:51:51+08:00"
-updatedAt: "2026-10-24T15:51:51+08:00"
-subtitle: "随笔 / 写在开始之后"
+updatedAt: "2026-10-27T12:11:19+08:00"
+subtitle: "HRT / 写在开始之后"
 image: "assets/cloud-white.svg"
 alt: "淡蓝与浅粉的光晕中，白色云朵慢慢舒展"
 order: 1

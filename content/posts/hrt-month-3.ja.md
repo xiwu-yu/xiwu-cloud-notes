@@ -2,12 +2,15 @@
 id: "hrt-month-3"
 lang: "ja"
 title: "HRT Month 3｜もう一度、希望を植えよう"
-category: "ジェンダーと暮らし"
+category: "ジェンダーとアイデンティティ"
 tags: ["HRT", "性自認", "失恋", "日々のエッセイ"]
 writtenAt: "2026-06-10"
 description: "HRT を始めてもうすぐ三か月。変化と迷いと希望が交差する。昔の足跡をたどりながら、自分のものだと思える性別で、もう一度生きていこうとする記録。"
 publishedAt: "2026-10-27T00:58:22+08:00"
-subtitle: "エッセイ / HRT 三か月目"
+subtitle: "HRT / 三か月目"
+updatedAt: "2026-10-27T12:40:40+08:00"
+image: "assets/cloud-mint.svg"
+alt: "穏やかな空に浮かぶ、淡いミント色の雲と星明かり"
 ---
 
 HRT Month 3
