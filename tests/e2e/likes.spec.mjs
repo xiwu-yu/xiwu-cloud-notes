@@ -82,7 +82,10 @@ test('like glass follows live clarity settings, preserves readable content and r
       expect(await button(page).evaluate(el=>getComputedStyle(el).backdropFilter||getComputedStyle(el).webkitBackdropFilter)).toBe('none');
       expect(await page.locator('.article-like').evaluate(el=>getComputedStyle(el,'::before').content)).toBe('none');
       await page.locator('#glass-enabled').check();await page.locator('#glass-settings-close').click();
-      await button(page).focus();await page.keyboard.press('Space');
+      // dialog.close() 的 close 事件异步恢复入口焦点，须等它完成再操作下一控件。
+      await expect(page.locator(trigger)).toHaveAttribute('aria-expanded','false');
+      await expect(page.locator(trigger)).toBeFocused();
+      await button(page).focus();await expect(button(page)).toBeFocused();await page.keyboard.press('Space');
       await expect(button(page)).toHaveAttribute('aria-pressed','true');
       expect(await button(page).locator('svg').evaluate(el=>getComputedStyle(el).fill)).not.toBe('none');
       expect(await button(page).evaluate(el=>getComputedStyle(el).transitionDuration)).toBe('0s');
