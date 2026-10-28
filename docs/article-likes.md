@@ -1,6 +1,14 @@
 # 文章共享点赞：Cloudflare Workers + D1
 
-网站仍由 GitHub Pages 提供，不迁移托管、不修改 DNS / Pages 设置。Worker 只提供点赞 API，D1 保存真实关系和累计数。访客无需账号；站长需要自己的 Cloudflare 账号完成以下一次性配置。本轮按作者选择**只交付代码与说明，不登录 Cloudflare、不创建或部署云端资源**。
+网站仍由 GitHub Pages 提供，不迁移托管、不修改 DNS / Pages 设置。Worker 只提供点赞 API，D1 保存真实关系和累计数。访客无需账号。作者于2026-10-28授权完成云端配置，当前使用自己的 Cloudflare 账号；以下保留首次配置及日常维护说明。
+
+## 已配置的服务
+
+- API：`https://xiwu-article-likes.xiwu-cloud-notes.workers.dev`。
+- Worker / D1 名称均为 `xiwu-article-likes`，`DB` 绑定指向已提交的真实数据库 UUID；已应用 `0001_likes.sql`。已有数据库无需重复创建。
+- `VISITOR_SECRET` 已通过标准输入写入 Cloudflare Secret，未输出或提交明文。后续部署不要重复生成或替换密钥。
+- 官方 Wrangler 仅授权账号读取、用户读取、Workers Scripts Write、D1 Write及后台刷新；不申请 DNS、Pages 或计费权限。可在个人资料 → Access Management → Connected Applications 撤销。
+- 真实 API 已验证双身份累计、并发重复点赞只加一次、取消与重复取消、精确 CORS 和未知文章拒绝；测试票全部撤销。站点仍沿用现有 PR / main 验证及 Pages 部署门槛。
 
 ## 当前开关与数据含义
 
@@ -13,25 +21,34 @@
 
 ## 一次性配置（终端在项目根目录）
 
+### 0. 注册账号与找到控制台入口
+
+1. 打开 [Cloudflare 注册页面](https://dash.cloudflare.com/sign-up)，使用你自己的邮箱注册并完成验证邮件。已有账号可以直接登录。[官方注册说明](https://developers.cloudflare.com/fundamentals/account/create-account/)。
+2. 登录后进入自己的账号，找到 **Workers & Pages**，使用 Workers Free。首次使用按提示设置一个自己的 `workers.dev` 子域；最终 API 地址形如 `xiwu-article-likes.你的子域.workers.dev`。可以使用该官方子域启动，无需把现有域名转入 Cloudflare。[官方 workers.dev 说明](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)。
+3. 本项目需要的是 Worker 和 D1；保持现有 GitHub Pages 托管和 DNS 不动，不必选择将网站迁移到 Cloudflare Pages，也不必购买域名或开启 Workers Paid。若界面出现付费升级提示，先核对当前选中的产品。
+4. 可在控制台 **D1 SQL Database** 找到稍后创建的数据库；在 **Workers & Pages → xiwu-article-likes → Bindings** 核对 `DB`，在 **Settings → Variables and Secrets** 核对 `VISITOR_SECRET`。控制台菜单可能调整，以产品名称为准。下面用项目锁定的 Wrangler 完成创建、迁移和部署，避免手工粘贴后端代码时漏掉文件。
+
 ### 1. 安装锁定工具并登录
 
 安装 Node.js 24 和项目指定 pnpm 后：
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm exec wrangler login
+pnpm exec wrangler login --device --scopes account:read user:read workers_scripts:write d1:write
 pnpm exec wrangler whoami
 ```
 
 浏览器中由你登录并授权自己的账号。仓库锁定 Wrangler `4.153.0`，只作为开发/部署工具，不打包到浏览器。`pnpm-workspace.yaml` 仅允许锁定版本的 esbuild/workerd 必要安装脚本，不全局放开脚本。
 
+请在包含 `package.json`、`content/` 和 `workers/` 的项目根目录运行。当前完整代码副本为 `/Users/xiwu/Documents/ChatGPT/云间来信/xiwu-cloud-notes-likes`；另一个旧工作区仍有未提交修改，先不要对它执行强制拉取或重置。注册密码、验证码和 Wrangler 登录授权由你在官方页面完成，无需把它们发到聊天中。
+
 ### 2. 创建 D1 数据库
 
 ```sh
-pnpm exec wrangler d1 create xiwu-article-likes
+pnpm exec wrangler d1 create xiwu-article-likes --config workers/likes/wrangler.jsonc --update-config=false
 ```
 
-打开 `workers/likes/wrangler.jsonc`，将 `d1_databases[0].database_id` 的全零占位符替换为输出的真实 ID，保留 `binding: "DB"`、数据库名称和 `migrations_dir`。数据库 ID 不是秘密，可提交；API Token、OAuth 凭证与服务密钥不能提交。存在多个 Cloudflare 账号时按 Wrangler 提示选择自己的账号。
+打开 `workers/likes/wrangler.jsonc`，仅在新账号首次建立服务时，将 `d1_databases[0].database_id` 替换为输出的真实 ID，保留 `binding: "DB"`、数据库名称和 `migrations_dir`。数据库 ID 不是秘密，可提交；API Token、OAuth 凭证与服务密钥不能提交。存在多个 Cloudflare 账号时按 Wrangler 提示选择自己的账号。
 
 `ALLOWED_ORIGINS` 默认只有 `https://cloud.xiwu.space`。这是精确 origin（没有末尾 `/`），多个使用逗号分隔。旧 GitHub Pages 已跳转正式站，不必扩大到通配符。CORS 是浏览器访问限制，不能当作身份认证或绝对防刷。
 
@@ -95,6 +112,8 @@ pnpm test:e2e
 
 ## 本地 Worker 验证与自动化边界
 
+`pnpm test:e2e` 在 `.test-site/real/` 和 `.test-site/fixture/` 独立构建副本，关闭副本的生产 API；真实文章仍来自当前 Markdown。点赞专项通过官方 Worker handler + 独立 SQLite 验证，不向生产写票。CI 视觉证据脚本也仅在其浏览器响应中关闭点赞，不修改发布产物或正式配置。普通本地 `pnpm dev` 保持真实配置：因生产 API 精确允许正式 origin，本地读取将显示不可用；需要完整本地预览时应另配本地 Worker，勿扩大生产 CORS。
+
 ```sh
 pnpm exec wrangler d1 migrations apply xiwu-article-likes --local --config workers/likes/wrangler.jsonc
 pnpm exec wrangler dev --local --config workers/likes/wrangler.jsonc --port 8791 \
@@ -119,3 +138,12 @@ pnpm exec wrangler dev --local --config workers/likes/wrangler.jsonc --port 8791
 ## 停用与恢复
 
 将 `content/likes.json` 恢复为 `{"apiUrl":null}` 并发布即可隐藏入口，不删除数据库或历史票。不要为停用执行 DROP TABLE。恢复原服务和 Secret 后原浏览器仍可取消。新增迁移应追加编号文件，不改写已应用的 `0001_likes.sql`；进行任何破坏性数据库操作前先备份。
+
+## 日常使用与排查
+
+- 读者点击文章末尾的心形按钮点赞，再点取消。线框/填充心形、按钮文字及 `aria-pressed` 一起表明状态；总数由 D1 返回，不由材质动画改变。
+- 站长新增文章后运行 `pnpm likes:prepare` 并重新部署 Worker，再按现有流程发布文章。不要删除 D1 数据库来更新文章。
+- 查看累计：进入 D1 数据库的 Console，执行 `SELECT article_id, total FROM article_counts ORDER BY article_id;`。不要编辑 `article_counts` 的数字来代替真实点赞关系。
+- 查看额度：在 Worker 与 D1 的 Metrics 页面核对请求和读写使用量。免费额度按账号共享，限流查询也会产生读写；不把免费理解为无限制。
+- 没有出现按钮：检查 `content/likes.json` 的 `apiUrl` 是否仍为 null，以及是否已重新构建、发布。
+- 出现服务不可用：先检查 API 返回码、`DB` 绑定、迁移与 Secret；再在实际使用网络上测试 Worker 地址可达性。遇到地区网络限制时，应单独评估可达的 API 域名，不更改已正常运行的网站 DNS 来碰运气。

@@ -1,4 +1,5 @@
 import { chromium } from '@playwright/test';
+import { isolateLikes } from './evidence-isolation.mjs';
 import { spawn, execFileSync } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -10,6 +11,7 @@ await once(server.stdout,'data');
 const browser=await chromium.launch();
 try {
   const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});
+  await isolateLikes(page);
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('console',e=>{if(e.type()==='error')errors.push(e.text());});

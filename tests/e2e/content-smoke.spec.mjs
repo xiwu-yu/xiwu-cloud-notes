@@ -3,7 +3,7 @@ import { test, expect, noOverflow } from './helpers.mjs';
 // 真实内容的篇数和标题来自本轮构建；不锁定某几篇文章或固定顺序。
 import { runInNewContext } from 'node:vm';
 const context = { window: {} };
-runInNewContext(await readFile(new URL('../../dist/profile.js', import.meta.url), 'utf8'), context);
+runInNewContext(await readFile(new URL('../../.test-site/real/dist/profile.js', import.meta.url), 'utf8'), context);
 const profile = context.window.siteProfile;
 
 test('real content loads in all languages and themes; every article is readable', async ({ page }) => {

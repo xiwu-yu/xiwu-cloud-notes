@@ -24,7 +24,7 @@ export default defineConfig({
     { name: 'content-smoke', testMatch: 'content-smoke.spec.mjs', use: { baseURL: 'http://127.0.0.1:4173/xiwu-cloud-notes/' } }
   ],
   webServer: [
-    { command: 'node scripts/build.mjs && node scripts/serve.mjs', url: 'http://127.0.0.1:4173', reuseExistingServer: false, timeout: 60_000 },
+    { command: 'node scripts/e2e-serve.mjs --real', url: 'http://127.0.0.1:4173', reuseExistingServer: false, timeout: 60_000 },
     { command: 'node scripts/e2e-serve.mjs', url: 'http://127.0.0.1:4174', reuseExistingServer: false, timeout: 60_000 }
   ]
 });

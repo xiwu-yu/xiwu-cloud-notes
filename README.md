@@ -4,11 +4,13 @@
 
 [打开网站](https://cloud.xiwu.space/)
 
-## 文章共享点赞（待站长配置服务）
+## 文章共享点赞
 
 新增 Cloudflare Workers + D1 点赞后端及四语言阅读入口，GitHub Pages 托管不变。匿名浏览器可点赞/取消，同一文章各语言共享真实累计，刷新保留身份，其他标签页同步。计数由服务端确认，唯一键与事务防止重复加减，并提供基础限流；它不等于严格的一人一票。
 
-按作者选择，本轮不登录或部署 Cloudflare。`content/likes.json` 默认 `apiUrl: null`，未接通真实服务前隐藏入口且不发请求，不伪造累计。站长完成 [Cloudflare 配置与部署步骤](docs/article-likes.md) 后填入真实 API 地址，再经现有验证发布。不要把 Secret、Token 放进前端或提交。普通网页构建不创建数据库、不迁移服务，也不扩大 Actions 权限。
+经作者授权，Cloudflare Workers + D1 已于2026-10-28配置并验证；`content/likes.json` 指向 `https://xiwu-article-likes.xiwu-cloud-notes.workers.dev`。两名匿名读者的真实累计、重复点赞及取消已验证，测试票已撤销。维护与停用见 [Cloudflare 配置与部署步骤](docs/article-likes.md)。不要把 Secret、Token 放进前端或提交。普通网页构建不创建数据库、不迁移服务，也不扩大 Actions 权限。
+
+点赞按钮采用共享的控件玻璃材质，带轻量蓝粉背景透色和边缘反光；线框/填充心形与文字同步表示状态。通透度由原有「玻璃外观」统一控制，前景文字和图标保持不透明，减少透明度、高对比度及强制颜色模式回退实色，减少动态时关闭按压缩放。
 
 首页资料区与问答区使用「阅读资源」「一些问题」作为标题，四语言切换同步对应翻译。
 
