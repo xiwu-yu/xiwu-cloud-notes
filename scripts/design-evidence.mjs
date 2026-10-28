@@ -1,5 +1,6 @@
 // 本地视觉与资源实测；不请求音乐，不修改正式网站。
 import { chromium } from '@playwright/test';
+import { isolateLikes } from './evidence-isolation.mjs';
 import { serve } from './serve.mjs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -12,6 +13,7 @@ const server=serve({root,port:4177});
 const browser=await chromium.launch();
 try {
   const page=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});
+  await isolateLikes(page);
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('requestfailed',r=>errors.push(r.url()));

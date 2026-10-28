@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "xiwu-article-likes",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "fe7a7e61-5d8f-4a8b-9b88-0a3fc79a2d0b",
       "migrations_dir": "migrations"
     }
   ],

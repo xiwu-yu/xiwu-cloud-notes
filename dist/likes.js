@@ -68,8 +68,12 @@
     if (!record) {record={id,endpoint,views:new Map(),state:null,busy:false,error:'',fetched:0};records.set(key,record);}
     const old=views.get(root);
     if (old) old.record.views.delete(root);
-    const button=document.createElement('button');button.type='button';button.className='like-button glass-action';
-    const heart=document.createElement('span');heart.className='like-heart';heart.setAttribute('aria-hidden','true');heart.textContent='♥';
+    const button=document.createElement('button');button.type='button';button.className='like-button glass-surface glass-action';
+    button.dataset.material='control';
+    const heart=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    heart.classList.add('like-heart');heart.setAttribute('viewBox','0 0 24 24');heart.setAttribute('width','24');heart.setAttribute('height','24');heart.setAttribute('aria-hidden','true');heart.setAttribute('focusable','false');
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d','M20.4 5.6a5.3 5.3 0 0 0-7.5 0l-.9.9-.9-.9a5.3 5.3 0 0 0-7.5 7.5L12 21l8.4-7.9a5.3 5.3 0 0 0 0-7.5Z');heart.append(path);
     const label=document.createElement('span'),count=document.createElement('span');count.className='like-count';
     button.append(heart,label,count);
     const status=document.createElement('span');status.className='like-status';status.setAttribute('role','status');

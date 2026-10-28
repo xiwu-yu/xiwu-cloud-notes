@@ -836,14 +836,20 @@ mark { background:var(--blue); color:var(--ink); border-radius:3px; padding-inli
   .music-toggle>span { display:none; }
 }
 /* 点赞只在服务端确认后更新，独立正文和阅读弹窗共用。 */
-.article-like { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-block:28px; }
+.article-like { position:relative; isolation:isolate; display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-block:28px; }
 .article-like[hidden] { display:none; }
-.like-button { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:48px; padding:10px 18px; border:1px solid var(--line); border-radius:999px; background:var(--paper); color:var(--ink); font:inherit; cursor:pointer; }
+:root[data-glass="on"] .article-like::before { content:""; position:absolute; z-index:-1; top:-10px; left:-8px; width:min(240px,100%); height:68px; pointer-events:none; background:radial-gradient(ellipse 64px 28px at 64px 34px,rgb(91 206 250 / 25%),transparent 100%),radial-gradient(ellipse 64px 28px at 152px 34px,rgb(245 169 184 / 25%),transparent 100%); }
+.like-button.glass-surface { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:48px; max-width:100%; padding:10px 18px; border-radius:var(--radius-pill); font:inherit; font-size:15px; font-weight:550; line-height:1.4; cursor:pointer; transition:transform var(--motion-press) ease,border-color var(--motion-hover) ease,color var(--motion-hover) ease; }
 .like-button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
 .like-button:disabled { cursor:default; }
 .like-button[aria-busy="true"] { cursor:progress; }
-.like-heart { color:var(--accent); font-size:22px; }
+.like-heart { flex:0 0 24px; color:var(--accent); fill:none; stroke:currentColor; stroke-width:1.65; stroke-linecap:round; stroke-linejoin:round; }
+.like-button[aria-pressed="true"] .like-heart { fill:currentColor; }
+.like-button:active:not(:disabled) { transform:scale(.98); }
 .like-count { padding-inline-start:10px; border-inline-start:1px solid var(--line); font-variant-numeric:tabular-nums; }
 .like-status { flex-basis:100%; font-size:14px; line-height:1.6; color:var(--ink); }
 .like-retry { min-height:44px; font:inherit; cursor:pointer; }
 .like-button:focus-visible,.like-retry:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+@media(hover:hover) and (pointer:fine) { .like-button:hover:not(:disabled) { border-color:var(--accent-decor); } }
+@media(prefers-reduced-motion:reduce) { .like-button.glass-surface { transition:none; } .like-button:active:not(:disabled) { transform:none; } }
+@media(forced-colors:active) { .like-heart { color:ButtonText; } }

@@ -60,6 +60,44 @@ test('same-browser tabs synchronize server-confirmed state without creating anot
   }finally{env.DB.close();}
 });
 
+test('like glass follows live clarity settings, preserves readable content and respects opaque/contrast/motion fallbacks in both readers',async({page,context})=>{
+  const env=setup();
+  try{
+    await connect(context,env);await page.emulateMedia({reducedMotion:'reduce'});
+    for(const path of ['./?post=rain&lang=zh-CN','./posts/rain/en.html']){
+      await page.goto(path);await expect(button(page)).toBeEnabled();
+      await expect(button(page)).toHaveClass(/glass-surface/);
+      await expect(button(page).locator('svg')).toHaveAttribute('aria-hidden','true');
+      const trigger=path.includes('post=')?'#interest-dialog .transparency-toggle':'.static-reader-toolbar .transparency-toggle';
+      await page.locator(trigger).click();
+      const backgrounds=[];
+      for(const value of [0,55,100]){
+        await page.locator('#glass-clarity').fill(String(value));await page.locator('#glass-clarity').dispatchEvent('change');
+        await expect(page.locator('html')).toHaveAttribute('data-glass-clarity',String(value));
+        const style=await button(page).evaluate(el=>{const s=getComputedStyle(el);return {bg:s.backgroundColor,blur:s.backdropFilter||s.webkitBackdropFilter,opacity:s.opacity,text:getComputedStyle(el.querySelector('.like-count')).opacity};});
+        expect(style.blur).toContain('blur');expect(style.opacity).toBe('1');expect(style.text).toBe('1');backgrounds.push(style.bg);
+      }
+      expect(new Set(backgrounds).size).toBe(3);
+      await page.locator('#glass-enabled').uncheck();
+      expect(await button(page).evaluate(el=>getComputedStyle(el).backdropFilter||getComputedStyle(el).webkitBackdropFilter)).toBe('none');
+      expect(await page.locator('.article-like').evaluate(el=>getComputedStyle(el,'::before').content)).toBe('none');
+      await page.locator('#glass-enabled').check();await page.locator('#glass-settings-close').click();
+      await button(page).focus();await page.keyboard.press('Space');
+      await expect(button(page)).toHaveAttribute('aria-pressed','true');
+      expect(await button(page).locator('svg').evaluate(el=>getComputedStyle(el).fill)).not.toBe('none');
+      expect(await button(page).evaluate(el=>getComputedStyle(el).transitionDuration)).toBe('0s');
+      await button(page).click();await expect(button(page)).toHaveAttribute('aria-pressed','false');
+      await page.emulateMedia({contrast:'more',reducedMotion:'reduce'});
+      await expect(page.locator('html')).toHaveAttribute('data-glass','off');
+      expect(await button(page).evaluate(el=>getComputedStyle(el).backdropFilter||getComputedStyle(el).webkitBackdropFilter)).toBe('none');
+      await page.emulateMedia({contrast:'no-preference',forcedColors:'active',reducedMotion:'reduce'});
+      await expect(page.locator('html')).toHaveAttribute('data-glass-reason','forced');
+      expect(await button(page).evaluate(el=>getComputedStyle(el).boxShadow)).toBe('none');
+      await page.emulateMedia({forcedColors:'none',contrast:'no-preference',reducedMotion:'reduce'});
+    }
+  }finally{env.DB.close();}
+});
+
 test('pending writes stay single, language changes do not invent counts or reload the music iframe',async({page,context})=>{
   const env=setup();let release;
   const waiting=new Promise(resolve=>release=resolve);

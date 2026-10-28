@@ -1,5 +1,6 @@
 // 本地证据；播放器使用标明的宿主 fixture，不代表网易云真实播放验证。
 import { chromium } from '@playwright/test';
+import { isolateLikes } from './evidence-isolation.mjs';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -12,6 +13,7 @@ await once(server.stdout, 'data');
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({viewport:{width:1440,height:900}, reducedMotion:'reduce'});
+  await isolateLikes(page);
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   page.on('requestfailed',request=>errors.push(request.url()));
