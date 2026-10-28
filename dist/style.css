@@ -836,9 +836,8 @@ mark { background:var(--blue); color:var(--ink); border-radius:3px; padding-inli
   .music-toggle>span { display:none; }
 }
 /* 点赞只在服务端确认后更新，独立正文和阅读弹窗共用。 */
-.article-like { position:relative; isolation:isolate; display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-block:28px; }
+.article-like { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-block:28px; }
 .article-like[hidden] { display:none; }
-:root[data-glass="on"] .article-like::before { content:""; position:absolute; z-index:-1; top:-10px; left:-8px; width:min(240px,100%); height:68px; pointer-events:none; background:radial-gradient(ellipse 64px 28px at 64px 34px,rgb(91 206 250 / 25%),transparent 100%),radial-gradient(ellipse 64px 28px at 152px 34px,rgb(245 169 184 / 25%),transparent 100%); }
 .like-button.glass-surface { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:48px; max-width:100%; padding:10px 18px; border-radius:var(--radius-pill); font:inherit; font-size:15px; font-weight:550; line-height:1.4; cursor:pointer; transition:transform var(--motion-press) ease,border-color var(--motion-hover) ease,color var(--motion-hover) ease; }
 .like-button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
 .like-button:disabled { cursor:default; }
