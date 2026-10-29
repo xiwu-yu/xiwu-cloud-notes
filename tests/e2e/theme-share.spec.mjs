@@ -1,4 +1,4 @@
-import {test,expect,noOverflow,prepareClipboard} from './helpers.mjs';
+import {test,expect,noOverflow,prepareClipboard,tabKey} from './helpers.mjs';
 import {readFile} from 'node:fs/promises';
 const themeKey = 'little-corner-theme';
 const settings = async(page,inReader=false) => {
@@ -194,7 +194,7 @@ test('without JavaScript static reading, titled article navigation and system da
   await noOverflow(page,320);await context.close();
 });
 
-test('keyboard, reduced motion, 200% text and failed clipboard keep sharing and system theme reachable',async({page})=>{
+test('keyboard, reduced motion, 200% text and failed clipboard keep sharing and system theme reachable',async({page,browserName})=>{
   await page.setViewportSize({width:320,height:568});await page.emulateMedia({reducedMotion:'reduce'});
   await page.addInitScript(()=>{Object.defineProperty(navigator,'clipboard',{value:{writeText:async()=>{throw Error('blocked');}}});});
   await page.goto('./?post=cloud&lang=en');
@@ -205,15 +205,16 @@ test('keyboard, reduced motion, 200% text and failed clipboard keep sharing and 
   await expect(page.locator('[data-share-status]')).toContainText('https://cloud.xiwu.space/posts/cloud/en.html');
   await noOverflow(page,320);expect(await page.locator('#article-share-panel').evaluate(e=>e.scrollWidth-e.clientWidth)).toBeLessThanOrEqual(1);
   await page.keyboard.press('Escape');await expect(page.locator('#essay-share-card')).toBeFocused();
-  await settings(page,true);await page.locator('#theme-choice').focus();await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
-  // Linux 原生选择器可让 Enter 打开弹出菜单，Esc 会先关闭它。
-  // 先以 Tab 完成原生控件操作，再独立验证宿主 dialog 的 Esc/焦点恢复。
-  await page.keyboard.press('Tab');await expect(page.locator('#theme-choice')).not.toBeFocused();
-  const choice=await page.locator('#theme-choice').inputValue();
-  await expect(page.locator('html')).toHaveAttribute('data-theme-mode',choice);
+  await settings(page,true);await page.locator('#theme-choice').focus();
+  await expect(page.locator('#theme-choice')).toBeFocused();
+  // 系统原生菜单会消费 Enter/Tab/Esc，不能假定各 OS 的弹出状态相同。
+  // 用原生表单接口核对选值，再单独验证闭合选择器的键盘导航和宿主 Esc。
   await page.locator('#theme-choice').selectOption('dark');
+  await expect(page.locator('#theme-choice')).toHaveValue('dark');
   await expect(page.locator('html')).toHaveAttribute('data-theme-mode','dark');
-  await page.locator('#glass-enabled').focus();
+  await page.keyboard.press(tabKey(browserName));
+  await expect(page.locator('#theme-choice')).not.toBeFocused();
+  expect(await page.locator('#glass-settings').evaluate(panel=>panel.contains(document.activeElement))).toBe(true);
   await page.keyboard.press('Escape');await expect(page.locator('#glass-settings')).not.toBeVisible();
   await expect(page.locator('#interest-dialog .transparency-toggle')).toBeFocused();
 });

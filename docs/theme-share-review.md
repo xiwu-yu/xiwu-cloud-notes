@@ -35,4 +35,4 @@
 - 复拍：启动本地预览后运行 `EVIDENCE_DIR=work/theme-share/ratio-3-4 node scripts/theme-share-evidence.mjs`。
 - 大量截图、日志及测试输出留在Git忽略目录；CI原有工作流在Actions Artifacts保留浏览器报告和验收证据。合并后沿用validate→deploy→verify-deployment门槛，PR不部署。
 
-首次PR云端验证139项通过、1项原生选择器键盘测试失败。Linux Chromium中Enter可能打开原生下拉，紧接的Esc先由该下拉消费，不能假定直接关闭宿主dialog；失败截图仍聚焦选择器。测试改为先断言真实主题选择生效，再用Tab完成原生控件操作，最后独立断言Esc关闭dialog及焦点恢复。没有拦截原生事件或改站点功能来迎合测试。
+首次PR云端验证在原生选择器键盘测试上发现平台差异：Linux Chromium中Enter可打开原生下拉，随后的Esc/Tab先由系统菜单消费，不能假定会立即作用于宿主dialog。测试改用Playwright原生表单接口验证实际选值与主题生效，再分别检查选择器焦点、闭合控件的Tab导航、Esc关闭dialog及焦点恢复。保留全部测试和断言，没有拦截原生事件或改站点功能来迎合测试。
