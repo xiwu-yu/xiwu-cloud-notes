@@ -114,7 +114,7 @@
       const url = new URL('./', location.href);
       const lang = document.querySelector('#language-select')?.value || root.lang;
       url.searchParams.set('lang', ['zh-CN','zh-TW','en','ja'].includes(lang) ? lang : 'zh-CN');
-      const state = {cloudHomeRefresh:{url:url.pathname + url.search, theme:root.dataset.theme, restoration:history.scrollRestoration}};
+      const state = {cloudHomeRefresh:{url:url.pathname + url.search, theme:root.dataset.theme, mode:window.siteTheme?.mode, restoration:history.scrollRestoration}};
       history.scrollRestoration = 'manual';
       history.replaceState(state, '', url);
       location.reload(); // 真正重载当前首页，不用 hash 跳转替代。

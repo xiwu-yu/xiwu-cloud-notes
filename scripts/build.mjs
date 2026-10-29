@@ -8,6 +8,7 @@ import { buildInfo } from './build-info.mjs';
 import { musicConfig, musicMarkup } from './music.mjs';
 import { appearancePanel } from './appearance.mjs';
 import { likesConfig } from './likes.mjs';
+import { sharePanel } from './sharing.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const DEFAULT_LOCALE = 'zh-CN';
@@ -184,7 +185,7 @@ export async function build(rootPath = root, options = {}) {
     await cp(join(rootPath, 'dist'), join(staging, 'dist'), { recursive: true });
     const indexPath = join(staging, 'dist/index.html');
     const index = await readFile(indexPath, 'utf8');
-    await writeFile(indexPath, index.replace(/<!-- MUSIC_PLAYER_START -->[\s\S]*?<!-- MUSIC_PLAYER_END -->/, `<!-- MUSIC_PLAYER_START -->\n${musicMarkup(music, ui[DEFAULT_LOCALE])}\n<!-- MUSIC_PLAYER_END -->`).replace(/<!-- GLASS_SETTINGS_START -->[\s\S]*?<!-- GLASS_SETTINGS_END -->/, `<!-- GLASS_SETTINGS_START -->\n${appearancePanel(ui[DEFAULT_LOCALE])}\n<!-- GLASS_SETTINGS_END -->`));
+    await writeFile(indexPath, index.replace(/<!-- MUSIC_PLAYER_START -->[\s\S]*?<!-- MUSIC_PLAYER_END -->/, `<!-- MUSIC_PLAYER_START -->\n${musicMarkup(music, ui[DEFAULT_LOCALE])}\n<!-- MUSIC_PLAYER_END -->`).replace(/<!-- GLASS_SETTINGS_START -->[\s\S]*?<!-- GLASS_SETTINGS_END -->/, `<!-- GLASS_SETTINGS_START -->\n${appearancePanel(ui[DEFAULT_LOCALE])}\n<!-- GLASS_SETTINGS_END -->`).replace(/<!-- SHARE_PANEL_START -->[\s\S]*?<!-- SHARE_PANEL_END -->/, `<!-- SHARE_PANEL_START -->\n${sharePanel(ui[DEFAULT_LOCALE])}\n<!-- SHARE_PANEL_END -->`));
     await rm(join(staging, 'dist/posts'), { recursive: true, force: true });
     await writeFile(join(staging, 'dist/profile.js'), '// 自动生成，请修改 content/ 后运行 pnpm build。\nwindow.siteProfile = ' + json + ';\n');
     await versionAssets(staging, assetVersions);

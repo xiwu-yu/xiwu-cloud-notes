@@ -8,7 +8,6 @@
   const DEFAULT_LOCALE = profile.defaultLocale || 'zh-CN';
   const LOCALES = Array.isArray(profile.locales) ? profile.locales : [DEFAULT_LOCALE];
   const LANG_STORAGE = 'xiwu-language';
-  const THEME_STORAGE = 'little-corner-theme';
   const $ = selector => document.querySelector(selector);
   const siteFor = lang => profile.localized?.[lang] || profile.localized?.[DEFAULT_LOCALE];
 
@@ -120,8 +119,7 @@
   }
 
   function updateThemeLabel() {
-    const dark = document.documentElement.dataset.theme === 'dark';
-    document.querySelectorAll('.theme-toggle,.dialog-theme-toggle').forEach(button => { button.setAttribute('aria-label', t(dark ? 'theme.toLight' : 'theme.toDark')); button.setAttribute('aria-pressed', String(dark)); });
+    window.siteTheme?.refresh();
   }
 
   function renderDialog(item, { focus = false, scroll = false } = {}) {
@@ -437,6 +435,11 @@
     }
     status.hidden = false;
   });
+  $('#essay-share-card').addEventListener('click', event => {
+    const item = posts.find(entry => entry.id === currentId);
+    if (!item) return;
+    window.articleShare?.open({id:item.id, lang:item.lang, title:item.title, description:item.description, category:item.category, date:item.writtenAt || item.publishedAt.slice(0,10), author:siteFor(item.lang).name, url:new URL(item.url, document.querySelector('link[rel="canonical"]').href).href, ui}, event.currentTarget);
+  });
   function syncFromUrl() {
     const url = new URL(location.href);
     const nextLocale = requestedLocale();
@@ -451,39 +454,10 @@
   }
   window.addEventListener('popstate', syncFromUrl);
 
-  // 5. 主题：优先本地偏好，其次系统设置；文案随界面语言更新。
-  const themeButton = $('.theme-toggle');
-  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
-  function setTheme(dark) {
-    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-    themeButton.setAttribute('aria-pressed', String(dark));
-    updateThemeLabel();
-  }
-  function preferredDark() {
-    if (['light','dark'].includes(document.documentElement.dataset.refreshTheme)) return document.documentElement.dataset.refreshTheme === 'dark';
-    try {
-      const stored = localStorage.getItem(THEME_STORAGE);
-      if (stored === 'dark' || stored === 'light') return stored === 'dark';
-    } catch {}
-    return systemTheme.matches;
-  }
-  setTheme(preferredDark());
+  // 主题由 reading.js 统一处理，首页与独立文章不再各保存一份逻辑。
   const collapseFaq = () => document.querySelectorAll('.faq details').forEach(item => { item.open = false; });
   collapseFaq();
-  window.addEventListener('pageshow', () => { setTheme(preferredDark()); collapseFaq(); });
-  window.addEventListener('storage', event => {
-    if (event.key === THEME_STORAGE || event.key === null) setTheme(preferredDark());
-  });
-  systemTheme.addEventListener('change', () => setTheme(preferredDark()));
-  document.querySelectorAll('.theme-toggle,.dialog-theme-toggle').forEach(button => {
-  button.hidden = false;
-  button.addEventListener('click', () => {
-    const dark = document.documentElement.dataset.theme !== 'dark';
-    setTheme(dark);
-    try { localStorage.setItem(THEME_STORAGE, dark ? 'dark' : 'light'); } catch {}
-  });
-
-  });
+  window.addEventListener('pageshow', collapseFaq);
 
   // 桌面与触屏共用官方控件；收起、改变视口与同页交互都不重建 iframe。
   const musicWidget = $('#music-widget');
