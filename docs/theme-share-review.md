@@ -34,3 +34,5 @@
 - 最新截图、真实PNG、测量：`work/theme-share/ratio-3-4/`；早期不同比例属于历史，不代表最终设计。
 - 复拍：启动本地预览后运行 `EVIDENCE_DIR=work/theme-share/ratio-3-4 node scripts/theme-share-evidence.mjs`。
 - 大量截图、日志及测试输出留在Git忽略目录；CI原有工作流在Actions Artifacts保留浏览器报告和验收证据。合并后沿用validate→deploy→verify-deployment门槛，PR不部署。
+
+首次PR云端验证139项通过、1项原生选择器键盘测试失败。Linux Chromium中Enter可能打开原生下拉，紧接的Esc先由该下拉消费，不能假定直接关闭宿主dialog；失败截图仍聚焦选择器。测试改为先断言真实主题选择生效，再用Tab完成原生控件操作，最后独立断言Esc关闭dialog及焦点恢复。没有拦截原生事件或改站点功能来迎合测试。

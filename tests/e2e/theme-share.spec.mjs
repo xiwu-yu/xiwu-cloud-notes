@@ -206,5 +206,14 @@ test('keyboard, reduced motion, 200% text and failed clipboard keep sharing and 
   await noOverflow(page,320);expect(await page.locator('#article-share-panel').evaluate(e=>e.scrollWidth-e.clientWidth)).toBeLessThanOrEqual(1);
   await page.keyboard.press('Escape');await expect(page.locator('#essay-share-card')).toBeFocused();
   await settings(page,true);await page.locator('#theme-choice').focus();await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
-  await page.keyboard.press('Escape');await expect(page.locator('#interest-dialog .transparency-toggle')).toBeFocused();
+  // Linux 原生选择器可让 Enter 打开弹出菜单，Esc 会先关闭它。
+  // 先以 Tab 完成原生控件操作，再独立验证宿主 dialog 的 Esc/焦点恢复。
+  await page.keyboard.press('Tab');await expect(page.locator('#theme-choice')).not.toBeFocused();
+  const choice=await page.locator('#theme-choice').inputValue();
+  await expect(page.locator('html')).toHaveAttribute('data-theme-mode',choice);
+  await page.locator('#theme-choice').selectOption('dark');
+  await expect(page.locator('html')).toHaveAttribute('data-theme-mode','dark');
+  await page.locator('#glass-enabled').focus();
+  await page.keyboard.press('Escape');await expect(page.locator('#glass-settings')).not.toBeVisible();
+  await expect(page.locator('#interest-dialog .transparency-toggle')).toBeFocused();
 });
