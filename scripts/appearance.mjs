@@ -4,6 +4,7 @@ export function appearancePanel(ui) {
   const text = key => `<span data-i18n="appearance.${key}">${escape(ui[`appearance.${key}`])}</span>`;
   return `<dialog id="glass-settings" class="glass-settings glass-surface" data-material="content" aria-labelledby="glass-settings-title">
   <div class="glass-settings-heading"><h2 id="glass-settings-title">${text('open')}</h2><button id="glass-settings-close" class="settings-close" type="button" aria-label="${escape(ui['appearance.close'])}" data-i18n-aria-label="appearance.close"><span aria-hidden="true">×</span></button></div>
+  <div class="theme-setting"><label for="theme-choice" data-i18n="theme.label">${escape(ui['theme.label'])}</label><select id="theme-choice" data-theme-choice aria-describedby="theme-hint">${['system','light','dark'].map(mode => `<option value="${mode}" data-i18n="theme.${mode}">${escape(ui[`theme.${mode}`])}</option>`).join('')}</select><p id="theme-hint" class="settings-hint" data-i18n="theme.hint">${escape(ui['theme.hint'])}</p></div>
   <label class="glass-enable-row" for="glass-enabled">${text('enabled')}<input id="glass-enabled" type="checkbox" role="switch"></label>
   <div id="glass-adjustments">
     <div class="glass-range-label"><label for="glass-clarity">${text('clarity')}</label><output id="glass-clarity-value" for="glass-clarity">55</output></div>

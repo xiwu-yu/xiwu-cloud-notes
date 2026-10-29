@@ -7,17 +7,19 @@
 <meta name="theme-color" content="#fbfaf8">
 <title>夕雾 · 云间来信</title>
 <link rel="icon" href="assets/favicon.svg?v=79847ec957" type="image/svg+xml">
+<script src="reading.js?v=afd5745694"></script>
 <script src="appearance.js?v=06e7ccb929"></script>
-<script src="navigation.js?v=0c74389e22"></script>
-<link rel="stylesheet" href="style.css?v=7dae4e02bc">
+<script src="navigation.js?v=795ed7daa7"></script>
+<link rel="stylesheet" href="style.css?v=917cc1fc4c">
 <link rel="stylesheet" href="motion.css?v=42134c50fe">
 <script defer src="music-drag.js?v=affba2808f"></script>
 <script defer src="motion.js?v=16670e6b6a"></script>
-<script defer src="profile.js?v=48525f7b16"></script>
+<script defer src="profile.js?v=29e8c6a273"></script>
 <script defer src="archive.js?v=461e9c9f06"></script>
 <script defer src="reader.js?v=8716d912f6"></script>
+<script defer src="sharing.js?v=dc6f944bf3"></script>
 <script defer src="likes.js?v=2a8581b9b9"></script>
-<script defer src="script.js?v=1cabdd820a"></script>
+<script defer src="script.js?v=bc8f3cbdfc"></script>
 <!-- SITE_META_START -->
 <link rel="canonical" href="https://cloud.xiwu.space/">
 <meta property="og:type" content="website">
@@ -183,15 +185,25 @@
   <a id="dialog-static" class="text-link" data-i18n="dialog.static">独立文章页 ↗</a>
   <div id="dialog-like" class="article-like" hidden></div>
   <div class="dialog-pagination">
-    <button id="essay-prev" type="button" data-i18n="dialog.prev">← 上一篇</button>
-    <div class="dialog-pagination-center"><span id="essay-position"></span><button id="essay-share" class="dialog-share" type="button" data-i18n="dialog.share">复制链接</button></div>
-    <button id="essay-next" type="button" data-i18n="dialog.next">下一篇 →</button>
+    <button id="essay-prev" class="glass-surface glass-action" type="button" data-i18n="dialog.prev">← 上一篇</button>
+    <div class="dialog-pagination-center"><span id="essay-position"></span><div class="article-share-actions"><button id="essay-share" class="dialog-share glass-surface glass-action" type="button" data-i18n="dialog.share">复制链接</button><button id="essay-share-card" class="glass-surface glass-action" type="button" aria-haspopup="dialog" data-i18n="share.card" hidden>分享卡片</button></div></div>
+    <button id="essay-next" class="glass-surface glass-action" type="button" data-i18n="dialog.next">下一篇 →</button>
   </div>
   <p class="dialog-share-status" id="dialog-share-status" role="status" hidden></p>
   <p class="dialog-note" hidden></p>
   <a class="dialog-source" id="dialog-source" target="_blank" rel="noopener noreferrer" hidden data-i18n="dialog.source">延伸阅读 ↗</a>
   </div>
 </dialog>
+<!-- SHARE_PANEL_START -->
+<dialog id="article-share-panel" class="article-share-panel" aria-labelledby="article-share-title">
+  <header class="share-heading"><h2 id="article-share-title"><span data-share-text="card">分享卡片</span></h2><button type="button" class="settings-close" data-share-close aria-label="关闭分享卡片"><span aria-hidden="true">×</span></button></header>
+  <p class="share-feedback" data-share-status role="status" aria-live="polite"></p>
+  <img class="share-preview" data-share-preview hidden alt="文章分享卡片预览，包含标题、摘要、作者及文章链接" width="900" height="1200">
+  <p class="settings-hint"><span data-share-text="hint">卡片在本机生成。可下载图片分享；不支持下载时可长按保存预览。</span></p>
+  <label class="share-url-label" for="article-share-url"><span data-share-text="link">文章链接</span></label><input id="article-share-url" type="url" readonly spellcheck="false">
+  <div class="share-controls"><a class="glass-surface glass-action" data-share-download hidden download><span data-share-text="download">下载图片</span></a><button type="button" class="glass-surface glass-action" data-share-native hidden><span data-share-text="native">系统分享</span></button><button type="button" class="glass-surface glass-action" data-share-copy><span data-share-text="copy">复制链接</span></button></div>
+</dialog>
+<!-- SHARE_PANEL_END -->
 <!-- MUSIC_PLAYER_START -->
 <p id="music-static-link" class="music-static-link wrap"><a href="https://music.163.com/playlist?id=18522359099" target="_blank" rel="noopener noreferrer" data-i18n="music.openPlaylist">在网易云打开歌单 ↗</a></p>
 <aside id="music-widget" class="music-widget" aria-label="音乐歌单" data-i18n-aria-label="music.region" hidden>
@@ -209,6 +221,7 @@
 <!-- GLASS_SETTINGS_START -->
 <dialog id="glass-settings" class="glass-settings glass-surface" data-material="content" aria-labelledby="glass-settings-title">
   <div class="glass-settings-heading"><h2 id="glass-settings-title"><span data-i18n="appearance.open">玻璃外观</span></h2><button id="glass-settings-close" class="settings-close" type="button" aria-label="关闭玻璃外观设置" data-i18n-aria-label="appearance.close"><span aria-hidden="true">×</span></button></div>
+  <div class="theme-setting"><label for="theme-choice" data-i18n="theme.label">主题模式</label><select id="theme-choice" data-theme-choice aria-describedby="theme-hint"><option value="system" data-i18n="theme.system">随系统自动切换</option><option value="light" data-i18n="theme.light">浅色模式</option><option value="dark" data-i18n="theme.dark">深色模式</option></select><p id="theme-hint" class="settings-hint" data-i18n="theme.hint">随系统实时切换；使用明暗按钮后改为手动模式，可在此恢复。</p></div>
   <label class="glass-enable-row" for="glass-enabled"><span data-i18n="appearance.enabled">玻璃云间</span><input id="glass-enabled" type="checkbox" role="switch"></label>
   <div id="glass-adjustments">
     <div class="glass-range-label"><label for="glass-clarity"><span data-i18n="appearance.clarity">通透程度</span></label><output id="glass-clarity-value" for="glass-clarity">55</output></div>

@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { appearancePanel } from './appearance.mjs';
 import { likeMarkup } from './likes.mjs';
+import { sharePanel, staticShare } from './sharing.mjs';
 
 // 一个入口配置所有可抓取 URL；相对文章/资源链接继续兼容项目子路径。
 export const DEFAULT_SITE_URL = 'https://cloud.xiwu.space/';
@@ -35,6 +36,7 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="${escape(ui[lang]['meta.shareImageAlt'])}">`;
   const readingVersion = createHash('sha256').update(await readFile(join(dist, 'reading.js'))).digest('hex').slice(0, 10);
+  const sharingVersion = createHash('sha256').update(await readFile(join(dist, 'sharing.js'))).digest('hex').slice(0, 10);
   const readerVersion = createHash('sha256').update(await readFile(join(dist, 'reader.js'))).digest('hex').slice(0, 10);
   const likesVersion = createHash('sha256').update(await readFile(join(dist, 'likes.js'))).digest('hex').slice(0, 10);
   const appearanceVersion = createHash('sha256').update(await readFile(join(dist, 'appearance.js'))).digest('hex').slice(0, 10);
@@ -73,7 +75,7 @@ ${imageMeta('zh-CN')}
     const neighbor = (offset,key) => {
       const candidates = byId.get(orderedIds[position+offset]);
       const item = candidates?.find(variant=>variant.lang===post.lang) || candidates?.find(variant=>variant.lang==='zh-CN');
-      return item ? `<a href="../../${postPath(item)}" lang="${item.lang}" hreflang="${item.lang}"><span>${escape(ui[post.lang][key])}</span><strong>${escape(item.title)}</strong>${item.lang!==post.lang ? `<small>${escape(ui[post.lang]['reader.original'])}</small>` : ''}</a>` : '';
+      return item ? `<a class="glass-surface glass-action" href="../../${postPath(item)}" lang="${item.lang}" hreflang="${item.lang}"><span>${escape(ui[post.lang][key])}</span><strong>${escape(item.title)}</strong>${item.lang!==post.lang ? `<small>${escape(ui[post.lang]['reader.original'])}</small>` : ''}</a>` : '';
     };
     const toc = post.headings.length < 2 ? '' : `<details class="reader-toc" open><summary>${escape(ui[post.lang]['reader.toc'])}</summary><nav aria-label="${escape(ui[post.lang]['reader.toc'])}">${post.headings.map(heading=>`<a data-reader-anchor="${heading.id}" href="#${heading.id}" style="--toc-indent:${Math.min(3,heading.level-Math.min(...post.headings.map(h=>h.level)))*12}px">${escape(heading.text)}</a>`).join('')}</nav></details>`;
     const absolute = new URL(postPath(post), SITE_URL).href;
@@ -108,6 +110,7 @@ ${imageMeta(post.lang)}
 <script src="../../reading.js?v=${readingVersion}"></script>
 <script defer src="../../reader.js?v=${readerVersion}"></script>
 <script defer src="../../likes.js?v=${likesVersion}"></script>
+<script defer src="../../sharing.js?v=${sharingVersion}"></script>
 <link rel="stylesheet" href="../../${escape(css)}">
 </head>
 <body class="static-reading">
@@ -125,11 +128,13 @@ ${toc}
 ${post.source ? `<p><a class="dialog-source" href="${escape(post.source)}" rel="noopener noreferrer">${escape(ui[post.lang]['dialog.source'])}</a></p>` : ''}
 </article>
 ${likeMarkup(post.id, likes, ui[post.lang])}
+${staticShare(post, localized[post.lang].name, absolute, ui[post.lang])}
 <nav class="static-pagination" aria-label="${escape(ui[post.lang]['reader.backToList'])}">${neighbor(-1,'reader.previous')}${neighbor(1,'reader.next')}</nav>
 <p class="static-back"><a class="text-link" href="../../?lang=${post.lang}#interests">${escape(ui[post.lang]['reader.backToList'])}</a></p>
 </div>
 </main>
 ${appearancePanel(ui[post.lang])}
+${sharePanel(ui[post.lang])}
 </body>
 </html>\n`;
     const directory = join(dist, 'posts', post.id);

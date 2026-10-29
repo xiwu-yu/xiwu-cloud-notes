@@ -80,6 +80,7 @@ test('Adding and removing Markdown updates the build; a bad file preserves the l
     await writeFile(join(root,'dist/style.css'),'body{background:url("assets/cloud-blue.svg")}');
     await writeFile(join(root,'dist/script.js'),'console.log(1);');
     await writeFile(join(root,'dist/appearance.js'),await readFile(new URL('../dist/appearance.js',import.meta.url)));
+    await writeFile(join(root,'dist/sharing.js'),await readFile(new URL('../dist/sharing.js',import.meta.url)));
     await writeFile(join(root,'dist/reading.js'),await readFile(new URL('../dist/reading.js',import.meta.url)));
     await writeFile(join(root,'dist/reader.js'),await readFile(new URL('../dist/reader.js',import.meta.url)));
     await writeFile(join(root,'content/posts/one.md'),source('第一篇'));
