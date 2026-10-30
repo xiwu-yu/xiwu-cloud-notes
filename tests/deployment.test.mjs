@@ -171,3 +171,23 @@ test('root/subpath builds have truthful static metadata and provenance; bad rebu
     await rm(root,{recursive:true,force:true});
   }
 });
+
+test('comments build into static languages with stable IDs, hashed assets and subpaths; bad config preserves output',async()=>{
+  const root=await repository();
+  try {
+    await writeFile(join(root,'content/comments.json'),JSON.stringify({enabled:true,repo:'xiwu-yu/xiwu-cloud-notes',repoId:'R_kgDOVU6AUw',category:'文章评论',categoryId:'DIC_test'}));
+    await build(root,{...options,siteUrl:'https://example.org/notes/'});
+    const home=await readFile(join(root,'dist/index.html'),'utf8');
+    assert.match(home,/comments\.js\?v=[a-f0-9]{10}/);
+    const ui=JSON.parse(await readFile(join(root,'content/ui.json'),'utf8'));
+    for(const lang of ['zh-CN','zh-TW','en','ja']){
+      const html=await readFile(join(root,`dist/posts/xiwu/${lang}.html`),'utf8');
+      assert.match(html,/\.\.\/\.\.\/comments\.js\?v=[a-f0-9]{10}/);assert.match(html,/data-article-comments data-article-id="xiwu"/);
+      assert.ok(html.includes(ui[lang]['comments.hint']));assert.match(html,/https:\/\/github.com\/xiwu-yu\/xiwu-cloud-notes\/discussions/);
+      assert.doesNotMatch(html,/<script[^>]+src="https:\/\/giscus/);
+    }
+    await writeFile(join(root,'content/comments.json'),JSON.stringify({enabled:true}));
+    await assert.rejects(build(root),/content\/comments.json/);
+    assert.equal(await readFile(join(root,'dist/index.html'),'utf8'),home);
+  }finally{await rm(root,{recursive:true,force:true});}
+});

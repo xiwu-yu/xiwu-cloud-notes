@@ -85,6 +85,7 @@ test('Adding and removing Markdown updates the build; a bad file preserves the l
     await writeFile(join(root,'dist/reader.js'),await readFile(new URL('../dist/reader.js',import.meta.url)));
     await writeFile(join(root,'content/posts/one.md'),source('第一篇'));
     await writeFile(join(root,'dist/likes.js'),await readFile(new URL('../dist/likes.js',import.meta.url)));
+    await writeFile(join(root,'dist/comments.js'),await readFile(new URL('../dist/comments.js',import.meta.url)));
     await build(root);
     await writeFile(join(root,'content/posts/two.md'),source('第二篇'));
     await build(root);

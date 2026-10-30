@@ -20,7 +20,7 @@ export default defineConfig({
     screenshot: 'only-on-failure'
   },
   projects: [
-    { name: 'interaction', testMatch: ['site.spec.mjs', 'music.spec.mjs', 'navigation.spec.mjs', 'recovery.spec.mjs', 'design.spec.mjs', 'glass-v2.spec.mjs', 'glass-v3.spec.mjs', 'appearance.spec.mjs', 'reading-discovery.spec.mjs', 'likes.spec.mjs', 'theme-share.spec.mjs'] },
+    { name: 'interaction', testMatch: ['site.spec.mjs', 'music.spec.mjs', 'navigation.spec.mjs', 'recovery.spec.mjs', 'design.spec.mjs', 'glass-v2.spec.mjs', 'glass-v3.spec.mjs', 'appearance.spec.mjs', 'reading-discovery.spec.mjs', 'likes.spec.mjs', 'comments.spec.mjs', 'theme-share.spec.mjs'] },
     { name: 'content-smoke', testMatch: 'content-smoke.spec.mjs', use: { baseURL: 'http://127.0.0.1:4173/xiwu-cloud-notes/' } }
   ],
   webServer: [

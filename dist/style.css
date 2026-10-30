@@ -876,3 +876,15 @@ mark { background:var(--blue); color:var(--ink); border-radius:3px; padding-inli
 @media(hover:hover) and (pointer:fine) { .like-button:hover:not(:disabled) { border-color:var(--accent-decor); } }
 @media(prefers-reduced-motion:reduce) { .like-button.glass-surface { transition:none; } .like-button:active:not(:disabled) { transform:none; } }
 @media(forced-colors:active) { .like-heart { color:ButtonText; } }
+
+/* Article comments: stable reader paper, glass only on the load/retry action. */
+.article-comments { margin-block:32px; padding-block:24px; border-top:1px solid var(--line); min-width:0; }
+.article-comments[hidden] { display:none; }
+.article-comments h2 { margin:0 0 12px; font-size:22px; line-height:1.5; }
+.comments-hint,.comments-status,.comments-fallback { font-size:14px; line-height:1.8; overflow-wrap:anywhere; }
+.comments-hint,.comments-status { color:var(--muted); }
+.comments-load { min-height:44px; padding:12px 18px; border-radius:var(--radius-pill); font:inherit; font-size:16px; cursor:pointer; }
+.comments-load:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+.comments-embed { min-width:0; width:100%; margin-top:16px; }
+.comments-embed:empty { display:none; }
+.comments-embed iframe.giscus-frame { display:block; width:100%; border:0; color-scheme:normal; }

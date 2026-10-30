@@ -184,7 +184,15 @@
     "share.ready": "卡片已生成，可下载或分享。",
     "share.error": "图片生成失败，请关闭后重试。仍可复制文章链接。",
     "share.nativeError": "系统分享暂不可用，请下载图片。",
-    "share.brand": "云间来信"
+    "share.brand": "云间来信",
+    "comments.title": "文章评论",
+    "comments.hint": "评论公开保存在 GitHub Discussions，发表评论需要登录 GitHub。点击后加载 Giscus 评论服务。",
+    "comments.load": "查看评论 / 写评论",
+    "comments.github": "在 GitHub 查看讨论 ↗",
+    "comments.loading": "正在加载评论…",
+    "comments.waiting": "加载较慢，网络可能影响评论服务。可在 GitHub 查看讨论。",
+    "comments.error": "评论暂时无法加载，请重试或在 GitHub 查看讨论。",
+    "comments.retry": "重新加载评论"
   },
   "zh-TW": {
     "meta.title": "夕霧 · 雲間來信",
@@ -371,7 +379,15 @@
     "share.ready": "卡片已產生，可下載或分享。",
     "share.error": "圖片產生失敗，請關閉後重試。仍可複製文章連結。",
     "share.nativeError": "系統分享暫不可用，請下載圖片。",
-    "share.brand": "雲間來信"
+    "share.brand": "雲間來信",
+    "comments.title": "文章評論",
+    "comments.hint": "評論公開儲存在 GitHub Discussions，發表評論需要登入 GitHub。點擊後載入 Giscus 評論服務。",
+    "comments.load": "查看評論 / 寫評論",
+    "comments.github": "在 GitHub 查看討論 ↗",
+    "comments.loading": "正在載入評論…",
+    "comments.waiting": "載入較慢，網路可能影響評論服務。可在 GitHub 查看討論。",
+    "comments.error": "評論暫時無法載入，請重試或在 GitHub 查看討論。",
+    "comments.retry": "重新載入評論"
   },
   "en": {
     "meta.title": "Xiwu · Letters in the Clouds",
@@ -558,7 +574,15 @@
     "share.ready": "Your card is ready to download or share.",
     "share.error": "The image could not be created. Close and try again, or copy the article link.",
     "share.nativeError": "System sharing is unavailable. Please download the image.",
-    "share.brand": "Letters in the Clouds"
+    "share.brand": "Letters in the Clouds",
+    "comments.title": "Comments",
+    "comments.hint": "Comments are public on GitHub Discussions. Sign in to GitHub to comment. Opening comments loads Giscus.",
+    "comments.load": "Read / write comments",
+    "comments.github": "View discussion on GitHub ↗",
+    "comments.loading": "Loading comments…",
+    "comments.waiting": "Loading is taking a while. Your network may affect the service. You can open GitHub instead.",
+    "comments.error": "Comments could not load. Retry or view the discussion on GitHub.",
+    "comments.retry": "Reload comments"
   },
   "ja": {
     "meta.title": "夕霧 · 雲間の手紙",
@@ -745,6 +769,14 @@
     "share.ready": "カードを生成しました。保存・共有できます。",
     "share.error": "画像を生成できませんでした。閉じて再試行するか、記事リンクをコピーしてください。",
     "share.nativeError": "システム共有を利用できません。画像を保存してください。",
-    "share.brand": "雲間の手紙"
+    "share.brand": "雲間の手紙",
+    "comments.title": "コメント",
+    "comments.hint": "コメントは GitHub Discussions に公開されます。投稿には GitHub へのログインが必要です。クリックすると Giscus を読み込みます。",
+    "comments.load": "コメントを読む・書く",
+    "comments.github": "GitHub で議論を見る ↗",
+    "comments.loading": "コメントを読み込み中…",
+    "comments.waiting": "読み込みに時間がかかっています。ネットワークの影響が考えられます。GitHub でも確認できます。",
+    "comments.error": "コメントを読み込めません。再試行するか、GitHub で確認してください。",
+    "comments.retry": "コメントを再読み込み"
   }
 }

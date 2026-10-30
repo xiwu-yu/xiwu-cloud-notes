@@ -10,6 +10,8 @@ await cp(new URL('../dist/', import.meta.url), `${root}/dist`, { recursive: true
 await cp(new URL('../content/', import.meta.url), `${root}/content`, { recursive: true });
 // 测试隔离生产 API；likes.spec 使用真正 Worker handler + 独立 SQLite。
 await writeFile(`${root}/content/likes.json`, JSON.stringify({apiUrl:null}));
+// 评论测试由 comments.spec 模拟官方边界，禁止向生产讨论发布内容。
+await writeFile(`${root}/content/comments.json`, JSON.stringify({enabled:false}));
 if (!real) {
   await rm(`${root}/content/posts`, { recursive: true });
   await cp(new URL('../tests/fixtures/posts/', import.meta.url), `${root}/content/posts`, { recursive: true });
