@@ -12,6 +12,7 @@
     // once per task; duplicate locale routes can cancel Giscus' own Next.js load.
     queueMicrotask(() => {
       view.syncQueued = false;
+      if (!view.embed.isConnected) return;
       const frame = view.embed.querySelector('iframe.giscus-frame');
       if (!frame) return;
       const config = {theme:theme(),lang:language(),term:'xiwu-article:'+view.id,backLink:view.url};
@@ -58,7 +59,7 @@
     root.hidden = !config;
     const previous = views.get(root);
     if (!config) {if(previous)clearTimeout(previous.timer);root.replaceChildren();views.delete(root);return;}
-    if (previous && JSON.stringify(previous.config) === JSON.stringify(config)) {
+    if (previous && previous.id === id && JSON.stringify(previous.config) === JSON.stringify(config)) {
       previous.id=id;previous.strings=strings;previous.url=url;
       previous.link.href=`https://github.com/${config.repo}/discussions?discussions_q=${encodeURIComponent('"xiwu-article:'+id+'"')}`;
       const script=previous.embed.querySelector('script');if(script)script.dataset.term='xiwu-article:'+id;

@@ -5,7 +5,7 @@ import {mkdir} from 'node:fs/promises';
 import {noOverflow} from './helpers.mjs';
 const evidenceDir=(process.env.EVIDENCE_DIR || 'work')+'/comments';
 const config={repo:'xiwu-yu/xiwu-cloud-notes',repoId:'R_kgDOVU6AUw',category:'文章评论',categoryId:'DIC_test'};
-const client=`(()=>{const s=document.currentScript;const root=s.parentElement;const f=document.createElement('iframe');f.className='giscus-frame';f.loading=s.dataset.loading;f.src='https://giscus.app/en/widget?term='+encodeURIComponent(s.dataset.term)+'&theme='+s.dataset.theme;root.append(f);})();`;
+const client=`(()=>{const s=document.currentScript;const root=s.parentElement;const f=document.createElement('iframe');f.className='giscus-frame';f.loading=s.dataset.loading;f.src='https://giscus.app/en/widget?term='+encodeURIComponent(s.dataset.term)+'&theme='+s.dataset.theme+'&origin='+encodeURIComponent(location.href);root.append(f);})();`;
 const widget=`<!doctype html><html><meta charset="utf-8"><body><p>Giscus lifecycle fixture — no public comments are posted.</p><script>window.updates=[];addEventListener('message',e=>{if(e.data?.giscus?.setConfig){updates.push(e.data.giscus.setConfig);document.documentElement.lang=e.data.giscus.setConfig.lang;}});</script></body></html>`;
 async function connect(context,{fail=false,slow=false}={}){
   const counts={scripts:0,frames:0};
@@ -18,7 +18,7 @@ async function connect(context,{fail=false,slow=false}={}){
   await context.route('https://giscus.app/**/widget?*',async route=>{counts.frames++;await route.fulfill({contentType:'text/html',body:widget});});
   return counts;
 }
-test('comments are opt-in, share the article ID across language, theme and history without reloading the iframe',async({page,context})=>{
+test('comments keep one frame per article across languages/themes and reset the OAuth context on article history changes',async({page,context})=>{
   const counts=await connect(context);await page.goto('./?post=cloud&lang=zh-CN');
   expect(counts.scripts).toBe(0);await expect(page.locator('.comments-load')).toBeVisible();
   await page.locator('.comments-load').click();await expect(page.locator('.giscus-frame')).toBeVisible();
@@ -36,9 +36,16 @@ test('comments are opt-in, share the article ID across language, theme and histo
   await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>updates.at(-1).theme)).toBe('dark');
   expect(await page.evaluate(()=>window.commentFrame===document.querySelector('.giscus-frame')&&window.musicFrame===document.querySelector('#music-frame'))).toBe(true);
   await page.locator('#essay-next').click();
+  await expect(page.locator('.giscus-frame')).toHaveCount(0);
+  await expect(page.locator('.comments-load')).toBeVisible();
+  await page.locator('.comments-load').click();
   await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>updates.at(-1).term)).not.toBe('xiwu-article:cloud');
-  await page.goBack();await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>updates.at(-1).term)).toBe('xiwu-article:cloud');
-  expect(counts.scripts).toBe(1);await expect.poll(()=>counts.frames).toBe(1);
+  expect(new URL(await page.locator('.giscus-frame').getAttribute('src')).searchParams.get('origin')).toBe(page.url());
+  expect(await page.evaluate(()=>window.musicFrame===document.querySelector('#music-frame'))).toBe(true);
+  await page.goBack();await expect(page.locator('.giscus-frame')).toHaveCount(0);await page.locator('.comments-load').click();
+  await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>updates.at(-1).term)).toBe('xiwu-article:cloud');
+  expect(new URL(await page.locator('.giscus-frame').getAttribute('src')).searchParams.get('origin')).toBe(page.url());
+  expect(counts.scripts).toBe(3);await expect.poll(()=>counts.frames).toBe(3);
 });
 for(const width of [320,390,768,1440])test(`${width}px comments work in static readers with four languages and both themes`,async({page,context})=>{
   const counts=await connect(context);await page.setViewportSize({width,height:900});await page.emulateMedia({reducedMotion:'reduce'});
