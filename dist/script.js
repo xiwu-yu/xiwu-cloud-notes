@@ -124,6 +124,7 @@
 
   function renderDialog(item, { focus = false, scroll = false } = {}) {
     window.articleLikes?.mount($('#dialog-like'), {id:item.id, endpoint:profile.likes, strings:ui});
+    window.articleComments?.mount($('#dialog-comments'), {id:item.id, config:profile.comments, strings:ui, url:new URL(item.url,location.href).href});
     $('#dialog-title').textContent = item.title;
     $('#dialog-category').textContent = item.category;
     const meta = $('#dialog-meta');

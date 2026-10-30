@@ -4,6 +4,10 @@
 
 [打开网站](https://cloud.xiwu.space/)
 
+## 文章评论
+
+新增 GitHub Discussions + Giscus 接入：按文章 ID 关联，四语言和两种阅读页面共用评论，主题同步；点击后才加载，失败可转到 GitHub。发表需要 GitHub 登录，不是匿名评论。Giscus App 已于2026-10-30授权，仅限此仓库；Discussions 与公告型“文章评论”分类已接通，使用真实分类 ID。评论采用稳定文章 ID 严格匹配，点击后才加载官方客户端，iframe 同时开启懒加载。见 [配置与管理说明](docs/article-comments.md)。本轮未改 DNS 或点赞服务。
+
 ## 文章共享点赞
 
 新增 Cloudflare Workers + D1 点赞后端及四语言阅读入口，GitHub Pages 托管不变。匿名浏览器可点赞/取消，同一文章各语言共享真实累计，刷新保留身份，其他标签页同步。计数由服务端确认，唯一键与事务防止重复加减，并提供基础限流；它不等于严格的一人一票。

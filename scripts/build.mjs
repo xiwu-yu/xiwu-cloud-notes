@@ -8,6 +8,7 @@ import { buildInfo } from './build-info.mjs';
 import { musicConfig, musicMarkup } from './music.mjs';
 import { appearancePanel } from './appearance.mjs';
 import { likesConfig } from './likes.mjs';
+import { commentsConfig } from './comments.mjs';
 import { sharePanel } from './sharing.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -63,7 +64,7 @@ function validateUi(ui) {
 const contentHash = contents => createHash('sha256').update(contents).digest('hex').slice(0, 10);
 
 async function buildInputPaths(rootPath, postFiles, assetVersions) {
-  const inputs = ['content/site.json', 'content/ui.json', 'content/likes.json', ...postFiles.map(file => `content/posts/${file}`), ...Object.keys(assetVersions).map(file => `dist/${file}`)];
+  const inputs = ['content/site.json', 'content/ui.json', 'content/likes.json', 'content/comments.json', ...postFiles.map(file => `content/posts/${file}`), ...Object.keys(assetVersions).map(file => `dist/${file}`)];
   for (const [directory, pattern] of [['scripts', /\.mjs$/], ['dist', /\.(?:html|css|js)$/]]) {
     let entries;
     try { entries = await readdir(join(rootPath, directory), {withFileTypes:true}); }
@@ -140,6 +141,9 @@ export async function build(rootPath = root, options = {}) {
   let likes = null;
   try { likes = likesConfig(JSON.parse(await readFile(join(rootPath, 'content/likes.json'), 'utf8'))); }
   catch(error) { if (error.code !== 'ENOENT') throw error; }
+  let comments = null;
+  try { comments = commentsConfig(JSON.parse(await readFile(join(rootPath, 'content/comments.json'), 'utf8'))); }
+  catch(error) { if (error.code !== 'ENOENT') throw error; }
   const siteUrl = resolveSiteUrl(options.siteUrl ?? process.env.SITE_URL ?? site.baseUrl);
   const info = buildInfo(rootPath, siteUrl, {...options, buildInputs:await buildInputPaths(rootPath, files, assetVersions)});
   const music = musicConfig(site.music);
@@ -175,6 +179,7 @@ export async function build(rootPath = root, options = {}) {
     locales: SUPPORTED_LANGS,
     isDemo: site.isDemo === true,
     likes,
+    comments,
     ui,
     localized
   };
@@ -189,7 +194,7 @@ export async function build(rootPath = root, options = {}) {
     await rm(join(staging, 'dist/posts'), { recursive: true, force: true });
     await writeFile(join(staging, 'dist/profile.js'), '// 自动生成，请修改 content/ 后运行 pnpm build。\nwindow.siteProfile = ' + json + ';\n');
     await versionAssets(staging, assetVersions);
-    await generateStatic(staging, posts, localized, ui, assetVersions, siteUrl, likes);
+    await generateStatic(staging, posts, localized, ui, assetVersions, siteUrl, likes, comments);
     await writeFile(join(staging, 'dist/build-info.json'), JSON.stringify(info, null, 2) + '\n');
     for (const file of ['style.css', 'index.html', 'profile.js', 'sitemap.xml', 'robots.txt', '404.html', 'build-info.json']) {
       try { await rename(join(staging, 'dist', file), join(rootPath, 'dist', file)); }
