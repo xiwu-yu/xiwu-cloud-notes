@@ -7,7 +7,7 @@ const evidenceDir=(process.env.EVIDENCE_DIR || 'work')+'/comments';
 const config={repo:'xiwu-yu/xiwu-cloud-notes',repoId:'R_kgDOVU6AUw',category:'文章评论',categoryId:'DIC_test'};
 const client=`(()=>{const s=document.currentScript;const root=s.parentElement;const f=document.createElement('iframe');f.className='giscus-frame';f.loading=s.dataset.loading;f.src='https://giscus.app/en/widget?term='+encodeURIComponent(s.dataset.term)+'&theme='+s.dataset.theme+'&origin='+encodeURIComponent(location.href);root.append(f);})();`;
 const widget=`<!doctype html><html><meta charset="utf-8"><body><p>Giscus lifecycle fixture — no public comments are posted.</p><script>window.updates=[];addEventListener('message',e=>{if(e.data?.giscus?.setConfig){updates.push(e.data.giscus.setConfig);document.documentElement.lang=e.data.giscus.setConfig.lang;}});</script></body></html>`;
-async function connect(context,{fail=false,slow=false}={}){
+async function connect(context,{fail=false,slow=false,frameDelay=0}={}){
   const counts={scripts:0,frames:0};
   await context.route(/\/profile\.js(?:\?|$)/,async route=>{const response=await route.fetch();await route.fulfill({response,body:(await response.text())+`\nwindow.siteProfile.comments=${JSON.stringify(config)};`});});
   await context.route(/\/posts\/[^/]+\/([^/]+)\.html(?:\?|$)/,async route=>{
@@ -15,11 +15,12 @@ async function connect(context,{fail=false,slow=false}={}){
     await route.fulfill({response,body:(await response.text()).replace('<nav class="static-pagination"',commentsMarkup('cloud',config,ui[lang])+'<nav class="static-pagination"')});
   });
   await context.route('https://giscus.app/client.js',async route=>{counts.scripts++;if(fail)return route.abort();if(slow)await new Promise(r=>setTimeout(r,14000));return route.fulfill({contentType:'application/javascript',body:client});});
-  await context.route('https://giscus.app/**/widget?*',async route=>{counts.frames++;await route.fulfill({contentType:'text/html',body:widget});});
+  await context.route('https://giscus.app/**/widget?*',async route=>{counts.frames++;if(frameDelay)await new Promise(r=>setTimeout(r,frameDelay));await route.fulfill({contentType:'text/html',body:widget});});
   return counts;
 }
 test('comments keep one frame per article across languages/themes and reset the OAuth context on article history changes',async({page,context})=>{
-  const counts=await connect(context);await page.goto('./?post=cloud&lang=zh-CN');
+  // Keep the iframe briefly on its initial document to exercise lazy-loading readiness.
+  const counts=await connect(context,{frameDelay:250});await page.goto('./?post=cloud&lang=zh-CN');
   expect(counts.scripts).toBe(0);await expect(page.locator('.comments-load')).toBeVisible();
   await page.locator('.comments-load').click();await expect(page.locator('.giscus-frame')).toBeVisible();
   expect(counts.scripts).toBe(1);await expect.poll(()=>counts.frames).toBe(1);
@@ -33,17 +34,17 @@ test('comments keep one frame per article across languages/themes and reset the 
     await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').getAttribute('lang')).toBe(lang);
   }
   await page.locator('.dialog-theme-toggle').click();
-  await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>updates.at(-1).theme)).toBe('dark');
+  await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>window.updates?.at(-1)?.theme)).toBe('dark');
   expect(await page.evaluate(()=>window.commentFrame===document.querySelector('.giscus-frame')&&window.musicFrame===document.querySelector('#music-frame'))).toBe(true);
   await page.locator('#essay-next').click();
   await expect(page.locator('.giscus-frame')).toHaveCount(0);
   await expect(page.locator('.comments-load')).toBeVisible();
   await page.locator('.comments-load').click();
-  await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>updates.at(-1).term)).not.toBe('xiwu-article:cloud');
+  await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>window.updates?.at(-1)?.term)).toBe('xiwu-article:'+new URL(page.url()).searchParams.get('post'));
   expect(new URL(await page.locator('.giscus-frame').getAttribute('src')).searchParams.get('origin')).toBe(page.url());
   expect(await page.evaluate(()=>window.musicFrame===document.querySelector('#music-frame'))).toBe(true);
   await page.goBack();await expect(page.locator('.giscus-frame')).toHaveCount(0);await page.locator('.comments-load').click();
-  await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>updates.at(-1).term)).toBe('xiwu-article:cloud');
+  await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>window.updates?.at(-1)?.term)).toBe('xiwu-article:cloud');
   expect(new URL(await page.locator('.giscus-frame').getAttribute('src')).searchParams.get('origin')).toBe(page.url());
   expect(counts.scripts).toBe(3);await expect.poll(()=>counts.frames).toBe(3);
 });
@@ -63,7 +64,7 @@ for(const width of [320,390,768,1440])test(`${width}px comments work in static r
     await expect(page.locator('.giscus-frame')).toBeVisible();
     for(const theme of ['light','dark']){
       if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('.theme-toggle').click();
-      await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>updates.at(-1).theme)).toBe(theme);
+      await expect.poll(()=>page.frameLocator('.giscus-frame').locator('html').evaluate(()=>window.updates?.at(-1)?.theme)).toBe(theme);
       await noOverflow(page,width);
       if(lang==='zh-CN' && [390,1440].includes(width)) {
         await mkdir(evidenceDir,{recursive:true});
@@ -117,14 +118,14 @@ test('system theme follows the OS and a language change sends only one final off
   await connect(context);await page.emulateMedia({colorScheme:'light'});await page.goto('./?post=cloud&lang=zh-CN');
   await page.locator('.comments-load').click();
   const frame=page.frameLocator('.giscus-frame');
-  await expect.poll(()=>frame.locator('html').evaluate(()=>updates.length)).toBeGreaterThan(0);
+  await expect.poll(()=>frame.locator('html').evaluate(()=>window.updates?.length ?? 0)).toBeGreaterThan(0);
   await page.emulateMedia({colorScheme:'dark'});
-  await expect.poll(()=>frame.locator('html').evaluate(()=>updates.at(-1).theme)).toBe('dark');
-  let count=await frame.locator('html').evaluate(()=>updates.length);
+  await expect.poll(()=>frame.locator('html').evaluate(()=>window.updates?.at(-1)?.theme)).toBe('dark');
+  let count=await frame.locator('html').evaluate(()=>window.updates?.length ?? 0);
   for(const lang of ['en','zh-TW','ja','zh-CN']){
     await page.locator('#dialog-language-select').selectOption(lang);
-    await expect.poll(()=>frame.locator('html').evaluate(()=>updates.length)).toBe(count+1);
-    const config=await frame.locator('html').evaluate(()=>updates.at(-1));
+    await expect.poll(()=>frame.locator('html').evaluate(()=>window.updates?.length ?? 0)).toBe(count+1);
+    const config=await frame.locator('html').evaluate(()=>window.updates?.at(-1));
     expect(config).toMatchObject({theme:'dark',lang,term:'xiwu-article:cloud'});
     expect(config.backLink).toContain(`/posts/cloud/${lang}.html`);
     count++;
