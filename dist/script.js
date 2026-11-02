@@ -205,7 +205,7 @@
     const number = node('span', 'card-number', String(index + 1).padStart(2, '0'));
     imageWrap.append(img, number);
     const content = node('div', 'card-content');
-    content.append(node('p', 'card-meta', item.subtitle), node('h3', '', item.title), dateLine(item), description(item,'card-description'), tagLine(item), node('span', 'card-more', t('notes.readMore')));
+    content.append(node('p', 'card-meta', item.subtitle), node('h3', '', item.title), dateLine(item), description(item,'card-description'), tagLine(item));
     button.append(imageWrap, content);
     button.addEventListener('click', event => {
       if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
