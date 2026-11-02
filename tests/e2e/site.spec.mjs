@@ -180,6 +180,10 @@ for (const width of [320, 375, 768, 1440]) {
         expect(await dialog.evaluate(n => n.scrollWidth - n.clientWidth)).toBeLessThanOrEqual(1);
         await expect(page.locator('.dialog-close')).toBeFocused();
         await page.keyboard.press(tabKey(browserName, true));
+        if(width<1100){
+          await expect(page.locator('#interest-dialog .reader-tools .reader-toc summary')).toBeFocused();
+          await page.keyboard.press(tabKey(browserName, true));
+        }
         await expect(page.locator('#interest-dialog .transparency-toggle')).toBeFocused();
         await page.keyboard.press(tabKey(browserName, true));
         await expect(page.locator('.dialog-theme-toggle')).toBeFocused();

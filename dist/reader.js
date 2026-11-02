@@ -1,6 +1,6 @@
 // 目录、搜索上下文与定位共用增强。正文和构建时目录不依赖本脚本。
 (() => {
-  const cache = new WeakMap(), contexts = new WeakMap();
+  const cache = new WeakMap(), contexts = new WeakMap(), tocPlaces = new WeakMap();
   const desktop = matchMedia('(min-width:1100px)');
   const terms = query => [...new Set(String(query || '').trim().split(/\s+/).filter(Boolean))];
   function blocks(item) {
@@ -36,8 +36,21 @@
     if(focus)target.focus({preventScroll:true});
     return true;
   }
+  function placeToc(toc,body) {
+    contexts.set(toc,body);
+    if(!tocPlaces.has(toc)){const place=document.createComment('reader directory');toc.before(place);tocPlaces.set(toc,place);}
+    const toolbar=body.closest('dialog')?.querySelector('.dialog-toolbar') || document.querySelector('.static-reader-toolbar');
+    // Move the existing directory only. Native fragment links stay in the
+    // original document position when this optional enhancement is unavailable.
+    if(!desktop.matches&&!toc.hidden&&toolbar){
+      let tools=toolbar.querySelector('.reader-tools');
+      if(!tools){tools=document.createElement('div');tools.className='reader-tools';toolbar.insertBefore(tools,toolbar.querySelector('.dialog-close'));}
+      tools.append(toc);
+    }else tocPlaces.get(toc).before(toc);
+    toc.open=desktop.matches&&!toc.hidden;
+  }
   function bindToc(toc,body) {
-    contexts.set(toc,body);toc.open=desktop.matches;
+    placeToc(toc,body);
     if(toc.dataset.bound)return;
     toc.dataset.bound='true';
     toc.addEventListener('click',event=>{
@@ -47,17 +60,19 @@
       jump(content,link.dataset.readerAnchor,true);
       if(!content.closest('dialog')){const url=new URL(location.href);url.hash=link.dataset.readerAnchor;history.replaceState(history.state,'',url);}
     });
+    toc.addEventListener('keydown',event=>{if(event.key==='Escape'&&!desktop.matches&&toc.open){event.preventDefault();event.stopPropagation();toc.open=false;toc.querySelector('summary').focus({preventScroll:true});}});
   }
   function mountToc(toc,body,label,baseUrl='') {
     const headings=[...body.querySelectorAll('h1[id],h2[id],h3[id],h4[id],h5[id],h6[id]')];
-    toc.hidden=headings.length<2;toc.replaceChildren();if(toc.hidden)return;
+    toc.hidden=headings.length<2;toc.replaceChildren();if(toc.hidden){placeToc(toc,body);return;}
     const summary=document.createElement('summary');summary.textContent=label;
     const nav=document.createElement('nav');nav.setAttribute('aria-label',label);
     const min=Math.min(...headings.map(h=>Number(h.tagName.slice(1))));
     headings.forEach(heading=>{const link=document.createElement('a');link.textContent=heading.textContent;link.href=baseUrl+'#'+heading.id;link.dataset.readerAnchor=heading.id;link.style.setProperty('--toc-indent',`${Math.min(3,Number(heading.tagName.slice(1))-min)*12}px`);nav.append(link);});
     toc.append(summary,nav);bindToc(toc,body);
   }
-  desktop.addEventListener('change',()=>document.querySelectorAll('.reader-toc').forEach(toc=>{toc.open=desktop.matches;}));
+  desktop.addEventListener('change',()=>document.querySelectorAll('.reader-toc').forEach(toc=>{const body=contexts.get(toc);if(body)placeToc(toc,body);}));
+  document.addEventListener('pointerdown',event=>{if(desktop.matches)return;document.querySelectorAll('.reader-tools>.reader-toc[open]').forEach(toc=>{if(!toc.contains(event.target))toc.open=false;});},{passive:true});
   document.addEventListener('DOMContentLoaded',()=>{
     if(!document.body.classList.contains('static-reading'))return;
     const body=document.querySelector('.article-body'),toc=document.querySelector('.reader-toc');
