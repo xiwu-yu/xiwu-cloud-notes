@@ -11,6 +11,7 @@
   const supported = CSS.supports('background','color-mix(in srgb,white 50%,transparent)') && (CSS.supports('backdrop-filter','blur(1px)') || CSS.supports('-webkit-backdrop-filter','blur(1px)'));
   const frames = new Map();
   let panel, opener, parentDialog, previewFrame = 0, openingAnimation;
+  let panelTop = null, panelViewport = '', detailsTarget, detailsAnimation;
 
   function readPreference() {
     try {
@@ -48,8 +49,9 @@
     root.dataset.glassClarity = String(preference.clarity);
     if (panel) {
       panel.querySelector('#glass-enabled').checked = preference.enabled;
-      panel.querySelector('#glass-adjustments').hidden = !preference.enabled;
+      syncAdjustments(panel.open);
       panel.querySelector('#glass-clarity').value = preference.clarity;
+      panel.querySelector('#glass-clarity').style.setProperty('--range-value',`${preference.clarity}%`);
       panel.querySelector('#glass-clarity-value').value = preference.clarity;
       panel.querySelectorAll('[data-glass-preset]').forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.glassPreset) === preference.clarity)));
       panel.querySelectorAll('[data-glass-reason]').forEach(message => { message.hidden = message.dataset.glassReason !== effective; });
@@ -68,17 +70,57 @@
     document.querySelectorAll('.transparency-toggle').forEach(button => button.setAttribute('aria-expanded', String(value && button === opener)));
     document.dispatchEvent(new CustomEvent('site:appearance-panel', {detail:{open:value}}));
   }
+  function syncAdjustments(animate = false, force = false) {
+    const details = panel.querySelector('#glass-adjustments'), enabled = preference.enabled;
+    panel.querySelector('#glass-enabled').setAttribute('aria-expanded', String(enabled));
+    if (!force && detailsTarget === enabled) return;
+    const from = details.hidden ? 0 : details.getBoundingClientRect().height;
+    const opacity = details.hidden ? .25 : Number(getComputedStyle(details).opacity);
+    detailsAnimation?.cancel(); detailsAnimation = null; detailsTarget = enabled;
+    if (!enabled && details.contains(document.activeElement)) panel.querySelector('#glass-enabled').focus({preventScroll:true});
+    details.inert = !enabled;
+    details.setAttribute('aria-hidden', String(!enabled));
+    details.hidden = false;
+    details.style.removeProperty('height');
+    const to = enabled ? details.scrollHeight : 0;
+    const finish = () => {
+      details.hidden = !enabled;
+      detailsAnimation?.cancel();
+      details.style.removeProperty('height'); details.style.removeProperty('overflow');
+      detailsAnimation = null;
+    };
+    if (!animate || motion.matches || document.hidden || Math.abs(from-to) < 1) { finish(); return; }
+    // Animate the clipped details height, never scale the text or the whole dialog.
+    details.style.overflow = 'hidden';
+    const animation = details.animate([
+      {height:`${from}px`,opacity},
+      {height:`${to}px`,opacity:enabled ? 1 : .25}
+    ], {duration:280,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'});
+    detailsAnimation = animation;
+    animation.onfinish = () => { if(detailsAnimation === animation) finish(); };
+  }
   function positionPanel() {
     if (!panel?.open) return;
-    if (innerWidth <= 720) {
-      panel.style.removeProperty('left'); panel.style.removeProperty('top');
-      return;
+    const viewportHeight = visualViewport?.height || innerHeight;
+    const viewport = `${innerWidth}:${viewportHeight}`;
+    const mobile = innerWidth <= 720;
+    if (panelTop === null || panelViewport !== viewport) {
+      // Choose a position that fits the expanded panel once per opening/viewport.
+      // Toggling details must never flip the dialog above/below its opener.
+      syncAdjustments(false, true);
+      panel.style.removeProperty('max-height'); panel.style.removeProperty('bottom');
+      const details = panel.querySelector('#glass-adjustments'), wasHidden = details.hidden;
+      details.hidden = false;
+      const expandedHeight = Math.min(panel.scrollHeight + 2, parseFloat(getComputedStyle(panel).maxHeight) || viewportHeight-24);
+      details.hidden = wasHidden;
+      const gap = mobile ? parseFloat(getComputedStyle(panel).bottom) || 12 : 12;
+      panelTop = mobile ? Math.max(12,viewportHeight-expandedHeight-gap) : Math.min(opener.getBoundingClientRect().bottom+12,Math.max(12,viewportHeight-expandedHeight-12));
+      panelViewport = viewport;
     }
-    const anchor = opener.getBoundingClientRect(), box = panel.getBoundingClientRect();
-    const left = Math.max(12,Math.min(innerWidth-box.width-12,anchor.right-box.width));
-    const below = anchor.bottom+12;
-    const top = below+box.height <= innerHeight-12 ? below : Math.max(12,Math.min(innerHeight-box.height-12,anchor.top-box.height-12));
-    panel.style.left = `${left}px`; panel.style.top = `${top}px`;
+    const box = panel.getBoundingClientRect(), anchor = opener.getBoundingClientRect();
+    const left = mobile ? 12 : Math.max(12,Math.min(innerWidth-box.width-12,anchor.right-box.width));
+    panel.style.left = `${left}px`; panel.style.top = `${panelTop}px`; panel.style.bottom = 'auto';
+    panel.style.maxHeight = `min(calc(100dvh - 24px - env(safe-area-inset-bottom,0px)), ${Math.max(44,viewportHeight-panelTop-12)}px)`;
   }
   const closePanel = () => { if(panel?.open) panel.close(); };
   const parentClosing = event => { if(event.target === parentDialog)closePanel(); };
@@ -90,6 +132,7 @@
     (parentDialog || document.body).append(panel);
     // 捕获阶段先移除子 modal 的 inert，父阅读器才能恢复到文章链接的焦点。
     parentDialog?.addEventListener('close', parentClosing, true);
+    panelTop = null; panelViewport = '';
     apply(); panel.showModal(); markOpen(true); positionPanel();
     if (!motion.matches) openingAnimation = panel.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'});
     panel.querySelector('#glass-enabled').focus({preventScroll:true});
@@ -124,9 +167,10 @@
     const queue=animate=>{animateNext=animateNext||animate;if(!frame)frame=requestAnimationFrame(()=>{frame=0;measure(animateNext);animateNext=false;});};
     const measure=animate=>{
       if(!group.contains(indicator))group.prepend(indicator);
-      const active=group.querySelector('[aria-pressed="true"]');if(!active)return;
+      const active=group.querySelector('[aria-pressed="true"]');if(!active){indicator.hidden=true;last=null;return;}
       // 只滚动分类容器，不把文档跳到尚未进入视口的分类区。
       const x=active.offsetLeft,y=active.offsetTop,w=active.offsetWidth,h=active.offsetHeight;
+      if(!w||!h){indicator.hidden=true;last=null;return;}
       const scrollMin=x-5,scrollMax=x+w-group.clientWidth+5;
       if(x<group.scrollLeft)group.scrollLeft=Math.max(0,scrollMin);
       else if(x+w>group.scrollLeft+group.clientWidth)group.scrollLeft=Math.max(0,scrollMax);
@@ -152,6 +196,7 @@
     group.addEventListener('click',()=>queue(true));
     addEventListener('resize',()=>queue(false),{passive:true});
     document.addEventListener('site:language-changed',()=>queue(false));
+    document.addEventListener('site:appearance-panel',()=>queue(false));
     document.fonts?.ready.then(()=>queue(false));document.fonts?.addEventListener('loadingdone',()=>queue(false));
     motion.addEventListener('change',()=>{animation?.cancel();animation=null;last=null;queue(false);});
     document.addEventListener('visibilitychange',()=>{if(document.hidden){animation?.cancel();animation=null;}else queue(false);});
@@ -179,7 +224,8 @@
         if(event.clientX<box.left || event.clientX>box.right || event.clientY<box.top || event.clientY>box.bottom)closePanel();
       });
       panel.addEventListener('close',()=>{
-        openingAnimation?.cancel();
+        openingAnimation?.cancel(); syncAdjustments(false, true);
+        panelTop = null; panelViewport = '';
         parentDialog?.removeEventListener('close',parentClosing,true);
         markOpen(false);
         if(opener?.isConnected && (!parentDialog || parentDialog.open))opener.focus({preventScroll:true});
@@ -201,6 +247,14 @@
     }
     installChoiceIndicator('.filters','.filter','filter');
     installChoiceIndicator('.view-switch','[data-view]','view');
+    installChoiceIndicator('#theme-choice','[data-theme-option]','theme');
+    installChoiceIndicator('.glass-presets','[data-glass-preset]','preset');
+    document.querySelectorAll('.settings-choice').forEach(group=>group.addEventListener('keydown',event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      const buttons=[...group.querySelectorAll('button')],index=buttons.indexOf(event.target);if(index<0)return;
+      event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;
+      buttons[next].focus({preventScroll:true});buttons[next].click();
+    }));
     installFAQ();
     document.querySelectorAll('[data-glass-light]').forEach(surface=>{
       surface.addEventListener('pointermove',event=>{
@@ -226,8 +280,8 @@
     apply();
   });
   [system,contrast,forced].forEach(query=>query.addEventListener('change',()=>{apply();positionPanel();}));
-  [pointer,motion].forEach(query=>query.addEventListener('change',()=>{resetLights();openingAnimation?.cancel();}));
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)resetLights();});
+  [pointer,motion].forEach(query=>query.addEventListener('change',()=>{resetLights();openingAnimation?.cancel();if(panel && motion.matches)syncAdjustments(false,true);}));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){resetLights();if(panel)syncAdjustments(false,true);}});
   document.addEventListener('site:language-changed',()=>{apply();positionPanel();});
   addEventListener('pageshow',()=>{preference=readPreference();apply();});
   addEventListener('storage',event=>{

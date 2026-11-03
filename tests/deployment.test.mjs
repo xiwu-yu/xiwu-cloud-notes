@@ -46,7 +46,9 @@ test('likes config reaches both readers with hashed assets, subpaths and four-la
       assert.match(html,/src="\.\.\/\.\.\/sharing\.js\?v=[a-f0-9]{10}"/);
       assert.match(html,/src="\.\.\/\.\.\/reading\.js\?v=[a-f0-9]{10}"/);
       assert.ok(html.includes(`data-share-url="https://example.org/notes/posts/xiwu/${lang}.html"`));
-      assert.match(html,/data-theme-choice/);
+      assert.match(html,/data-theme-option="system"/);
+      assert.match(html,/data-theme-option="light"/);
+      assert.match(html,/data-theme-option="dark"/);
       const ui=JSON.parse(await readFile(join(root,'content/ui.json'),'utf8'));
       assert.ok(html.includes(`data-likes-like="${ui[lang]['likes.like']}"`));
       assert.ok(html.includes(`https://example.org/notes/posts/xiwu/${lang}.html`));

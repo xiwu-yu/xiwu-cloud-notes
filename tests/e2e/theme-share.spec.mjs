@@ -24,7 +24,7 @@ test('system theme follows live changes, manual choice overrides it, and automat
   await page.emulateMedia({colorScheme:'light'});await page.emulateMedia({colorScheme:'dark'});
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
   await page.reload();await expect(page.locator('html')).toHaveAttribute('data-theme','light');
-  await settings(page);await page.locator('#theme-choice').selectOption('system');await done(page);
+  await settings(page);await page.locator('[data-theme-option="system"]').click();await done(page);
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   await page.emulateMedia({colorScheme:'light'});
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
@@ -34,16 +34,16 @@ test('system theme follows live changes, manual choice overrides it, and automat
 test('theme preferences synchronize across tabs, static articles, modal and all four translations',async({page,context})=>{
   await page.goto('./?post=cloud&lang=zh-CN');
   const other=await context.newPage();await other.goto('http://127.0.0.1:4174/xiwu-cloud-notes/posts/cloud/en.html');
-  await settings(page,true);await page.locator('#theme-choice').selectOption('dark');await done(page);
+  await settings(page,true);await page.locator('[data-theme-option="dark"]').click();await done(page);
   await expect(other.locator('html')).toHaveAttribute('data-theme','dark');
   for(const lang of ['zh-CN','zh-TW','en','ja']) {
     await page.locator('#dialog-language-select').selectOption(lang);
     await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
-    await settings(page,true);await expect(page.locator('#theme-choice')).toHaveValue('dark');await done(page);
+    await settings(page,true);await expect(page.locator('[data-theme-option="dark"]')).toHaveAttribute('aria-pressed','true');await done(page);
   }
   await other.locator('.theme-toggle').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
-  await other.locator('.transparency-toggle').click();await other.locator('#theme-choice').selectOption('system');
+  await other.locator('.transparency-toggle').click();await other.locator('[data-theme-option="system"]').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme-mode','system');
   await other.close();
 });
@@ -60,7 +60,7 @@ test('legacy manual preferences remain manual, invalid values follow system, blo
     if(preference==='blocked'){
       await page.locator('.theme-toggle').click();await page.emulateMedia({colorScheme:'dark'});await page.emulateMedia({colorScheme:'light'});
       await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
-      await settings(page);await page.locator('#theme-choice').selectOption('system');await done(page);
+      await settings(page);await page.locator('[data-theme-option="system"]').click();await done(page);
       await expect(page.locator('html')).toHaveAttribute('data-theme','light');
     }
     await context.close();
@@ -205,15 +205,12 @@ test('keyboard, reduced motion, 200% text and failed clipboard keep sharing and 
   await expect(page.locator('[data-share-status]')).toContainText('https://cloud.xiwu.space/posts/cloud/en.html');
   await noOverflow(page,320);expect(await page.locator('#article-share-panel').evaluate(e=>e.scrollWidth-e.clientWidth)).toBeLessThanOrEqual(1);
   await page.keyboard.press('Escape');await expect(page.locator('#essay-share-card')).toBeFocused();
-  await settings(page,true);await page.locator('#theme-choice').focus();
-  await expect(page.locator('#theme-choice')).toBeFocused();
-  // 系统原生菜单会消费 Enter/Tab/Esc，不能假定各 OS 的弹出状态相同。
-  // 用原生表单接口核对选值，再单独验证闭合选择器的键盘导航和宿主 Esc。
-  await page.locator('#theme-choice').selectOption('dark');
-  await expect(page.locator('#theme-choice')).toHaveValue('dark');
+  await settings(page,true);const automatic=page.locator('[data-theme-option="system"]'),dark=page.locator('[data-theme-option="dark"]');
+  await automatic.focus();await expect(automatic).toBeFocused();await page.keyboard.press('End');
+  await expect(dark).toBeFocused();await expect(dark).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('html')).toHaveAttribute('data-theme-mode','dark');
   await page.keyboard.press(tabKey(browserName));
-  await expect(page.locator('#theme-choice')).not.toBeFocused();
+  await expect(dark).not.toBeFocused();
   expect(await page.locator('#glass-settings').evaluate(panel=>panel.contains(document.activeElement))).toBe(true);
   await page.keyboard.press('Escape');await expect(page.locator('#glass-settings')).not.toBeVisible();
   await expect(page.locator('#interest-dialog .transparency-toggle')).toBeFocused();

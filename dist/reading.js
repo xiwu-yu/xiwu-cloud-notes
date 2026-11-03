@@ -24,7 +24,7 @@
       const label = strings?.[dark ? 'theme.toLight' : 'theme.toDark'] || (dark ? button.dataset.toLight : button.dataset.toDark);
       if (label) button.setAttribute('aria-label', label);
     });
-    document.querySelectorAll('[data-theme-choice]').forEach(select => { select.value = mode; });
+    document.querySelectorAll('[data-theme-option]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.themeOption === mode)));
     document.dispatchEvent(new Event('site:theme-changed'));
   }
   function setMode(value) {
@@ -40,7 +40,7 @@
       button.hidden = false;
       button.addEventListener('click', () => setMode(root.dataset.theme === 'dark' ? 'light' : 'dark'));
     });
-    document.querySelectorAll('[data-theme-choice]').forEach(select => select.addEventListener('change', () => setMode(select.value)));
+    document.querySelectorAll('[data-theme-option]').forEach(button => button.addEventListener('click', () => setMode(button.dataset.themeOption)));
     refresh();
   }, {once:true});
   addEventListener('pageshow', refresh);

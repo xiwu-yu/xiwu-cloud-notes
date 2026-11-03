@@ -1,7 +1,7 @@
 // 目录、搜索上下文与定位共用增强。正文和构建时目录不依赖本脚本。
 (() => {
   const cache = new WeakMap(), contexts = new WeakMap(), tocPlaces = new WeakMap();
-  const desktop = matchMedia('(min-width:1100px)');
+  const desktop = matchMedia('(min-width:721px)');
   const terms = query => [...new Set(String(query || '').trim().split(/\s+/).filter(Boolean))];
   function blocks(item) {
     if (!cache.has(item)) {
@@ -44,7 +44,7 @@
     // original document position when this optional enhancement is unavailable.
     if(!desktop.matches&&!toc.hidden&&toolbar){
       let tools=toolbar.querySelector('.reader-tools');
-      if(!tools){tools=document.createElement('div');tools.className='reader-tools';toolbar.insertBefore(tools,toolbar.querySelector('.dialog-close'));}
+      if(!tools){tools=document.createElement('div');tools.className='reader-tools';toolbar.insertBefore(tools,toolbar.querySelector('.language-picker')?.closest('.language-menu') || toolbar.querySelector('.language-picker') || toolbar.querySelector('.theme-toggle'));}
       tools.append(toc);
     }else tocPlaces.get(toc).before(toc);
     toc.open=desktop.matches&&!toc.hidden;
@@ -72,7 +72,14 @@
     toc.append(summary,nav);bindToc(toc,body);
   }
   desktop.addEventListener('change',()=>document.querySelectorAll('.reader-toc').forEach(toc=>{const body=contexts.get(toc);if(body)placeToc(toc,body);}));
-  document.addEventListener('pointerdown',event=>{if(desktop.matches)return;document.querySelectorAll('.reader-tools>.reader-toc[open]').forEach(toc=>{if(!toc.contains(event.target))toc.open=false;});},{passive:true});
+  document.addEventListener('pointerdown',event=>{
+    document.querySelectorAll('.language-menu[open]').forEach(menu=>{if(!menu.contains(event.target))menu.open=false;});
+    if(!desktop.matches)document.querySelectorAll('.reader-tools>.reader-toc[open]').forEach(toc=>{if(!toc.contains(event.target))toc.open=false;});
+  },{passive:true});
+  document.addEventListener('keydown',event=>{
+    const menu=event.target.closest('.language-menu[open]');
+    if(event.key==='Escape'&&menu){event.preventDefault();menu.open=false;menu.querySelector('summary').focus({preventScroll:true});}
+  });
   document.addEventListener('DOMContentLoaded',()=>{
     if(!document.body.classList.contains('static-reading'))return;
     const body=document.querySelector('.article-body'),toc=document.querySelector('.reader-toc');
