@@ -115,7 +115,7 @@ test('static mobile articles use 17px and 20px margins; no JS and failed appeara
       const layout=await body.evaluate(el=>({font:getComputedStyle(el).fontSize,x:el.getBoundingClientRect().x,right:el.getBoundingClientRect().right}));
       expect(layout.font).toBe('17px');expect(layout.x).toBe(20);expect(layout.right).toBe(370);
       await expect(page.locator('article')).toHaveAttribute('lang',lang);
-      await expect(page.locator('header a')).toHaveAttribute('href',`../../?lang=${lang}`);
+      await expect(page.locator('.static-reader-toolbar>.brand')).toHaveAttribute('href',`../../?lang=${lang}`);
       await noOverflow(page,390);
     }
     await context.close();

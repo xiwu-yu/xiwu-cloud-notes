@@ -7,16 +7,16 @@
 <meta name="theme-color" content="#fbfaf8">
 <title>夕雾 · 云间来信</title>
 <link rel="icon" href="assets/favicon.svg?v=79847ec957" type="image/svg+xml">
-<script src="reading.js?v=afd5745694"></script>
-<script src="appearance.js?v=06e7ccb929"></script>
+<script src="reading.js?v=ae4da4344a"></script>
+<script src="appearance.js?v=36523751c7"></script>
 <script src="navigation.js?v=795ed7daa7"></script>
-<link rel="stylesheet" href="style.css?v=44c67b1656">
+<link rel="stylesheet" href="style.css?v=8ac27e538f">
 <link rel="stylesheet" href="motion.css?v=42134c50fe">
 <script defer src="music-drag.js?v=affba2808f"></script>
 <script defer src="motion.js?v=16670e6b6a"></script>
-<script defer src="profile.js?v=9e76cefb24"></script>
+<script defer src="profile.js?v=d316b35706"></script>
 <script defer src="archive.js?v=461e9c9f06"></script>
-<script defer src="reader.js?v=bb58beb953"></script>
+<script defer src="reader.js?v=d1fcbe3cd1"></script>
 <script defer src="sharing.js?v=dc6f944bf3"></script>
 <script defer src="comments.js?v=44107633ec"></script>
 <script defer src="likes.js?v=2a8581b9b9"></script>
@@ -46,6 +46,7 @@
   </div>
   <nav aria-label="主要导航" data-i18n-aria-label="nav.aria"><a href="#about" data-i18n="nav.about">关于夕雾</a><a href="#interests" data-i18n="nav.notes">云间来信</a><a href="#resources" data-i18n="nav.resources">阅读资源</a></nav>
   <label class="language-picker">
+    <svg class="language-icon" width="38" height="24" viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18M12 3c-5 5-5 13 0 18M28 10l4 4 4-4"/></svg>
     <select id="language-select" name="lang" form="home-refresh-form" aria-label="界面语言" data-i18n-aria-label="language.label">
       <option value="zh-CN" lang="zh-CN">简体中文</option>
       <option value="zh-TW" lang="zh-TW">繁體中文</option>
@@ -54,7 +55,7 @@
     </select>
   </label>
   <button class="theme-toggle" type="button" aria-label="切换到深色模式" aria-pressed="false"><span aria-hidden="true">◐</span></button>
-  <button class="transparency-toggle glass-action" type="button" hidden aria-haspopup="dialog" aria-expanded="false" aria-controls="glass-settings" aria-label="玻璃外观" title="玻璃外观" data-i18n-aria-label="appearance.open" data-i18n-title="appearance.open"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="12" r="6" fill="currentColor" opacity=".65"/></svg></button>
+  <button class="transparency-toggle glass-action" type="button" hidden aria-haspopup="dialog" aria-expanded="false" aria-controls="glass-settings" aria-label="设置" title="设置" data-i18n-aria-label="appearance.open" data-i18n-title="appearance.open"><svg class="settings-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.8 3.2h4.4l.6 2.3 1.8 1 2.3-.6 2.2 3.8-1.7 1.7v2l1.7 1.7-2.2 3.8-2.3-.6-1.8 1-.6 2.3H9.8l-.6-2.3-1.8-1-2.3.6-2.2-3.8 1.7-1.7v-2L2.9 9.7l2.2-3.8 2.3.6 1.8-1Z"/><circle cx="12" cy="12.4" r="3"/></svg></button>
   </div>
 </header>
 <main id="main">
@@ -165,15 +166,18 @@
 <dialog id="interest-dialog" aria-labelledby="dialog-title">
   <div class="dialog-toolbar glass-surface">
     <button class="brand-mark dialog-home-refresh" type="button" aria-label="回到首页顶部并刷新" data-i18n-aria-label="nav.homeRefresh"><span aria-hidden="true">☁</span></button>
+    <label class="language-picker">
+    <svg class="language-icon" width="38" height="24" viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18M12 3c-5 5-5 13 0 18M28 10l4 4 4-4"/></svg>
     <select id="dialog-language-select" class="dialog-language-select" aria-label="界面语言" data-i18n-aria-label="language.label">
       <option value="zh-CN" lang="zh-CN">简体中文</option>
       <option value="zh-TW" lang="zh-TW">繁體中文</option>
       <option value="en" lang="en">English</option>
       <option value="ja" lang="ja">日本語</option>
     </select>
+    </label>
 
     <button class="dialog-theme-toggle" type="button" hidden aria-label="切换到深色模式" aria-pressed="false"><span aria-hidden="true">◐</span></button>
-    <button class="transparency-toggle glass-action" type="button" hidden aria-haspopup="dialog" aria-expanded="false" aria-controls="glass-settings" aria-label="玻璃外观" title="玻璃外观" data-i18n-aria-label="appearance.open" data-i18n-title="appearance.open"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="12" r="6" fill="currentColor" opacity=".65"/></svg></button>
+    <button class="transparency-toggle glass-action" type="button" hidden aria-haspopup="dialog" aria-expanded="false" aria-controls="glass-settings" aria-label="设置" title="设置" data-i18n-aria-label="appearance.open" data-i18n-title="appearance.open"><svg class="settings-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.8 3.2h4.4l.6 2.3 1.8 1 2.3-.6 2.2 3.8-1.7 1.7v2l1.7 1.7-2.2 3.8-2.3-.6-1.8 1-.6 2.3H9.8l-.6-2.3-1.8-1-2.3.6-2.2-3.8 1.7-1.7v-2L2.9 9.7l2.2-3.8 2.3.6 1.8-1Z"/><circle cx="12" cy="12.4" r="3"/></svg></button>
   <button class="dialog-close" aria-label="关闭详情" data-i18n-aria-label="dialog.close" type="button">×</button>
   </div>
 
@@ -222,17 +226,22 @@
 <!-- MUSIC_PLAYER_END -->
 <!-- GLASS_SETTINGS_START -->
 <dialog id="glass-settings" class="glass-settings glass-surface" data-material="content" aria-labelledby="glass-settings-title">
-  <div class="glass-settings-heading"><h2 id="glass-settings-title"><span data-i18n="appearance.open">玻璃外观</span></h2><button id="glass-settings-close" class="settings-close" type="button" aria-label="关闭玻璃外观设置" data-i18n-aria-label="appearance.close"><span aria-hidden="true">×</span></button></div>
-  <div class="theme-setting"><label for="theme-choice" data-i18n="theme.label">主题模式</label><select id="theme-choice" data-theme-choice aria-describedby="theme-hint"><option value="system" data-i18n="theme.system">随系统自动切换</option><option value="light" data-i18n="theme.light">浅色模式</option><option value="dark" data-i18n="theme.dark">深色模式</option></select><p id="theme-hint" class="settings-hint" data-i18n="theme.hint">随系统实时切换；使用明暗按钮后改为手动模式，可在此恢复。</p></div>
-  <label class="glass-enable-row" for="glass-enabled"><span data-i18n="appearance.enabled">玻璃云间</span><input id="glass-enabled" type="checkbox" role="switch"></label>
-  <div id="glass-adjustments">
+  <div class="glass-settings-heading"><h2 id="glass-settings-title"><span data-i18n="appearance.open">设置</span></h2><button id="glass-settings-close" class="settings-close" type="button" aria-label="关闭设置" data-i18n-aria-label="appearance.close"><span aria-hidden="true">×</span></button></div>
+  <div class="settings-sections">
+  <div class="settings-section theme-setting"><p id="theme-mode-label" class="settings-section-title" data-i18n="theme.label">主题模式</p><div id="theme-choice" class="settings-choice theme-choices" role="group" aria-labelledby="theme-mode-label" aria-describedby="theme-hint"><button type="button" data-theme-option="system" aria-pressed="true" aria-label="随系统自动切换" title="随系统自动切换" data-i18n-aria-label="theme.system" data-i18n-title="theme.system"><span data-i18n="theme.choice.system">自动</span></button><button type="button" data-theme-option="light" aria-pressed="false" aria-label="浅色模式" title="浅色模式" data-i18n-aria-label="theme.light" data-i18n-title="theme.light"><span data-i18n="theme.choice.light">浅色</span></button><button type="button" data-theme-option="dark" aria-pressed="false" aria-label="深色模式" title="深色模式" data-i18n-aria-label="theme.dark" data-i18n-title="theme.dark"><span data-i18n="theme.choice.dark">深色</span></button></div><p id="theme-hint" class="settings-hint" data-i18n="theme.hint">随系统实时切换；使用明暗按钮后改为手动模式，可在此恢复。</p></div>
+  <section class="settings-section glass-setting" aria-labelledby="glass-section-title">
+  <label class="glass-enable-row" for="glass-enabled"><span id="glass-section-title"><span data-i18n="appearance.enabled">玻璃云间</span></span><input id="glass-enabled" type="checkbox" role="switch" aria-controls="glass-adjustments" aria-expanded="true"></label>
+  <div id="glass-adjustments"><div class="glass-adjustments-content">
     <div class="glass-range-label"><label for="glass-clarity"><span data-i18n="appearance.clarity">通透程度</span></label><output id="glass-clarity-value" for="glass-clarity">55</output></div>
     <input id="glass-clarity" type="range" min="0" max="100" step="1" value="55" aria-describedby="glass-range-hint">
     <p id="glass-range-hint" class="settings-hint"><span data-i18n="appearance.rangeHint">数值越大，越能看见背后的颜色；文字保持清晰。</span></p>
-    <div class="glass-presets" role="group" aria-label="玻璃快捷档位" data-i18n-aria-label="appearance.presets"><button type="button" data-glass-preset="20" aria-pressed="false"><span data-i18n="appearance.soft">柔和</span></button><button type="button" data-glass-preset="55" aria-pressed="false"><span data-i18n="appearance.balanced">均衡</span></button><button type="button" data-glass-preset="90" aria-pressed="false"><span data-i18n="appearance.clear">通透</span></button></div>
+    <div class="settings-choice glass-presets" role="group" aria-label="玻璃快捷档位" data-i18n-aria-label="appearance.presets"><button type="button" data-glass-preset="20" aria-pressed="false"><span data-i18n="appearance.soft">柔和</span></button><button type="button" data-glass-preset="55" aria-pressed="false"><span data-i18n="appearance.balanced">均衡</span></button><button type="button" data-glass-preset="90" aria-pressed="false"><span data-i18n="appearance.clear">通透</span></button></div>
+  </div>
   </div>
   <div class="glass-effective" role="status" aria-live="polite"><p data-glass-reason="auto"><span data-i18n="appearance.status.auto">玻璃效果已开启，调整会实时预览。</span></p><p data-glass-reason="off" hidden><span data-i18n="appearance.status.off">玻璃效果已关闭，保留上次的通透程度。</span></p><p data-glass-reason="system" hidden><span data-i18n="appearance.status.system">系统要求减少透明效果，当前使用不透明表面；你的设置已保留。</span></p><p data-glass-reason="contrast" hidden><span data-i18n="appearance.status.contrast">系统要求更高对比度，当前使用不透明表面；你的设置已保留。</span></p><p data-glass-reason="forced" hidden><span data-i18n="appearance.status.forced">系统强制颜色生效，当前使用系统配色；你的设置已保留。</span></p><p data-glass-reason="unsupported" hidden><span data-i18n="appearance.status.unsupported">浏览器不支持背景模糊，当前使用不透明表面；你的设置已保留。</span></p></div>
   <button id="glass-reset" class="settings-reset" type="button"><span data-i18n="appearance.reset">恢复默认</span></button>
+  </section>
+  </div>
 </dialog>
 <!-- GLASS_SETTINGS_END -->
 </body>

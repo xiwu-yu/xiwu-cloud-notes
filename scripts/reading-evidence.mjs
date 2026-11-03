@@ -16,7 +16,7 @@ try {
   if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('.theme-toggle').click();
   await page.screenshot({path:out+'/static-'+suffix+'.png'});
   const toc=page.locator('.reader-toc');
-  if(await toc.count() && width<1100){await toc.locator('summary').click();await page.screenshot({path:out+'/toc-'+suffix+'.png'});await toc.locator('summary').click();}
+  if(await toc.count() && width<=720){await toc.locator('summary').click();await page.screenshot({path:out+'/toc-'+suffix+'.png'});await toc.locator('summary').click();}
   await page.evaluate(()=>scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}));
   await page.screenshot({path:out+'/bottom-'+suffix+'.png'});
   await page.goto(base+'?lang='+lang);

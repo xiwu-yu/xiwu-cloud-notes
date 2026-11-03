@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
-import { appearancePanel } from './appearance.mjs';
+import { appearancePanel, settingsIcon } from './appearance.mjs';
 import { likeMarkup } from './likes.mjs';
 import { commentsMarkup } from './comments.mjs';
 import { sharePanel, staticShare } from './sharing.mjs';
@@ -42,7 +42,7 @@ export async function generateStatic(rootPath, posts, localized, ui, assetVersio
   const commentsVersion = createHash('sha256').update(await readFile(join(dist, 'comments.js'))).digest('hex').slice(0, 10);
   const likesVersion = createHash('sha256').update(await readFile(join(dist, 'likes.js'))).digest('hex').slice(0, 10);
   const appearanceVersion = createHash('sha256').update(await readFile(join(dist, 'appearance.js'))).digest('hex').slice(0, 10);
-  const transparency = lang => `<button class="transparency-toggle glass-action" type="button" hidden aria-haspopup="dialog" aria-expanded="false" aria-controls="glass-settings" aria-label="${escape(ui[lang]['appearance.open'])}" title="${escape(ui[lang]['appearance.open'])}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="12" r="6" fill="currentColor" opacity=".65"/></svg></button>`;
+  const transparency = lang => `<button class="transparency-toggle glass-action" type="button" hidden aria-haspopup="dialog" aria-expanded="false" aria-controls="glass-settings" aria-label="${escape(ui[lang]['appearance.open'])}" title="${escape(ui[lang]['appearance.open'])}">${settingsIcon}</button>`;
   const css = (await readFile(join(dist, 'index.html'), 'utf8')).match(/href="(style\.css[^\"]*)"/)?.[1] || 'style.css';
   const byId = new Map();
   for (const post of posts) {
@@ -86,7 +86,7 @@ ${imageMeta('zh-CN')}
     const languageNav = Object.keys(labels).map(lang => {
       const variant = variants.find(item => item.lang === lang);
       return variant ? `<a href="../../${postPath(variant)}" lang="${lang}" hreflang="${lang}"${lang === post.lang ? ' aria-current="page"' : ''}>${labels[lang]}</a>` : `<span lang="${lang}">${labels[lang]} (暂无译文 / unavailable)</span>`;
-    }).join(' · ');
+    }).join('');
     // 正文、语言和元数据均在 HTML 中；reading.js 仅增强主题切换。
     const html = `<!doctype html>
 <html lang="${post.lang}">
@@ -118,11 +118,10 @@ ${imageMeta(post.lang)}
 </head>
 <body class="static-reading">
 <div class="sky-background" aria-hidden="true"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span></div>
-<header class="wrap static-reader-toolbar glass-surface"><a class="brand" href="../../?lang=${post.lang}">☁ ${escape(homeLabel[post.lang])}</a><button class="theme-toggle" type="button" hidden aria-label="${escape(ui[post.lang]['theme.toDark'])}" aria-pressed="false" data-to-dark="${escape(ui[post.lang]['theme.toDark'])}" data-to-light="${escape(ui[post.lang]['theme.toLight'])}"><span aria-hidden="true">◐</span></button>${transparency(post.lang)}</header>
+<header class="wrap static-reader-toolbar glass-surface"><a class="brand" href="../../?lang=${post.lang}" aria-label="${escape(homeLabel[post.lang])}"><span aria-hidden="true">☁</span><span class="static-home-label">${escape(homeLabel[post.lang])}</span></a><details class="language-menu"><summary class="language-picker" aria-label="${escape(ui[post.lang]['language.label'])}"><svg class="language-icon" width="38" height="24" viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18M12 3c-5 5-5 13 0 18M28 10l4 4 4-4"/></svg></summary><nav aria-label="${escape(ui[post.lang]['language.label'])}">${languageNav}</nav></details><button class="theme-toggle" type="button" hidden aria-label="${escape(ui[post.lang]['theme.toDark'])}" aria-pressed="false" data-to-dark="${escape(ui[post.lang]['theme.toDark'])}" data-to-light="${escape(ui[post.lang]['theme.toLight'])}"><span aria-hidden="true">◐</span></button>${transparency(post.lang)}</header>
 <main class="static-layout wrap">
 ${toc}
 <div class="static-article reader-surface">
-<nav aria-label="${escape(ui[post.lang]['language.label'])}">${languageNav}</nav>
 <article lang="${post.lang}">
 <p class="eyebrow">${escape(post.category)}</p>
 <h1>${escape(post.title)}</h1>

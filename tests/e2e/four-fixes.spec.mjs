@@ -6,7 +6,7 @@ async function directoryInView(page,toolbar){
  const box=await summary.boundingBox();expect(box.y).toBeGreaterThanOrEqual(0);expect(box.y+box.height).toBeLessThanOrEqual(await page.evaluate(()=>innerHeight));expect(box.height).toBeGreaterThanOrEqual(44);
  return {toc,summary};
 }
-for(const width of [320,390,768])test(width+'px mobile directory stays reachable mid-article in modal and static readers, all languages and themes',async({page})=>{
+for(const width of [320,390])test(width+'px mobile directory stays reachable mid-article in modal and static readers, all languages and themes',async({page})=>{
  test.setTimeout(60000);await page.setViewportSize({width,height:844});await page.emulateMedia({reducedMotion:'reduce'});
  for(const lang of languages)for(const theme of ['light','dark']){
   await page.goto('./?post=rain&lang='+lang);await page.evaluate(theme=>siteTheme.setMode(theme),theme);await longProse(page,'#dialog-body');await page.locator('#interest-dialog').evaluate(d=>d.scrollTop=1400);
@@ -27,7 +27,7 @@ for(const width of [320,390,768])test(width+'px mobile directory stays reachable
 test('directory moves without duplication on resize and short articles keep their simple toolbar',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('./?post=rain&lang=en');
  await page.evaluate(()=>{window.originalDirectory=document.querySelector('.reader-toc');});
- for(const width of [390,1440,320,1440]){await page.setViewportSize({width,height:900});await expect(page.locator('.reader-toc')).toHaveCount(1);await expect(page.locator('.reader-toc nav a')).toHaveCount(3);expect(await page.evaluate(()=>originalDirectory===document.querySelector('.reader-toc'))).toBe(true);await expect(page.locator(width<1100?'.reader-tools>.reader-toc':'.reader-layout>.reader-toc')).toBeVisible();}
+ for(const width of [390,1440,320,1440]){await page.setViewportSize({width,height:900});await expect(page.locator('.reader-toc')).toHaveCount(1);await expect(page.locator('.reader-toc nav a')).toHaveCount(3);expect(await page.evaluate(()=>originalDirectory===document.querySelector('.reader-toc'))).toBe(true);await expect(page.locator(width<=720?'.reader-tools>.reader-toc':'.reader-layout>.reader-toc')).toBeVisible();}
  await page.setViewportSize({width:320,height:844});await page.locator('#dialog-language-select').selectOption('ja');await expect(page.locator('.reader-toc')).toHaveCount(1);await page.locator('.dialog-close').click();await page.locator('[data-essay-id="cloud"] .card-button').click();await expect(page.locator('.reader-toc')).toBeHidden();await expect(page.locator('.reader-tools .reader-toc')).toHaveCount(0);await expect(page.locator('.dialog-close')).toBeVisible();
  await page.goto('./posts/rain/en.html');await page.evaluate(()=>document.documentElement.style.fontSize='200%');await noOverflow(page,320);await directoryInView(page,page.locator('.static-reader-toolbar'));
 });
@@ -52,4 +52,46 @@ test('this patch contains no read-later, saved position, font settings or progre
  await expect(page.locator('.reading-home-actions,.card-resume,.card-save,.reading-library-trigger')).toHaveCount(0);await page.locator('[data-essay-id="rain"] .card-button').click();await longProse(page,'#dialog-body');await page.locator('#interest-dialog').evaluate(d=>d.scrollTop=1400);
  await expect(page.locator('.reading-settings-trigger,.reading-resume,.reader-progress,.reader-save')).toHaveCount(0);expect(await page.evaluate(()=>localStorage.getItem('xiwu-reading-state-v1'))).toBeNull();expect(requests.some(path=>/\/(reading-state|reading-model|home-shell)\.js$/.test(path))).toBe(false);
  await page.route('**/reader.js*',r=>r.fulfill({contentType:'application/javascript',body:'/* optional directory enhancement unavailable */'}));await page.goto('./posts/rain/zh-CN.html');await expect(page.locator('.static-layout>.reader-toc a')).toHaveCount(3);await page.locator('.reader-toc a').nth(1).click();expect(new URL(page.url()).hash).toBe('#section-2');await expect(page.locator('.article-body')).toContainText('星河');
+});
+
+// Mobile-only toolbar enhancement must never move the desktop directory.
+test('768–1440px keep modal and static directories to the left of the article in four languages and two themes',async({page})=>{
+ test.setTimeout(60000);await page.emulateMedia({reducedMotion:'reduce'});
+ for(const width of [768,1024,1280,1440])for(const lang of languages)for(const theme of ['light','dark']){
+  await page.setViewportSize({width,height:900});await page.goto('./?post=rain&lang='+lang);await page.evaluate(theme=>siteTheme.setMode(theme),theme);
+  const toc=page.locator('.reader-layout>.reader-toc'),body=page.locator('#dialog-body');await expect(toc).toBeVisible();await expect(toc).toHaveAttribute('open','');await expect(page.locator('.dialog-toolbar .reader-toc')).toHaveCount(0);
+  const a=await toc.boundingBox(),b=await body.boundingBox();expect(a.x+a.width).toBeLessThanOrEqual(b.x-10);expect(a.width).toBeGreaterThanOrEqual(130);await noOverflow(page,width);
+  await page.goto('./posts/rain/'+lang+'.html');const directory=page.locator('.static-layout>.reader-toc'),article=page.locator('.static-article');await expect(directory).toHaveAttribute('open','');await expect(page.locator('.static-reader-toolbar .reader-toc')).toHaveCount(0);
+  const c=await directory.boundingBox(),d=await article.boundingBox();expect(c.x+c.width).toBeLessThanOrEqual(d.x-10);await noOverflow(page,width);
+ }
+});
+
+test('mobile first row holds the short directory label, icon language pill and all reader controls',async({page})=>{
+ test.setTimeout(60000);await page.emulateMedia({reducedMotion:'reduce'});
+ const labels={'zh-CN':'目录','zh-TW':'目錄',en:'Contents',ja:'目次'};
+ for(const width of [320,390])for(const lang of languages)for(const theme of ['light','dark']){
+  await page.setViewportSize({width,height:844});await page.goto('./?post=rain&lang='+lang);await page.evaluate(theme=>siteTheme.setMode(theme),theme);
+  // Linux Contents measured about 62px in CI; reserve 64px to reproduce wider system fonts on every OS.
+  if(width===320 && lang==='en')await page.addStyleTag({content:'.dialog-toolbar .reader-toc summary{min-width:64px}'});
+  const summary=page.locator('.dialog-toolbar .reader-toc summary');await expect(summary).toHaveText(labels[lang]);expect(await summary.evaluate(el=>getComputedStyle(el,'::after').content)).toBe('none');
+  const selectors=['.dialog-home-refresh','.reader-toc summary','.language-picker','.dialog-theme-toggle','.transparency-toggle','.dialog-close'];const boxes=[];
+  for(const selector of selectors){const el=page.locator('.dialog-toolbar').locator(selector);const box=await el.boundingBox();expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);boxes.push(box);}
+  expect(Math.max(...boxes.map(b=>b.y))-Math.min(...boxes.map(b=>b.y))).toBeLessThanOrEqual(1);expect((await page.locator('.dialog-toolbar').boundingBox()).height).toBeLessThanOrEqual(70);
+  await expect(page.locator('#dialog-language-select')).toHaveValue(lang);await expect(page.locator('.dialog-toolbar .language-icon')).toBeVisible();await noOverflow(page,width);
+  await page.goto('./posts/rain/'+lang+'.html');const staticToolbar=page.locator('.static-reader-toolbar');const staticBoxes=[];
+  for(const selector of ['.brand','.reader-toc summary','.language-menu>summary','.theme-toggle','.transparency-toggle'])staticBoxes.push(await staticToolbar.locator(selector).boundingBox());
+  expect(Math.max(...staticBoxes.map(b=>b.y))-Math.min(...staticBoxes.map(b=>b.y))).toBeLessThanOrEqual(1);expect((await staticToolbar.boundingBox()).height).toBeLessThanOrEqual(70);await noOverflow(page,width);
+ }
+});
+
+test('icon language entries keep native selection, visible keyboard focus and static no-JS translation links',async({page,browser})=>{
+ await page.setViewportSize({width:320,height:844});await page.goto('./');
+ const picker=page.locator('.site-header .language-picker'),select=page.locator('#language-select');
+ await expect(picker.locator('.language-icon')).toBeVisible();expect((await picker.boundingBox()).width).toBe(60);await select.focus();await page.keyboard.press('ArrowDown');
+ expect(await picker.evaluate(el=>getComputedStyle(el).outlineStyle)).not.toBe('none');
+ for(const lang of languages){await select.selectOption(lang);await expect(page.locator('html')).toHaveAttribute('lang',lang);}
+ await page.emulateMedia({forcedColors:'active'});await expect(picker.locator('.language-icon')).toBeVisible();await page.emulateMedia({forcedColors:'none'});
+ await page.goto('./posts/rain/zh-CN.html');const menu=page.locator('.language-menu'),trigger=menu.locator('summary');await trigger.click();await expect(menu.locator('nav a')).toHaveCount(4);await expect(menu.locator('[aria-current="page"]')).toHaveAttribute('lang','zh-CN');await menu.locator('a').last().focus();await page.keyboard.press('Escape');await expect(menu).not.toHaveAttribute('open');await expect(trigger).toBeFocused();
+ await trigger.click();await menu.locator('a[lang="en"]').click();await expect(page.locator('html')).toHaveAttribute('lang','en');
+ const context=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});try{const native=await context.newPage();await native.goto('http://127.0.0.1:4174/xiwu-cloud-notes/posts/rain/zh-CN.html');await native.locator('.language-menu summary').click();await native.locator('.language-menu a[lang="ja"]').click();await expect(native.locator('html')).toHaveAttribute('lang','ja');await expect(native.locator('.article-body')).toBeVisible();}finally{await context.close();}
 });

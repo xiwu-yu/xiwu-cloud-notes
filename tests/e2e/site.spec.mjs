@@ -180,16 +180,12 @@ for (const width of [320, 375, 768, 1440]) {
         expect(await dialog.evaluate(n => n.scrollWidth - n.clientWidth)).toBeLessThanOrEqual(1);
         await expect(page.locator('.dialog-close')).toBeFocused();
         await page.keyboard.press(tabKey(browserName, true));
-        if(width<1100){
-          await expect(page.locator('#interest-dialog .reader-tools .reader-toc summary')).toBeFocused();
-          await page.keyboard.press(tabKey(browserName, true));
-        }
         await expect(page.locator('#interest-dialog .transparency-toggle')).toBeFocused();
         await page.keyboard.press(tabKey(browserName, true));
         await expect(page.locator('.dialog-theme-toggle')).toBeFocused();
         await page.keyboard.press(tabKey(browserName, true));
         await expect(page.locator('#dialog-language-select')).toBeFocused();
-        expect(await page.locator('#dialog-language-select').evaluate(n => getComputedStyle(n).outlineStyle)).not.toBe('none');
+        expect(await page.locator('#dialog-language-select').evaluate(n => getComputedStyle(n.closest('.language-picker')).outlineStyle)).not.toBe('none');
         await page.keyboard.press('Escape');
         await expect(page.locator('.card-button').first()).toBeFocused();
         await noOverflow(page, width);
@@ -265,7 +261,8 @@ test('static archive follows the site language; theme persists through reading, 
     }
   }
   await page.goto('./posts/cloud/en.html');
-  await page.locator('nav a[lang="ja"]').click();
+  await page.locator('.language-menu summary').click();
+  await page.locator('.language-menu a[lang="ja"]').click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
   await page.locator('.brand').click();
   await expect(page.locator('#language-select')).toHaveValue('ja');
