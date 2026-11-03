@@ -914,7 +914,7 @@ mark { background:var(--blue); color:var(--ink); border-radius:3px; padding-inli
 /* Keep the directory in the first row, including narrow four-language layouts.
    At enlarged text sizes the toolbar can still wrap instead of clipping. */
 @media(max-width:359px) {
-  .dialog-toolbar { column-gap:2px; }
+  .dialog-toolbar { column-gap:1px; padding-inline:6px; }
   .reader-tools>.reader-toc summary { font-size:12px; padding-inline:0; }
 }
 

@@ -71,6 +71,8 @@ test('mobile first row holds the short directory label, icon language pill and a
  const labels={'zh-CN':'目录','zh-TW':'目錄',en:'Contents',ja:'目次'};
  for(const width of [320,390])for(const lang of languages)for(const theme of ['light','dark']){
   await page.setViewportSize({width,height:844});await page.goto('./?post=rain&lang='+lang);await page.evaluate(theme=>siteTheme.setMode(theme),theme);
+  // Linux Contents measured about 62px in CI; reserve 64px to reproduce wider system fonts on every OS.
+  if(width===320 && lang==='en')await page.addStyleTag({content:'.dialog-toolbar .reader-toc summary{min-width:64px}'});
   const summary=page.locator('.dialog-toolbar .reader-toc summary');await expect(summary).toHaveText(labels[lang]);expect(await summary.evaluate(el=>getComputedStyle(el,'::after').content)).toBe('none');
   const selectors=['.dialog-home-refresh','.reader-toc summary','.language-picker','.dialog-theme-toggle','.transparency-toggle','.dialog-close'];const boxes=[];
   for(const selector of selectors){const el=page.locator('.dialog-toolbar').locator(selector);const box=await el.boundingBox();expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);boxes.push(box);}
