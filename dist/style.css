@@ -672,6 +672,7 @@ html[lang="ja"] .hero h1 [data-i18n="hero.titleD"] { display:inline-block; }
 .card-image img[src*="assets/cloud-purple.svg"] { --night-cloud-image:url("assets/cloud-purple-night.svg?v=5ebb2d5841"); }
 .card-image img[src*="assets/cloud-mint.svg"] { --night-cloud-image:url("assets/cloud-mint-night.svg?v=e3498c1868"); }
 .card-image img[src*="assets/cloud-white.svg"] { --night-cloud-image:url("assets/cloud-white-night.svg?v=15947f6665"); }
+.card-image img[src*="assets/cloud-orange.svg"] { --night-cloud-image:url("assets/cloud-orange-night.svg?v=73f1877467"); }
 :root[data-theme="dark"] .card-image img[src*="assets/cloud-"] { content:var(--night-cloud-image,normal); }
 @media(prefers-color-scheme:dark) {
   :root:not([data-theme]) .card-image img[src*="assets/cloud-"] { content:var(--night-cloud-image,normal); }

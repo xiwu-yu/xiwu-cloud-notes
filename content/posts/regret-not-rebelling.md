@@ -8,6 +8,8 @@ writtenAt: "2026-11-10"
 description: "曾经我不敢叛逆，现在我开始hrt了，但是，一切都太迟了……"
 subtitle: "随笔/永远无法读懂“悟以往之不谏”"
 publishedAt: "2026-11-10T03:09:41+08:00"
+image: "assets/cloud-orange.svg"
+alt: "淡橙色的云朵与星光"
 ---
 
 我为自己曾经没有叛逆后悔终生
