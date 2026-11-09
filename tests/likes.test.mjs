@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile,readdir} from 'node:fs/promises';
+import {compilePosts} from '../scripts/content.mjs';
 import worker from '../workers/likes/index.mjs';
 import {database} from './likes-db.mjs';
 import {likesConfig,likeMarkup} from '../scripts/likes.mjs';
@@ -10,6 +12,16 @@ const setup=()=>({DB:database(),VISITOR_SECRET:'test-only-not-for-deployment-sec
 function call(env,{method='GET',id='rain',body,auth=token,site=origin,ip='192.0.2.1',headers={}}={}) {
   return worker.fetch(new Request('https://likes.test/v1/articles/'+id,{method,headers:{Origin:site,Authorization:'Bearer '+auth,'CF-Connecting-IP':ip,'Content-Type':'application/json',...headers},...(body===undefined?{}:{body:typeof body==='string'?body:JSON.stringify(body)})}),env);
 }
+
+test('every published article ID is allowed by the production likes Worker',async()=>{
+  const directory=new URL('../content/posts/',import.meta.url);
+  const files=(await readdir(directory)).filter(name=>name.endsWith('.md'));
+  const posts=compilePosts(await Promise.all(files.map(async filename=>({filename,source:await readFile(new URL(filename,directory),'utf8')}))));
+  const expected=[...new Set(posts.map(post=>post.id))].sort();
+  const raw=await readFile(new URL('../workers/likes/wrangler.jsonc',import.meta.url),'utf8');
+  const config=JSON.parse(raw.replace(/^\s*\/\/.*$/gm,''));
+  assert.deepEqual(config.vars.ARTICLE_IDS.split(',').map(id=>id.trim()).sort(),expected,'运行 pnpm likes:prepare 同步文章 ID，并重新部署点赞 Worker');
+});
 
 test('likes configuration is disabled by default, permits only HTTPS origins and escapes static labels',()=>{
   assert.equal(likesConfig(null),null);assert.equal(likesConfig({apiUrl:null}),null);

@@ -5,7 +5,7 @@
   "workers_dev": true,
   "vars": {
     "ALLOWED_ORIGINS": "https://cloud.xiwu.space",
-    "ARTICLE_IDS": "claw-marks,hrt-month-3,hrt-preface,through-time-and-space,xiwu"
+    "ARTICLE_IDS": "claw-marks,hrt-month-3,hrt-preface,regret-not-rebelling,through-time-and-space,xiwu"
   },
   "d1_databases": [
     {

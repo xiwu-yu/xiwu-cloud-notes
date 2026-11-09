@@ -59,7 +59,7 @@ pnpm likes:prepare
 pnpm exec wrangler d1 migrations apply xiwu-article-likes --remote --config workers/likes/wrangler.jsonc
 ```
 
-`likes:prepare` 使用同一 Markdown 校验器读取文章，更新 Worker `ARTICLE_IDS` 白名单，**不部署**。目前五篇文章，无假文章和假数据。正常新增文章后，需要再次执行 prepare 并部署 Worker；只更新译文无需改计数。不要重命名既有文章 ID，否则会视为新文章。
+`likes:prepare` 使用同一 Markdown 校验器读取文章，更新 Worker `ARTICLE_IDS` 白名单，**不部署**。`pnpm test` 检查名单和文章 ID 是否一致。正常新增文章后，需要再次执行 prepare 并部署 Worker，然后用新文章 ID 执行第 5 步的只读请求，确认返回 HTTP 200；只更新译文无需改计数。不要重命名既有文章 ID，否则会视为新文章。
 
 ### 4. 部署 Worker 并设置服务端密钥
 
